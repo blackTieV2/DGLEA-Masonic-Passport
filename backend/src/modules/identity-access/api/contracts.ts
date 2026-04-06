@@ -1,13 +1,41 @@
-/**
- * API contracts (placeholders).
- */
-export interface ApiRequest<TBody = unknown, TParams = Record<string, string>> {
-  params: TParams;
-  body: TBody;
-  actorUserId: string;
+export interface AuthLoginRequest {
+  email: string;
+  password: string;
 }
 
-export interface ApiResponse<TBody = unknown> {
-  status: number;
-  body: TBody;
+export interface AuthRefreshRequest {
+  refreshToken: string;
+}
+
+export interface AuthSessionResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresAtIso: string;
+  currentUser: {
+    userId: string;
+    email: string;
+    displayName: string;
+    status: string;
+    roles: string[];
+    scopes: {
+      lodges: string[];
+      districts: string[];
+      assignedMemberUserIds: string[];
+    };
+    capabilities: string[];
+  };
+}
+
+export interface CurrentUserResponse {
+  userId: string;
+  email: string;
+  displayName: string;
+  status: string;
+  roles: string[];
+  scopes: {
+    lodges: string[];
+    districts: string[];
+    assignedMemberUserIds: string[];
+  };
+  capabilities: string[];
 }
