@@ -1,4 +1,4 @@
-import type { Capability, CurrentUserContext } from '../../../shared/contracts/authorization';
+import type { Capability } from '../../../shared/contracts/authorization';
 import { NotFoundError } from '../../../shared/utilities/errors';
 import { deriveEffectiveScopes, resolveCapabilities } from '../domain/permissions';
 import type { IdentityAccessRepository } from './ports';
@@ -39,5 +39,4 @@ export class CurrentUserService {
       capabilities,
     };
   }
-
 }

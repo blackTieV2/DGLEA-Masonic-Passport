@@ -1,5 +1,3 @@
-import assert from 'node:assert/strict';
-import test from 'node:test';
 import { AuthSessionService } from '../../src/modules/identity-access/application/auth-session.service';
 import type { IdentityAccessRepository, SessionStore, TokenProvider } from '../../src/modules/identity-access/application/ports';
 
@@ -59,17 +57,18 @@ class FakeTokenProvider implements TokenProvider {
   }
 }
 
-test('login creates a session for valid credentials', async () => {
-  const service = new AuthSessionService(new FakeRepo(), new FakeSessionStore(), new FakeTokenProvider());
-  const session = await service.login('user@example.org', 'pass');
-  assert.equal(session.accessToken, 'access-token');
-  assert.equal(session.refreshToken, 'refresh-token');
-  assert.equal(session.currentUser.identity.userId, 'usr_1');
-});
+describe('auth session (integration)', () => {
+  it('login creates a session for valid credentials', async () => {
+    const service = new AuthSessionService(new FakeRepo(), new FakeSessionStore(), new FakeTokenProvider());
+    const session = await service.login('user@example.org', 'pass');
 
-test('refresh rejects unknown refresh token', async () => {
-  const service = new AuthSessionService(new FakeRepo(), new FakeSessionStore(), new FakeTokenProvider());
-  await assert.rejects(async () => {
-    await service.refresh('unknown-token');
+    expect(session.accessToken).toBe('access-token');
+    expect(session.refreshToken).toBe('refresh-token');
+    expect(session.currentUser.identity.userId).toBe('usr_1');
+  });
+
+  it('refresh rejects unknown refresh token', async () => {
+    const service = new AuthSessionService(new FakeRepo(), new FakeSessionStore(), new FakeTokenProvider());
+    await expect(service.refresh('unknown-token')).rejects.toThrow();
   });
 });
