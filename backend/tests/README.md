@@ -1,10 +1,19 @@
 # backend/tests
 
-Backend test suites.
+Initial backend test skeletons aligned with the project test strategy.
 
-Recommended organization:
-- unit tests for domain and policy logic
-- integration tests for API + persistence + authorization
-- focused end-to-end tests for critical workflows
+## Alignment
 
-Prioritize permissions, scope isolation, and verification workflow correctness.
+This structure mirrors the documented priorities:
+1. permissions and scope correctness
+2. workflow state transition correctness
+3. data integrity and auditability
+
+## Folders
+
+- `unit/` — domain/service-level rule tests (placeholders)
+- `integration/` — API + persistence + policy tests (placeholders)
+
+## Current status
+
+All files in this folder are **placeholders only** (`it.todo`) and intentionally contain no feature implementation assertions yet.
