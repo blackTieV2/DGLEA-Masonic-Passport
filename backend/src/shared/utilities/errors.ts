@@ -18,3 +18,10 @@ export class NotFoundError extends Error {
     this.name = 'NotFoundError';
   }
 }
+
+export class InvalidStateTransitionError extends Error {
+  constructor(message = 'Invalid workflow state transition.') {
+    super(message);
+    this.name = 'InvalidStateTransitionError';
+  }
+}
