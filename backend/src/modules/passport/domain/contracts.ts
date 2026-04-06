@@ -25,6 +25,8 @@ export interface PassportRecord {
   templateItem: TemplateItemReference;
   note?: string;
   eventDate?: string;
+  reviewReason?: string;
+  supersedesRecordId?: string;
   status: PassportRecordStatus;
   currentVersion: number;
   isOfficialProgress: boolean;
@@ -97,6 +99,7 @@ export function submitRecordForVerification(record: PassportRecord, nowIso: stri
   return {
     ...record,
     status: 'SUBMITTED',
+    reviewReason: undefined,
     submittedAt: nowIso,
     isOfficialProgress: false,
     updatedAt: nowIso,

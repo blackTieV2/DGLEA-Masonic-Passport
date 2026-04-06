@@ -1,13 +1,30 @@
-/**
- * API contracts (placeholders).
- */
-export interface ApiRequest<TBody = unknown, TParams = Record<string, string>> {
-  params: TParams;
-  body: TBody;
-  actorUserId: string;
+import type { CurrentUserContext } from '../../../shared/contracts/authorization';
+import type { VerificationDecisionStatus } from '../domain/contracts';
+
+export interface VerifyRecordRequest {
+  recordId: string;
+  actor: CurrentUserContext;
 }
 
-export interface ApiResponse<TBody = unknown> {
-  status: number;
-  body: TBody;
+export interface RejectRecordRequest {
+  recordId: string;
+  reason: string;
+  actor: CurrentUserContext;
+}
+
+export interface ClarificationRequest {
+  recordId: string;
+  reason: string;
+  actor: CurrentUserContext;
+}
+
+export interface OverrideRecordRequest {
+  recordId: string;
+  overrideTo: VerificationDecisionStatus;
+  reason: string;
+  actor: CurrentUserContext;
+}
+
+export interface PendingQueueRequest {
+  actor: CurrentUserContext;
 }

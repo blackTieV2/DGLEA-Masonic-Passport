@@ -34,6 +34,8 @@ export interface PassportRecordResponse {
   templateLodgeId?: string;
   note?: string;
   eventDate?: string;
+  reviewReason?: string;
+  supersedesRecordId?: string;
   status: PassportRecordStatus;
   isOfficialProgress: boolean;
   currentVersion: number;

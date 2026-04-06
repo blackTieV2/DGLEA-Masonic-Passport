@@ -14,6 +14,10 @@ export class InMemoryPassportRecordRepository implements PassportRecordRepositor
     return this.records.get(id) ?? null;
   }
 
+  async listByStatus(status: PassportRecord['status']): Promise<PassportRecord[]> {
+    return [...this.records.values()].filter((record) => record.status === status);
+  }
+
   async save(record: PassportRecord): Promise<void> {
     this.records.set(record.id, record);
   }

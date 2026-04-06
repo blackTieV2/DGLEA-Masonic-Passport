@@ -15,6 +15,8 @@ function toResponse(record: {
   templateItem: { templateItemId: string; isDistrictCore: boolean; lodgeId?: string };
   note?: string;
   eventDate?: string;
+  reviewReason?: string;
+  supersedesRecordId?: string;
   status: string;
   isOfficialProgress: boolean;
   currentVersion: number;
@@ -33,6 +35,8 @@ function toResponse(record: {
     templateLodgeId: record.templateItem.lodgeId,
     note: record.note,
     eventDate: record.eventDate,
+    reviewReason: record.reviewReason,
+    supersedesRecordId: record.supersedesRecordId,
     status: record.status as PassportRecordResponse['status'],
     isOfficialProgress: record.isOfficialProgress,
     currentVersion: record.currentVersion,

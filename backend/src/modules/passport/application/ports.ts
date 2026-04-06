@@ -3,6 +3,7 @@ import type { PassportRecord, TemplateItemReference } from '../domain/contracts'
 export interface PassportRecordRepository {
   nextId(): string;
   getById(id: string): Promise<PassportRecord | null>;
+  listByStatus(status: PassportRecord['status']): Promise<PassportRecord[]>;
   save(record: PassportRecord): Promise<void>;
 }
 
