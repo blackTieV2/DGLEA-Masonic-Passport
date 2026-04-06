@@ -1,12 +1,3 @@
-Yes. Here is the exact starter pack.
-
-A couple of Codex-specific points first: Codex can work against your current project directory, and OpenAI explicitly recommends using Git checkpoints before and after tasks. Codex also supports repo-scoped instructions via `AGENTS.md`, and project-scoped config via `.codex/config.toml`. ([OpenAI Developers][1])
-
-# 1) Exact repo root `README.md`
-
-Save this as:
-
-`DGLEA-Masonic-Passport/README.md`
 
 ````md
 # DGLEA Masonic Passport
