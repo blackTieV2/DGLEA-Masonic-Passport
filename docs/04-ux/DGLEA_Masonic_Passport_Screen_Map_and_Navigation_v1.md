@@ -94,7 +94,7 @@ Primary use cases:
 5. **Notifications / Alerts**
 6. **Audit / Support Entry Point** (role-controlled)
 
-## 5.2 Lodge Admin Screens
+## 5.2 Lodge Administrator Screens
 7. **Lodge Dashboard**
 8. **Lodge Members List**
 9. **Member Detail**
@@ -118,7 +118,7 @@ Primary use cases:
 23. **District Reports**
 24. **District User and Role Management**
 
-## 5.5 System / District Admin Screens
+## 5.5 System / District Administrator Screens
 25. **Feature Flags**
 26. **District Template Management**
 27. **User Scope Role Management**
@@ -186,7 +186,7 @@ Recommended left-side nav groups:
 - Account
 
 ### 7.2 Role-Adaptive Web Navigation
-#### Lodge Admin
+#### Lodge Administrator
 - Dashboard
 - Members
 - Mentors
@@ -205,7 +205,7 @@ Recommended left-side nav groups:
 - Analytics
 - Reports
 
-#### District Admin / System Admin
+#### District Administrator / System Administrator
 - District Dashboard
 - Lodges
 - Users & Roles
@@ -384,7 +384,7 @@ flowchart TD
     D3 --> E
 ```
 
-## 9.3 Lodge Admin Flow — Onboard Member
+## 9.3 Lodge Administrator Flow — Onboard Member
 ```mermaid
 flowchart TD
     A[Lodge Dashboard] --> B[Members]
@@ -406,7 +406,7 @@ flowchart TD
 
 ## 10. Role-to-Screen Access Summary
 
-| Screen Group | Brother | Personal Mentor | Lodge Mentor | Lodge Reviewer | Lodge Admin | District Mentor | District Admin |
+| Screen Group | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Administrator / Secretary | District Mentor | District Administrator / System Administrator |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Android Home | Y | Y | Y | N | N | N | N |
 | My Passport | Y | N | N | N | N | N | N |
