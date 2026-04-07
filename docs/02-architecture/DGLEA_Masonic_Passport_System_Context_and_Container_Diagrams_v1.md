@@ -55,9 +55,9 @@ flowchart TD
     PM[Personal Mentor]
     LM[Lodge Mentor]
     LR[Lodge Leadership Reviewer]
-    LA[Lodge Admin / Secretary]
+    LA[Lodge Administrator / Secretary]
     DM[District Mentor]
-    DA[District Admin / System Admin]
+    DA[District Administrator / System Administrator]
 
     SYS[DGLEA Masonic Passport Platform]
 
@@ -245,7 +245,7 @@ flowchart TD
 
     subgraph Modules
         IA[Identity & Access]
-        ADMIN[Lodge & District Admin]
+        ADMIN[Lodge & District Administration]
         MEMBER[Member Profile]
         PASS[Passport]
         ASSIGN[Mentor Assignment]
@@ -285,7 +285,7 @@ flowchart TD
 1. Mentor uses Android app or web portal
 2. Request reaches backend
 3. Backend checks assignment/lodge scope and policy
-4. Backend transitions state to `verified`
+4. Backend transitions state to `VERIFIED`
 5. Backend updates read models / reporting projections
 6. Backend creates audit event
 7. Notification sent to Brother
