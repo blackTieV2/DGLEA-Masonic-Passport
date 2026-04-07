@@ -1545,6 +1545,7 @@ components:
             - VERIFIED
             - REJECTED
             - REQUESTED_CLARIFICATION
+            - OVERRIDDEN
             - SUPERSEDED
             - ARCHIVED
         priorStatus:

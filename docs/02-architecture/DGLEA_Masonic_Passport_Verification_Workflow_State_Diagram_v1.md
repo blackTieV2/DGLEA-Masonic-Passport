@@ -82,7 +82,6 @@ The workflow uses the following states:
 - `NEEDS_CLARIFICATION`
 - `VERIFIED`
 - `REJECTED`
-- `OVERRIDDEN`
 - `SUPERSEDED`
 - `ARCHIVED`
 
@@ -105,13 +104,10 @@ The submission has been accepted by an authorised verifier and now counts as an 
 ### 5.5 `REJECTED`
 The submission has been reviewed and declined. It does not count as official progress.
 
-### 5.6 `OVERRIDDEN`
-A prior mentor decision has been replaced by an authorised Lodge Mentor override. This state exists to preserve audit truth and governance.
-
-### 5.7 `SUPERSEDED`
+### 5.6 `SUPERSEDED`
 A previously valid record has been replaced by a newer corrected record, while retaining the history of the earlier one.
 
-### 5.8 `ARCHIVED`
+### 5.7 `ARCHIVED`
 A record is retained for history but no longer participates in active workflow. This is an administrative state, not a normal user state.
 
 ---
@@ -128,25 +124,26 @@ stateDiagram-v2
     SUBMITTED --> VERIFIED : Mentor verifies
     SUBMITTED --> REJECTED : Mentor rejects
     SUBMITTED --> NEEDS_CLARIFICATION : Mentor requests clarification
-    SUBMITTED --> OVERRIDDEN : Lodge Mentor override of prior action
+    SUBMITTED --> VERIFIED : Lodge Mentor override to accepted
+    SUBMITTED --> REJECTED : Lodge Mentor override to rejected
+    SUBMITTED --> SUPERSEDED : Lodge Mentor override to superseded
 
     NEEDS_CLARIFICATION --> DRAFT : Brother edits / resaves
     NEEDS_CLARIFICATION --> SUBMITTED : Brother resubmits directly
     NEEDS_CLARIFICATION --> REJECTED : Mentor rejects after follow-up
     NEEDS_CLARIFICATION --> VERIFIED : Mentor verifies after clarification
-    NEEDS_CLARIFICATION --> OVERRIDDEN : Lodge Mentor override
+    NEEDS_CLARIFICATION --> REJECTED : Lodge Mentor override to rejected
+    NEEDS_CLARIFICATION --> VERIFIED : Lodge Mentor override to accepted
+    NEEDS_CLARIFICATION --> SUPERSEDED : Lodge Mentor override to superseded
 
     REJECTED --> DRAFT : Brother creates revised version
     REJECTED --> ARCHIVED : Admin archive
-    REJECTED --> OVERRIDDEN : Lodge Mentor override
+    REJECTED --> VERIFIED : Lodge Mentor override to accepted
+    REJECTED --> SUPERSEDED : Lodge Mentor override to superseded
 
     VERIFIED --> SUPERSEDED : Controlled correction path
     VERIFIED --> ARCHIVED : Admin archive exceptional case
-    VERIFIED --> OVERRIDDEN : Lodge Mentor exceptional override
-
-    OVERRIDDEN --> VERIFIED : Final accepted outcome
-    OVERRIDDEN --> REJECTED : Final overridden rejection
-    OVERRIDDEN --> SUPERSEDED : Corrective replacement path
+    VERIFIED --> REJECTED : Lodge Mentor exceptional override
 
     SUPERSEDED --> ARCHIVED : Historical retention
     ARCHIVED --> [*]
@@ -260,7 +257,7 @@ Requirements:
 - reason required
 - prior verified record preserved as historical truth
 
-### 8.8 `* -> OVERRIDDEN`
+### 8.8 `* -> (VERIFIED | REJECTED | SUPERSEDED) via override`
 Triggered by:
 - authorised Lodge Mentor only in normal operation
 - exceptional admin tooling only under strict audit
@@ -290,7 +287,6 @@ Requirements:
 | `NEEDS_CLARIFICATION` | Authorised verifier | No direct content edit by verifier | Brother resubmits, verifier rejects/verifies |
 | `VERIFIED` | Authorised verifier | No direct casual edit | Controlled correction / override / archive |
 | `REJECTED` | Authorised verifier | No direct casual edit | Brother creates revised version, Lodge Mentor override, admin archive |
-| `OVERRIDDEN` | Lodge Mentor / exceptional admin | No casual edit | Final target state selected |
 | `SUPERSEDED` | Controlled correction flow | No casual edit | Admin archive only |
 | `ARCHIVED` | Admin only | No | Terminal |
 
@@ -328,7 +324,7 @@ Additional requirements:
 | `SUBMITTED -> REJECTED` | Brother | rejection notice with reason summary |
 | `SUBMITTED -> NEEDS_CLARIFICATION` | Brother | clarification request |
 | `NEEDS_CLARIFICATION -> SUBMITTED` | Relevant verifier(s) | resubmission alert |
-| `* -> OVERRIDDEN` | affected parties as configured | override notification |
+| `* -> (VERIFIED/REJECTED/SUPERSEDED) via override` | affected parties as configured | override notification |
 | inactivity while `SUBMITTED` | verifier(s) | stale pending reminder |
 
 ---
