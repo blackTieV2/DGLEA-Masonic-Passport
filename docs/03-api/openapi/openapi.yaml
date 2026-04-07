@@ -1498,30 +1498,27 @@ components:
     PassportRecord:
       type: object
       required:
-        [id, memberProfileId, sectionTemplateId, recordType, status, currentVersion, lodgeId, districtId, createdByUserId]
+        [id, memberProfileId, districtId, lodgeId, sectionTemplateId, templateItemId, status, currentVersion, isOfficialProgress, createdAt, updatedAt]
       properties:
         id: { type: string }
         memberProfileId: { type: string }
+        districtId: { type: string }
+        lodgeId: { type: string }
         sectionTemplateId: { type: string }
-        learningOutcomeTemplateId: { type: string, nullable: true }
-        recordType:
-          $ref: '#/components/schemas/ItemType'
-        titleSnapshot: { type: string }
-        descriptionSnapshot: { type: string, nullable: true }
-        eventDate: { type: string, format: date, nullable: true }
+        templateItemId: { type: string }
+        templateIsDistrictCore: { type: boolean }
+        templateLodgeId: { type: string, nullable: true }
         note: { type: string, nullable: true }
+        eventDate: { type: string, format: date, nullable: true }
+        reviewReason: { type: string, nullable: true }
+        supersedesRecordId: { type: string, nullable: true }
         status:
           $ref: '#/components/schemas/PassportRecordStatus'
         currentVersion: { type: integer }
         isOfficialProgress: { type: boolean }
-        lodgeId: { type: string }
-        districtId: { type: string }
-        createdByUserId: { type: string }
         submittedAt: { type: string, format: date-time, nullable: true }
-        verifiedAt: { type: string, format: date-time, nullable: true }
-        verifiedByUserId: { type: string, nullable: true }
-        updatedAt: { type: string, format: date-time, nullable: true }
-        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
 
     PassportRecordVersion:
       type: object
@@ -1757,12 +1754,12 @@ components:
 
     CreatePassportRecordRequest:
       type: object
-      required: [sectionId, recordType]
+      required: [districtId, lodgeId, sectionTemplateId, templateItemId]
       properties:
-        sectionId: { type: string }
-        learningOutcomeTemplateId: { type: string, nullable: true }
-        recordType:
-          $ref: '#/components/schemas/ItemType'
+        districtId: { type: string }
+        lodgeId: { type: string }
+        sectionTemplateId: { type: string }
+        templateItemId: { type: string }
         eventDate: { type: string, format: date, nullable: true }
         note: { type: string, nullable: true }
 

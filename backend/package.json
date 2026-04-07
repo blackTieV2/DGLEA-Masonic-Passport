@@ -14,7 +14,8 @@
     "fixture:apply": "node scripts/fixture-apply.cjs"
   },
   "dependencies": {
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "fastify": "^5.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

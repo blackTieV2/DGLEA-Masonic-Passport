@@ -43,6 +43,30 @@ npm run seed
 npm run fixture:apply
 ```
 
+## HTTP transport
+
+A minimal Fastify transport is wired for implemented slices:
+
+- `POST /auth/login`
+- `POST /auth/refresh`
+- `GET /auth/me`
+- `GET /me`
+- `POST /members/{memberId}/passport-records`
+- `PATCH /passport-records/{recordId}`
+- `POST /passport-records/{recordId}/submit`
+- `POST /passport-records/{recordId}/verify`
+- `POST /passport-records/{recordId}/reject`
+- `POST /passport-records/{recordId}/clarification`
+- `POST /passport-records/{recordId}/override`
+- `GET /verification-queue`
+
+Start locally:
+
+```bash
+cd backend
+npm run dev
+```
+
 ## Database scaffolding
 
 Database scaffolding lives in `db/`:
