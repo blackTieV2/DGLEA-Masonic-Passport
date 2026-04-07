@@ -6,7 +6,7 @@
 -- - SUBMITTED -> NEEDS_CLARIFICATION -> SUBMITTED -> VERIFIED
 -- - SUBMITTED -> REJECTED
 -- - VERIFIED -> SUPERSEDED
--- - * -> OVERRIDDEN (audited)
+-- - * -> override to VERIFIED/REJECTED/SUPERSEDED (audited via verification_decisions)
 
 BEGIN;
 

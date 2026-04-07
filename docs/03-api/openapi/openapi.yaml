@@ -474,7 +474,7 @@ paths:
       tags: [PassportRecords]
       summary: Update draft passport record
       description: |
-        Server enforces that VERIFIED, SUPERSEDED, OVERRIDDEN, or ARCHIVED records are not
+        Server enforces that VERIFIED, SUPERSEDED, or ARCHIVED records are not
         casually edited via this endpoint.
       requestBody:
         required: true
@@ -1230,7 +1230,6 @@ components:
         - NEEDS_CLARIFICATION
         - VERIFIED
         - REJECTED
-        - OVERRIDDEN
         - SUPERSEDED
         - ARCHIVED
 
@@ -1546,7 +1545,6 @@ components:
             - VERIFIED
             - REJECTED
             - REQUESTED_CLARIFICATION
-            - OVERRIDDEN
             - SUPERSEDED
             - ARCHIVED
         priorStatus:

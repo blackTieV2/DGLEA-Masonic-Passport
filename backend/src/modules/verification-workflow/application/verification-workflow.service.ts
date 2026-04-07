@@ -19,8 +19,8 @@ import type {
 } from './ports';
 
 class DefaultVerificationAuthorizationPolicy implements VerificationAuthorizationPolicy {
-  assertCanReview(record: PassportRecord, actor: CurrentUserContext): void {
-    if (record.createdByUserId === actor.identity.userId) {
+  assertCanReview(record: PassportRecord, memberUserId: string, actor: CurrentUserContext): void {
+    if (memberUserId === actor.identity.userId) {
       throw new ForbiddenError('Brother cannot verify own records.');
     }
 
@@ -30,15 +30,15 @@ class DefaultVerificationAuthorizationPolicy implements VerificationAuthorizatio
     }
 
     if (hasCapability(actor, 'verification.verify.assigned')) {
-      assertAssignedMemberScope(actor, record.createdByUserId);
+      assertAssignedMemberScope(actor, memberUserId);
       return;
     }
 
     throw new ForbiddenError('Caller lacks verification permission.');
   }
 
-  assertCanOverride(record: PassportRecord, actor: CurrentUserContext): void {
-    if (record.createdByUserId === actor.identity.userId) {
+  assertCanOverride(record: PassportRecord, memberUserId: string, actor: CurrentUserContext): void {
+    if (memberUserId === actor.identity.userId) {
       throw new ForbiddenError('Brother cannot override own records.');
     }
     if (!hasCapability(actor, 'verification.override.lodge')) {
@@ -59,7 +59,8 @@ export class VerificationWorkflowService {
 
   async verify(input: { recordId: string; actor: CurrentUserContext }): Promise<PassportRecord> {
     const existing = await this.getRecordOrThrow(input.recordId);
-    this.policy.assertCanReview(existing, input.actor);
+    const memberUserId = await this.getMemberUserIdOrThrow(existing.memberProfileId);
+    this.policy.assertCanReview(existing, memberUserId, input.actor);
 
     const nowIso = this.clock.nowIso();
     const verified = verifyRecord(existing, nowIso);
@@ -87,7 +88,8 @@ export class VerificationWorkflowService {
 
   async reject(input: { recordId: string; reason: string; actor: CurrentUserContext }): Promise<PassportRecord> {
     const existing = await this.getRecordOrThrow(input.recordId);
-    this.policy.assertCanReview(existing, input.actor);
+    const memberUserId = await this.getMemberUserIdOrThrow(existing.memberProfileId);
+    this.policy.assertCanReview(existing, memberUserId, input.actor);
 
     const nowIso = this.clock.nowIso();
     const rejected = rejectRecord(existing, input.reason, nowIso);
@@ -117,7 +119,8 @@ export class VerificationWorkflowService {
 
   async requestClarification(input: { recordId: string; reason: string; actor: CurrentUserContext }): Promise<PassportRecord> {
     const existing = await this.getRecordOrThrow(input.recordId);
-    this.policy.assertCanReview(existing, input.actor);
+    const memberUserId = await this.getMemberUserIdOrThrow(existing.memberProfileId);
+    this.policy.assertCanReview(existing, memberUserId, input.actor);
 
     const nowIso = this.clock.nowIso();
     const needsClarification = requestClarification(existing, input.reason, nowIso);
@@ -152,7 +155,8 @@ export class VerificationWorkflowService {
     actor: CurrentUserContext;
   }): Promise<PassportRecord> {
     const existing = await this.getRecordOrThrow(input.recordId);
-    this.policy.assertCanOverride(existing, input.actor);
+    const memberUserId = await this.getMemberUserIdOrThrow(existing.memberProfileId);
+    this.policy.assertCanOverride(existing, memberUserId, input.actor);
 
     const nowIso = this.clock.nowIso();
     const overridden = applyOverrideDecision(existing, input.targetStatus, input.reason, nowIso);
@@ -192,31 +196,34 @@ export class VerificationWorkflowService {
       return [];
     }
 
-    return submitted.filter((record) => {
-      if (record.createdByUserId === input.actor.identity.userId) {
-        return false;
+    const queue: PassportRecord[] = [];
+    for (const record of submitted) {
+      const memberUserId = await this.repo.getMemberUserIdByMemberProfileId(record.memberProfileId);
+      if (!memberUserId || memberUserId === input.actor.identity.userId) {
+        continue;
       }
 
       if (canVerifyLodge) {
         try {
           assertLodgeScope(input.actor, record.lodgeId);
-          return true;
+          queue.push(record);
+          continue;
         } catch {
-          return false;
+          continue;
         }
       }
 
       if (canVerifyAssigned) {
         try {
-          assertAssignedMemberScope(input.actor, record.createdByUserId);
-          return true;
+          assertAssignedMemberScope(input.actor, memberUserId);
+          queue.push(record);
+          continue;
         } catch {
-          return false;
+          continue;
         }
       }
-
-      return false;
-    });
+    }
+    return queue;
   }
 
   private async getRecordOrThrow(recordId: string): Promise<PassportRecord> {
@@ -225,6 +232,14 @@ export class VerificationWorkflowService {
       throw new NotFoundError('Passport record not found.');
     }
     return record;
+  }
+
+  private async getMemberUserIdOrThrow(memberProfileId: string): Promise<string> {
+    const memberUserId = await this.repo.getMemberUserIdByMemberProfileId(memberProfileId);
+    if (!memberUserId) {
+      throw new NotFoundError('Member profile user identity not found.');
+    }
+    return memberUserId;
   }
 
   private resolveActorRoleCode(actor: CurrentUserContext): RoleCode {

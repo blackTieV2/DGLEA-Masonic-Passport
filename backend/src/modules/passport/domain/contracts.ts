@@ -6,7 +6,6 @@ export type PassportRecordStatus =
   | 'NEEDS_CLARIFICATION'
   | 'VERIFIED'
   | 'REJECTED'
-  | 'OVERRIDDEN'
   | 'SUPERSEDED'
   | 'ARCHIVED';
 

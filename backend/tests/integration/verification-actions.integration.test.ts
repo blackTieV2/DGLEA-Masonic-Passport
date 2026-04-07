@@ -153,9 +153,9 @@ describe('verification actions (integration)', () => {
 
   it('returns pending verification queue filtered by scope and self exclusion', async () => {
     const { endpoint } = await setup([
-      submittedRecord({ id: 'pr_own', createdByUserId: 'mentor_lodge' }),
-      submittedRecord({ id: 'pr_lodge_match', createdByUserId: 'brother_2' }),
-      submittedRecord({ id: 'pr_other_lodge', lodgeId: 'l_2', createdByUserId: 'brother_3' }),
+      submittedRecord({ id: 'pr_own', memberProfileId: 'mp_own', createdByUserId: 'mentor_lodge' }),
+      submittedRecord({ id: 'pr_lodge_match', memberProfileId: 'mp_lodge_match', createdByUserId: 'brother_2' }),
+      submittedRecord({ id: 'pr_other_lodge', memberProfileId: 'mp_other_lodge', lodgeId: 'l_2', createdByUserId: 'brother_3' }),
     ]);
 
     const lodgeMentor = ctx('mentor_lodge', [

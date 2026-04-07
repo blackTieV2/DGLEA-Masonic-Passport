@@ -4,6 +4,7 @@ import type { PassportRecord } from '../../passport/domain/contracts';
 export interface VerificationRecordRepository {
   getById(recordId: string): Promise<PassportRecord | null>;
   listByStatus(status: PassportRecord['status']): Promise<PassportRecord[]>;
+  getMemberUserIdByMemberProfileId(memberProfileId: string): Promise<string | null>;
   save(record: PassportRecord): Promise<void>;
 }
 
@@ -46,6 +47,6 @@ export interface VerificationClockPort {
 }
 
 export interface VerificationAuthorizationPolicy {
-  assertCanReview(record: PassportRecord, actor: CurrentUserContext): void;
-  assertCanOverride(record: PassportRecord, actor: CurrentUserContext): void;
+  assertCanReview(record: PassportRecord, memberUserId: string, actor: CurrentUserContext): void;
+  assertCanOverride(record: PassportRecord, memberUserId: string, actor: CurrentUserContext): void;
 }

@@ -38,7 +38,6 @@ CREATE TYPE passport_record_status AS ENUM (
   'NEEDS_CLARIFICATION',
   'VERIFIED',
   'REJECTED',
-  'OVERRIDDEN',
   'SUPERSEDED',
   'ARCHIVED'
 );
@@ -215,7 +214,13 @@ CREATE TABLE passport_records (
   record_type                 item_type NOT NULL,
   title_snapshot              TEXT NOT NULL,
   description_snapshot        TEXT,
+  template_item_is_district_core BOOLEAN,
+  template_item_lodge_id      TEXT,
   event_date                  DATE,
+  note                        TEXT,
+  review_reason               TEXT,
+  submitted_at                TIMESTAMPTZ,
+  supersedes_record_id        TEXT,
   status                      passport_record_status NOT NULL DEFAULT 'DRAFT',
   current_version             INTEGER NOT NULL DEFAULT 1,
   is_official_progress        BOOLEAN NOT NULL DEFAULT FALSE,
