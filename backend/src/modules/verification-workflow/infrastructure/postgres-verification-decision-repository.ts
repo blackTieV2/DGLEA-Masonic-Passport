@@ -2,6 +2,8 @@ import type { SqlClient } from '../../../shared/persistence/sql-client';
 import type { VerificationDecisionRepository } from '../application/ports';
 
 export class PostgresVerificationDecisionRepository implements VerificationDecisionRepository {
+  private counter = 0;
+
   constructor(private readonly sql: SqlClient) {}
 
   async append(decision: {
@@ -14,6 +16,7 @@ export class PostgresVerificationDecisionRepository implements VerificationDecis
     actorRoleCode: string;
     actedAt: string;
   }): Promise<void> {
+    this.counter += 1;
     await this.sql.query(
       `INSERT INTO verification_decisions (
           id,
@@ -25,11 +28,9 @@ export class PostgresVerificationDecisionRepository implements VerificationDecis
           actor_user_id,
           actor_role_code,
           acted_at
-        ) VALUES (
-          CONCAT('vd_', EXTRACT(EPOCH FROM NOW())::bigint, '_', FLOOR(RANDOM() * 1000000)::bigint),
-          $1, $2, $3, $4, $5, $6, $7, $8
-        )`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
+        `vd_${this.counter}`,
         decision.passportRecordId,
         decision.decisionType,
         decision.priorStatus,

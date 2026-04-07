@@ -38,6 +38,9 @@ npm run test
 npm run lint
 npm run build
 npm run typecheck
+npm run migrate
+npm run seed
+npm run fixture:apply
 ```
 
 ## Database scaffolding

@@ -3,10 +3,12 @@ import { PassportRecordService } from '../modules/passport/application/passport-
 import { InMemoryAuditEventWriter, InMemoryNotificationEventHook } from '../modules/passport/infrastructure/in-memory-audit-notification';
 import { InMemoryPassportRecordRepository } from '../modules/passport/infrastructure/in-memory-passport-record-repository';
 import { InMemoryTemplateItemRepository } from '../modules/passport/infrastructure/in-memory-template-item-repository';
+import { PostgresAuditEventWriter, PostgresNotificationEventHook } from '../modules/passport/infrastructure/postgres-audit-notification';
+import { PostgresPassportRecordRepository } from '../modules/passport/infrastructure/postgres-passport-record-repository';
+import { PostgresTemplateItemRepository } from '../modules/passport/infrastructure/postgres-template-item-repository';
 import { VerificationEndpoint } from '../modules/verification-workflow/api/verification.endpoint';
 import { VerificationWorkflowService } from '../modules/verification-workflow/application/verification-workflow.service';
 import { InMemoryVerificationDecisionRepository } from '../modules/verification-workflow/infrastructure/in-memory-verification-decision-repository';
-import { PostgresPassportRecordRepository } from '../modules/passport/infrastructure/postgres-passport-record-repository';
 import { PostgresVerificationDecisionRepository } from '../modules/verification-workflow/infrastructure/postgres-verification-decision-repository';
 import type { SqlClient } from '../shared/persistence/sql-client';
 
@@ -41,9 +43,9 @@ export function composeInMemoryApp(): AppComposition {
 export function composePostgresApp(sql: SqlClient): AppComposition {
   const clock = new SystemClock();
   const recordRepo = new PostgresPassportRecordRepository(sql);
-  const templateRepo = new InMemoryTemplateItemRepository();
-  const auditWriter = new InMemoryAuditEventWriter();
-  const notificationHook = new InMemoryNotificationEventHook();
+  const templateRepo = new PostgresTemplateItemRepository(sql);
+  const auditWriter = new PostgresAuditEventWriter(sql);
+  const notificationHook = new PostgresNotificationEventHook();
   const decisionRepo = new PostgresVerificationDecisionRepository(sql);
 
   const passportService = new PassportRecordService(recordRepo, templateRepo, auditWriter, notificationHook, clock);
