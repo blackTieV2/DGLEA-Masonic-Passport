@@ -1,5 +1,6 @@
 package com.dglea.passport.data
 
+import android.content.Context
 import com.dglea.passport.network.AuthInterceptor
 import com.dglea.passport.network.BackendApi
 import okhttp3.OkHttpClient
@@ -7,8 +8,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
-class AppContainer(baseUrl: String) {
-    private val sessionStore = SessionStore()
+class AppContainer(context: Context, baseUrl: String) {
+    private val sessionStore: SessionStore = SharedPrefsSessionStore(
+        context.getSharedPreferences("dglea_session", Context.MODE_PRIVATE),
+    )
 
     private val api: BackendApi by lazy {
         val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }

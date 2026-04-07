@@ -33,7 +33,7 @@ class PassportViewModel(private val repository: PassportRepository) : ViewModel(
                 repository.createDraft(memberProfileId, districtId, lodgeId, sectionTemplateId, templateItemId, note)
             }
                 .onSuccess { record -> _state.value = PassportUiState(lastRecord = record) }
-                .onFailure { e -> _state.value = PassportUiState(error = e.message ?: "Create draft failed") }
+                .onFailure { e -> _state.value = PassportUiState(error = e.toUiMessage("Create draft failed")) }
         }
     }
 
@@ -43,7 +43,7 @@ class PassportViewModel(private val repository: PassportRepository) : ViewModel(
             _state.value = _state.value.copy(loading = true, error = null)
             runCatching { repository.submit(last.id) }
                 .onSuccess { submitted -> _state.value = PassportUiState(lastRecord = submitted) }
-                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.message ?: "Submit failed") }
+                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Submit failed")) }
         }
     }
 }

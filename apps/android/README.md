@@ -12,9 +12,13 @@ Thin Android Brother slice client for DGLEA Masonic Passport.
 Implemented only Brother flow:
 1. sign in
 2. current user
-3. My Passport summary (latest record status in-session)
+3. My Passport summary
 4. create draft passport record
 5. submit draft for verification
+
+## My Passport screen status (explicit)
+The current **My Passport** screen is a **thin first-screen placeholder**, not a full product-valid passport summary.
+It currently shows signed-in user context and latest in-session record status, plus draft/submit actions for the first Brother slice.
 
 ## Out of scope
 - dashboards
@@ -32,3 +36,4 @@ Implemented only Brother flow:
 ## Notes
 - For local emulator, base URL is `http://10.0.2.2:3000/`.
 - Member profile id is entered explicitly in this thin slice (defaults to `mp_1` for seeded local flows).
+- Session token persistence is backed by SharedPreferences in this stabilisation pass.

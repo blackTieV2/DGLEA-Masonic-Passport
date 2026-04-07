@@ -1,7 +1,7 @@
 package com.dglea.passport.ui
 
 import com.dglea.passport.data.AuthRepository
-import com.dglea.passport.data.SessionStore
+import com.dglea.passport.data.InMemorySessionStore
 import com.dglea.passport.network.BackendApi
 import com.dglea.passport.network.CreateDraftRequest
 import com.dglea.passport.network.LoginRequest
@@ -37,7 +37,7 @@ class AuthViewModelTest {
             override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
         }
 
-        val vm = AuthViewModel(AuthRepository(api, SessionStore()))
+        val vm = AuthViewModel(AuthRepository(api, InMemorySessionStore()))
         vm.signIn("brother@example.org", "pass")
         dispatcher.scheduler.advanceUntilIdle()
 

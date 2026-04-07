@@ -18,7 +18,7 @@ import com.dglea.passport.ui.screens.MyPassportScreen
 import com.dglea.passport.ui.screens.SignInScreen
 
 class MainActivity : ComponentActivity() {
-    private val container by lazy { AppContainer(baseUrl = "http://10.0.2.2:3000/") }
+    private val container by lazy { AppContainer(this, baseUrl = "http://10.0.2.2:3000/") }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

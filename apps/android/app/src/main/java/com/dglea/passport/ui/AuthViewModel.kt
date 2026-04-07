@@ -24,7 +24,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             _state.value = AuthUiState(loading = true)
             runCatching { repository.signIn(email, password) }
                 .onSuccess { user -> _state.value = AuthUiState(user = user) }
-                .onFailure { e -> _state.value = AuthUiState(error = e.message ?: "Sign in failed") }
+                .onFailure { e -> _state.value = AuthUiState(error = e.toUiMessage("Sign in failed")) }
         }
     }
 
@@ -33,7 +33,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             _state.value = _state.value.copy(loading = true, error = null)
             runCatching { repository.currentUser() }
                 .onSuccess { user -> _state.value = AuthUiState(user = user) }
-                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.message ?: "Failed") }
+                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Failed")) }
         }
     }
 }
