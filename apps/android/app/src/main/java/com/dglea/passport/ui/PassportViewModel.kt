@@ -3,6 +3,7 @@ package com.dglea.passport.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dglea.passport.data.PassportRepository
+import com.dglea.passport.network.BrotherPassportSummaryDto
 import com.dglea.passport.network.PassportRecordDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 data class PassportUiState(
     val loading: Boolean = false,
     val lastRecord: PassportRecordDto? = null,
+    val summary: BrotherPassportSummaryDto? = null,
     val error: String? = null,
 )
 
@@ -44,6 +46,15 @@ class PassportViewModel(private val repository: PassportRepository) : ViewModel(
             runCatching { repository.submit(last.id) }
                 .onSuccess { submitted -> _state.value = PassportUiState(lastRecord = submitted) }
                 .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Submit failed")) }
+        }
+    }
+
+    fun loadSummary(memberProfileId: String) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(loading = true, error = null)
+            runCatching { repository.summary(memberProfileId) }
+                .onSuccess { summary -> _state.value = _state.value.copy(loading = false, summary = summary) }
+                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Summary failed")) }
         }
     }
 }

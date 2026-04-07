@@ -63,6 +63,21 @@ export class PostgresPassportRecordRepository implements PassportRecordRepositor
     return result.rows.map((row) => this.mapRowToDomain(row));
   }
 
+  async listByMemberProfileId(memberProfileId: string): Promise<PassportRecord[]> {
+    const result = await this.sql.query<PassportRecordRow>(
+      `SELECT id, member_profile_id, district_id, lodge_id, section_template_id,
+              learning_outcome_template_id, template_item_is_district_core, template_item_lodge_id,
+              event_date, note, review_reason, submitted_at, supersedes_record_id, status, current_version,
+              is_official_progress, created_by_user_id, created_at, updated_at
+         FROM passport_records
+        WHERE member_profile_id = $1
+        ORDER BY updated_at DESC`,
+      [memberProfileId],
+    );
+
+    return result.rows.map((row) => this.mapRowToDomain(row));
+  }
+
   async getMemberUserIdByMemberProfileId(memberProfileId: string): Promise<string | null> {
     const result = await this.sql.query<{ user_id: string }>(
       `SELECT user_id

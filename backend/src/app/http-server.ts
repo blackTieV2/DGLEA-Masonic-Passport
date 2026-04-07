@@ -169,6 +169,19 @@ export function buildHttpServer(app: AppComposition = composeInMemoryApp()): Fas
     }
   });
 
+  server.get('/members/:memberId/passport-summary', async (request, reply) => {
+    const auth = await requireAuth(request, reply, app);
+    if (!auth) return;
+
+    try {
+      const params = request.params as { memberId: string };
+      const summary = await app.passport.brotherSummary({ memberProfileId: params.memberId });
+      reply.send(summary);
+    } catch (error) {
+      toHttpError(error, reply);
+    }
+  });
+
   server.patch('/passport-records/:recordId', async (request, reply) => {
     const auth = await requireAuth(request, reply, app);
     if (!auth) return;

@@ -4,6 +4,7 @@ export interface PassportRecordRepository {
   nextId(): string;
   getById(id: string): Promise<PassportRecord | null>;
   listByStatus(status: PassportRecord['status']): Promise<PassportRecord[]>;
+  listByMemberProfileId(memberProfileId: string): Promise<PassportRecord[]>;
   save(record: PassportRecord): Promise<void>;
 }
 

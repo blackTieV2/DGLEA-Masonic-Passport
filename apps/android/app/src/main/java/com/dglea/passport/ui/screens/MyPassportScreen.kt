@@ -12,13 +12,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dglea.passport.network.PassportRecordDto
+import com.dglea.passport.network.BrotherPassportSummaryDto
 import com.dglea.passport.network.UserDto
 
 @Composable
 fun MyPassportScreen(
     user: UserDto,
+    summary: BrotherPassportSummaryDto?,
     lastRecord: PassportRecordDto?,
     error: String?,
+    onLoadSummary: (memberProfileId: String) -> Unit,
     onCreateDraft: (memberProfileId: String, districtId: String, lodgeId: String, sectionTemplateId: String, templateItemId: String, note: String?) -> Unit,
     onSubmitDraft: () -> Unit,
 ) {
@@ -31,7 +34,7 @@ fun MyPassportScreen(
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Signed in: ${user.displayName} (${user.email})")
-        Text("My Passport Summary")
+        Text("My Passport Summary (Brother)")
         Text("Latest record status: ${lastRecord?.status ?: "none"}")
 
         OutlinedTextField(memberProfileId.value, { memberProfileId.value = it }, label = { Text("Member Profile Id") }, modifier = Modifier.fillMaxWidth())
@@ -40,6 +43,19 @@ fun MyPassportScreen(
         OutlinedTextField(sectionTemplateId.value, { sectionTemplateId.value = it }, label = { Text("Section Template Id") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(templateItemId.value, { templateItemId.value = it }, label = { Text("Template Item Id") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(note.value, { note.value = it }, label = { Text("Note") }, modifier = Modifier.fillMaxWidth())
+
+        Button(onClick = { onLoadSummary(memberProfileId.value) }, modifier = Modifier.padding(top = 8.dp)) {
+            Text("Refresh Summary")
+        }
+
+        summary?.sections?.forEach { section ->
+            Text(
+                text = "${section.sectionName} (${section.sectionCode}) • ${section.progressState}" +
+                  (section.latestStatus?.let { " • latest: $it" } ?: "") +
+                  (section.pendingAction?.let { " • action: $it" } ?: ""),
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
 
         Button(
             onClick = {

@@ -4,10 +4,12 @@ import com.dglea.passport.data.AuthRepository
 import com.dglea.passport.data.InMemorySessionStore
 import com.dglea.passport.network.BackendApi
 import com.dglea.passport.network.CreateDraftRequest
+import com.dglea.passport.network.BrotherPassportSummaryDto
 import com.dglea.passport.network.LoginRequest
 import com.dglea.passport.network.LoginResponse
 import com.dglea.passport.network.PassportRecordDto
 import com.dglea.passport.network.UserDto
+import com.dglea.passport.network.SectionSummaryDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -35,6 +37,8 @@ class AuthViewModelTest {
             override suspend fun me(): UserDto = UserDto("usr_brother", "brother@example.org", "Brother", "ACTIVE")
             override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
             override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
+                BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "NOT_STARTED")))
         }
 
         val vm = AuthViewModel(AuthRepository(api, InMemorySessionStore()))

@@ -90,6 +90,19 @@ describe('http transport integration', () => {
     expect(verified.statusCode).toBe(200);
     expect(verified.json().status).toBe('VERIFIED');
 
+    const summary = await server.inject({
+      method: 'GET',
+      url: '/members/mp_1/passport-summary',
+      headers: { authorization: `Bearer ${brotherToken}` },
+    });
+    expect(summary.statusCode).toBe(200);
+    expect(summary.json().sections).toHaveLength(4);
+    expect(summary.json().sections[0]).toMatchObject({
+      sectionCode: 'EA',
+      progressState: 'VERIFIED',
+      latestStatus: 'VERIFIED',
+    });
+
     await server.close();
   });
 

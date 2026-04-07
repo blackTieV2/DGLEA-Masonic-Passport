@@ -1,7 +1,9 @@
 import { PassportRecordService } from '../application/passport-record.service';
 import type {
+  BrotherPassportSummaryResponse,
   CreateDraftPassportRecordRequest,
   PassportRecordResponse,
+  PassportSectionSummaryResponse,
   SubmitPassportRecordRequest,
   UpdateDraftPassportRecordRequest,
 } from './contracts';
@@ -62,5 +64,20 @@ export class PassportRecordEndpoint {
   async submitForVerification(request: SubmitPassportRecordRequest): Promise<PassportRecordResponse> {
     const record = await this.service.submitForVerification(request);
     return toResponse(record);
+  }
+
+  async brotherSummary(request: { memberProfileId: string }): Promise<BrotherPassportSummaryResponse> {
+    const summary = await this.service.getBrotherSummary(request);
+    return {
+      memberProfileId: summary.memberProfileId,
+      sections: summary.sections.map((section): PassportSectionSummaryResponse => ({
+        sectionCode: section.sectionCode,
+        sectionName: section.sectionName,
+        progressState: section.progressState,
+        latestStatus: section.latestStatus,
+        lastActivityAt: section.lastActivityAt,
+        pendingAction: section.pendingAction,
+      })),
+    };
   }
 }

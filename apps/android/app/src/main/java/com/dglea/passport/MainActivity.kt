@@ -41,8 +41,10 @@ class MainActivity : ComponentActivity() {
                     } else {
                         MyPassportScreen(
                             user = authState.user!!,
+                            summary = passportState.summary,
                             lastRecord = passportState.lastRecord,
                             error = passportState.error,
+                            onLoadSummary = passportVm::loadSummary,
                             onCreateDraft = passportVm::createDraft,
                             onSubmitDraft = passportVm::submitLastDraft,
                         )

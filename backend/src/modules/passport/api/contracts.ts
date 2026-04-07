@@ -43,3 +43,17 @@ export interface PassportRecordResponse {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface PassportSectionSummaryResponse {
+  sectionCode: string;
+  sectionName: string;
+  progressState: 'NOT_STARTED' | 'IN_PROGRESS' | 'VERIFIED';
+  latestStatus?: PassportRecordStatus;
+  lastActivityAt?: string;
+  pendingAction?: 'SUBMIT_DRAFT' | 'AWAITING_REVIEW' | 'RESPOND_TO_CLARIFICATION';
+}
+
+export interface BrotherPassportSummaryResponse {
+  memberProfileId: string;
+  sections: PassportSectionSummaryResponse[];
+}

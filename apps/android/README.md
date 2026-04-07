@@ -17,8 +17,10 @@ Implemented only Brother flow:
 5. submit draft for verification
 
 ## My Passport screen status (explicit)
-The current **My Passport** screen is a **thin first-screen placeholder**, not a full product-valid passport summary.
-It currently shows signed-in user context and latest in-session record status, plus draft/submit actions for the first Brother slice.
+The current **My Passport** screen is now an MVP-valid Brother summary view:
+- four core sections are shown (EA, FC, MM, PFO),
+- each section shows progress state and latest/pending status when available,
+- a clear create-draft action is preserved in the same screen.
 
 ## Out of scope
 - dashboards

@@ -450,6 +450,24 @@ paths:
         '422':
           $ref: '#/components/responses/ValidationError'
 
+  /members/{memberId}/passport-summary:
+    parameters:
+      - $ref: '#/components/parameters/MemberId'
+    get:
+      tags: [PassportRecords]
+      summary: Brother passport summary
+      responses:
+        '200':
+          description: Passport summary payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrotherPassportSummary'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
   /passport-records/{recordId}:
     parameters:
       - $ref: '#/components/parameters/RecordId'
@@ -1586,6 +1604,33 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PassportRecord'
+
+    BrotherPassportSummary:
+      type: object
+      required: [memberProfileId, sections]
+      properties:
+        memberProfileId: { type: string }
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrotherPassportSectionSummary'
+
+    BrotherPassportSectionSummary:
+      type: object
+      required: [sectionCode, sectionName, progressState]
+      properties:
+        sectionCode: { type: string }
+        sectionName: { type: string }
+        progressState:
+          type: string
+          enum: [NOT_STARTED, IN_PROGRESS, VERIFIED]
+        latestStatus:
+          $ref: '#/components/schemas/PassportRecordStatus'
+        lastActivityAt: { type: string, format: date-time, nullable: true }
+        pendingAction:
+          type: string
+          nullable: true
+          enum: [SUBMIT_DRAFT, AWAITING_REVIEW, RESPOND_TO_CLARIFICATION]
 
     MentorDashboard:
       type: object

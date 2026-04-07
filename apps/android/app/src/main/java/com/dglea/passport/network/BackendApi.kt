@@ -20,4 +20,7 @@ interface BackendApi {
 
     @POST("passport-records/{recordId}/submit")
     suspend fun submit(@Path("recordId") recordId: String): PassportRecordDto
+
+    @GET("members/{memberId}/passport-summary")
+    suspend fun passportSummary(@Path("memberId") memberId: String): BrotherPassportSummaryDto
 }

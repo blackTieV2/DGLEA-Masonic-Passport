@@ -26,3 +26,17 @@ data class PassportRecordDto(
     val status: String,
     val submittedAt: String? = null,
 )
+
+data class BrotherPassportSummaryDto(
+    val memberProfileId: String,
+    val sections: List<SectionSummaryDto>,
+)
+
+data class SectionSummaryDto(
+    val sectionCode: String,
+    val sectionName: String,
+    val progressState: String,
+    val latestStatus: String? = null,
+    val lastActivityAt: String? = null,
+    val pendingAction: String? = null,
+)
