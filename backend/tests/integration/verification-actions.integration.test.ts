@@ -2,6 +2,7 @@ import { ForbiddenError, InvalidStateTransitionError } from '../../src/shared/ut
 import type { CurrentUserContext } from '../../src/shared/contracts/authorization';
 import { VerificationEndpoint } from '../../src/modules/verification-workflow/api/verification.endpoint';
 import { VerificationWorkflowService } from '../../src/modules/verification-workflow/application/verification-workflow.service';
+import { InMemoryVerificationDecisionRepository } from '../../src/modules/verification-workflow/infrastructure/in-memory-verification-decision-repository';
 import { InMemoryAuditEventWriter } from '../../src/modules/passport/infrastructure/in-memory-audit-notification';
 import { InMemoryPassportRecordRepository } from '../../src/modules/passport/infrastructure/in-memory-passport-record-repository';
 import type { PassportRecord } from '../../src/modules/passport/domain/contracts';
@@ -45,10 +46,11 @@ describe('verification actions (integration)', () => {
   function setup(seed: PassportRecord[] = [submittedRecord()]) {
     const repo = new InMemoryPassportRecordRepository();
     const audit = new InMemoryAuditEventWriter();
-    const service = new VerificationWorkflowService(repo, audit, new FixedClock());
+    const decisions = new InMemoryVerificationDecisionRepository();
+    const service = new VerificationWorkflowService(repo, decisions, audit, new FixedClock());
     const endpoint = new VerificationEndpoint(service);
 
-    return Promise.all(seed.map((record) => repo.save(record))).then(() => ({ endpoint, repo, audit }));
+    return Promise.all(seed.map((record) => repo.save(record))).then(() => ({ endpoint, repo, audit, decisions }));
   }
 
   it('supports verify/reject/clarification valid transitions from SUBMITTED', async () => {
@@ -117,8 +119,8 @@ describe('verification actions (integration)', () => {
     await expect(endpoint.verify({ recordId: 'pr_submitted', actor: districtMentor })).rejects.toThrow(ForbiddenError);
   });
 
-  it('supports lodge mentor override while preserving historical truth with audit', async () => {
-    const { endpoint, repo, audit } = await setup([submittedRecord({ id: 'pr_base', status: 'REJECTED' })]);
+  it('supports lodge mentor override while preserving history in decision + audit logs', async () => {
+    const { endpoint, repo, audit, decisions } = await setup([submittedRecord({ id: 'pr_base', status: 'REJECTED' })]);
 
     const lodgeMentor = ctx('mentor_override', [
       { roleCode: 'LODGE_MENTOR', scopeType: 'LODGE', lodgeId: 'l_1', districtId: 'd_1', active: true },
@@ -126,21 +128,26 @@ describe('verification actions (integration)', () => {
 
     const overrideRecord = await endpoint.override({
       recordId: 'pr_base',
-      overrideTo: 'VERIFIED',
+      targetStatus: 'VERIFIED',
       reason: 'Manual validation approved',
       actor: lodgeMentor,
     });
 
     const original = await repo.getById('pr_base');
 
-    expect(original?.status).toBe('REJECTED');
-    expect(overrideRecord.status).toBe('OVERRIDDEN');
-    expect(overrideRecord.supersedesRecordId).toBe('pr_base');
-    expect(overrideRecord.reviewReason).toContain('VERIFIED: Manual validation approved');
+    expect(original?.status).toBe('VERIFIED');
+    expect(overrideRecord.status).toBe('VERIFIED');
+    expect(overrideRecord.reviewReason).toBe('Manual validation approved');
+    expect(decisions.items.at(-1)).toMatchObject({
+      decisionType: 'OVERRIDDEN',
+      passportRecordId: 'pr_base',
+      priorStatus: 'REJECTED',
+      newStatus: 'VERIFIED',
+    });
     expect(audit.events.at(-1)).toMatchObject({
       eventType: 'PASSPORT_RECORD_OVERRIDDEN',
       entityId: overrideRecord.id,
-      metadata: { supersedesRecordId: 'pr_base', overrideTo: 'VERIFIED' },
+      metadata: { overrideTo: 'VERIFIED' },
     });
   });
 

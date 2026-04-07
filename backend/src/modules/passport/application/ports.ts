@@ -7,6 +7,22 @@ export interface PassportRecordRepository {
   save(record: PassportRecord): Promise<void>;
 }
 
+/**
+ * Deferred for current stabilisation pass:
+ * full PassportRecordVersion write/read support will be added when persistence
+ * integration goes beyond the current minimal workflow baseline.
+ */
+export interface PassportRecordVersionRepository {
+  appendVersion(_version: {
+    passportRecordId: string;
+    versionNumber: number;
+    payloadJson: Record<string, unknown>;
+    changeReason?: string;
+    createdByUserId: string;
+    createdAt: string;
+  }): Promise<void>;
+}
+
 export interface TemplateItemRepository {
   getById(templateItemId: string): Promise<TemplateItemReference | null>;
 }

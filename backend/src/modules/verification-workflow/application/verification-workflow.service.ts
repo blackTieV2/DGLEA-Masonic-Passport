@@ -1,19 +1,20 @@
 import { ForbiddenError, NotFoundError } from '../../../shared/utilities/errors';
-import type { CurrentUserContext } from '../../../shared/contracts/authorization';
+import type { CurrentUserContext, RoleCode } from '../../../shared/contracts/authorization';
 import { hasCapability } from '../../identity-access/domain/permissions';
 import { assertAssignedMemberScope, assertLodgeScope } from '../../identity-access/domain/scope-enforcement';
 import type { PassportRecord } from '../../passport/domain/contracts';
 import {
-  createOverrideRecord,
-  rejectSubmittedRecord,
-  requestClarificationForSubmittedRecord,
-  verifySubmittedRecord,
+  applyOverrideDecision,
+  rejectRecord,
+  requestClarification,
+  verifyRecord,
   type VerificationDecisionStatus,
 } from '../domain/contracts';
 import type {
   VerificationAuditWriter,
   VerificationAuthorizationPolicy,
   VerificationClockPort,
+  VerificationDecisionRepository,
   VerificationRecordRepository,
 } from './ports';
 
@@ -50,6 +51,7 @@ class DefaultVerificationAuthorizationPolicy implements VerificationAuthorizatio
 export class VerificationWorkflowService {
   constructor(
     private readonly repo: VerificationRecordRepository,
+    private readonly decisionRepo: VerificationDecisionRepository,
     private readonly audit: VerificationAuditWriter,
     private readonly clock: VerificationClockPort,
     private readonly policy: VerificationAuthorizationPolicy = new DefaultVerificationAuthorizationPolicy(),
@@ -60,8 +62,17 @@ export class VerificationWorkflowService {
     this.policy.assertCanReview(existing, input.actor);
 
     const nowIso = this.clock.nowIso();
-    const verified = verifySubmittedRecord(existing, nowIso);
+    const verified = verifyRecord(existing, nowIso);
     await this.repo.save(verified);
+    await this.decisionRepo.append({
+      decisionType: 'VERIFIED',
+      passportRecordId: verified.id,
+      priorStatus: existing.status,
+      newStatus: verified.status,
+      actorUserId: input.actor.identity.userId,
+      actorRoleCode: this.resolveActorRoleCode(input.actor),
+      actedAt: nowIso,
+    });
     await this.audit.write({
       eventType: 'PASSPORT_RECORD_VERIFIED',
       entityId: verified.id,
@@ -79,8 +90,18 @@ export class VerificationWorkflowService {
     this.policy.assertCanReview(existing, input.actor);
 
     const nowIso = this.clock.nowIso();
-    const rejected = rejectSubmittedRecord(existing, input.reason, nowIso);
+    const rejected = rejectRecord(existing, input.reason, nowIso);
     await this.repo.save(rejected);
+    await this.decisionRepo.append({
+      decisionType: 'REJECTED',
+      passportRecordId: rejected.id,
+      priorStatus: existing.status,
+      newStatus: rejected.status,
+      decisionReason: rejected.reviewReason,
+      actorUserId: input.actor.identity.userId,
+      actorRoleCode: this.resolveActorRoleCode(input.actor),
+      actedAt: nowIso,
+    });
     await this.audit.write({
       eventType: 'PASSPORT_RECORD_REJECTED',
       entityId: rejected.id,
@@ -99,8 +120,18 @@ export class VerificationWorkflowService {
     this.policy.assertCanReview(existing, input.actor);
 
     const nowIso = this.clock.nowIso();
-    const needsClarification = requestClarificationForSubmittedRecord(existing, input.reason, nowIso);
+    const needsClarification = requestClarification(existing, input.reason, nowIso);
     await this.repo.save(needsClarification);
+    await this.decisionRepo.append({
+      decisionType: 'REQUESTED_CLARIFICATION',
+      passportRecordId: needsClarification.id,
+      priorStatus: existing.status,
+      newStatus: needsClarification.status,
+      decisionReason: needsClarification.reviewReason,
+      actorUserId: input.actor.identity.userId,
+      actorRoleCode: this.resolveActorRoleCode(input.actor),
+      actedAt: nowIso,
+    });
     await this.audit.write({
       eventType: 'PASSPORT_RECORD_CLARIFICATION_REQUESTED',
       entityId: needsClarification.id,
@@ -116,7 +147,7 @@ export class VerificationWorkflowService {
 
   async override(input: {
     recordId: string;
-    overrideTo: VerificationDecisionStatus;
+    targetStatus: VerificationDecisionStatus;
     reason: string;
     actor: CurrentUserContext;
   }): Promise<PassportRecord> {
@@ -124,16 +155,19 @@ export class VerificationWorkflowService {
     this.policy.assertCanOverride(existing, input.actor);
 
     const nowIso = this.clock.nowIso();
-    const overridden = createOverrideRecord({
-      newId: this.repo.nextId(),
-      source: existing,
-      actorUserId: input.actor.identity.userId,
-      nowIso,
-      status: input.overrideTo,
-      reason: input.reason,
-    });
+    const overridden = applyOverrideDecision(existing, input.targetStatus, input.reason, nowIso);
 
     await this.repo.save(overridden);
+    await this.decisionRepo.append({
+      decisionType: 'OVERRIDDEN',
+      passportRecordId: overridden.id,
+      priorStatus: existing.status,
+      newStatus: overridden.status,
+      decisionReason: overridden.reviewReason,
+      actorUserId: input.actor.identity.userId,
+      actorRoleCode: this.resolveActorRoleCode(input.actor),
+      actedAt: nowIso,
+    });
     await this.audit.write({
       eventType: 'PASSPORT_RECORD_OVERRIDDEN',
       entityId: overridden.id,
@@ -142,7 +176,7 @@ export class VerificationWorkflowService {
       newStatus: overridden.status,
       reason: overridden.reviewReason,
       occurredAt: nowIso,
-      metadata: { supersedesRecordId: existing.id, overrideTo: input.overrideTo },
+      metadata: { overrideTo: input.targetStatus },
     });
 
     return overridden;
@@ -191,5 +225,10 @@ export class VerificationWorkflowService {
       throw new NotFoundError('Passport record not found.');
     }
     return record;
+  }
+
+  private resolveActorRoleCode(actor: CurrentUserContext): RoleCode {
+    const active = actor.roles.find((role) => role.active);
+    return active?.roleCode ?? 'BROTHER';
   }
 }

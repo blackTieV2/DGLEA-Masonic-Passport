@@ -6,9 +6,9 @@ import {
   updateDraftRecord,
 } from '../../src/modules/passport/domain/contracts';
 import {
-  rejectSubmittedRecord,
-  requestClarificationForSubmittedRecord,
-  verifySubmittedRecord,
+  rejectRecord,
+  requestClarification,
+  verifyRecord,
 } from '../../src/modules/verification-workflow/domain/contracts';
 
 const BASE_TIME = '2026-04-06T00:00:00.000Z';
@@ -56,7 +56,7 @@ describe('workflow state transitions (unit)', () => {
 
   it('SUBMITTED -> VERIFIED is valid', () => {
     const submitted = submitRecordForVerification(makeDraft(), '2026-04-06T04:00:00.000Z');
-    const verified = verifySubmittedRecord(submitted, '2026-04-06T05:00:00.000Z');
+    const verified = verifyRecord(submitted, '2026-04-06T05:00:00.000Z');
 
     expect(verified.status).toBe('VERIFIED');
     expect(verified.isOfficialProgress).toBe(true);
@@ -65,9 +65,9 @@ describe('workflow state transitions (unit)', () => {
   it('SUBMITTED -> REJECTED requires reason', () => {
     const submitted = submitRecordForVerification(makeDraft(), '2026-04-06T06:00:00.000Z');
 
-    expect(() => rejectSubmittedRecord(submitted, ' ', '2026-04-06T07:00:00.000Z')).toThrow(InvalidStateTransitionError);
+    expect(() => rejectRecord(submitted, ' ', '2026-04-06T07:00:00.000Z')).toThrow(InvalidStateTransitionError);
 
-    const rejected = rejectSubmittedRecord(submitted, 'Evidence missing', '2026-04-06T07:00:00.000Z');
+    const rejected = rejectRecord(submitted, 'Evidence missing', '2026-04-06T07:00:00.000Z');
     expect(rejected.status).toBe('REJECTED');
     expect(rejected.reviewReason).toBe('Evidence missing');
   });
@@ -75,11 +75,11 @@ describe('workflow state transitions (unit)', () => {
   it('SUBMITTED -> NEEDS_CLARIFICATION requires reason', () => {
     const submitted = submitRecordForVerification(makeDraft(), '2026-04-06T08:00:00.000Z');
 
-    expect(() => requestClarificationForSubmittedRecord(submitted, '', '2026-04-06T09:00:00.000Z')).toThrow(
+    expect(() => requestClarification(submitted, '', '2026-04-06T09:00:00.000Z')).toThrow(
       InvalidStateTransitionError,
     );
 
-    const clarification = requestClarificationForSubmittedRecord(
+    const clarification = requestClarification(
       submitted,
       'Please add event date evidence',
       '2026-04-06T09:00:00.000Z',

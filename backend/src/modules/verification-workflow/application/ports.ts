@@ -1,11 +1,27 @@
-import type { CurrentUserContext } from '../../../shared/contracts/authorization';
+import type { CurrentUserContext, RoleCode } from '../../../shared/contracts/authorization';
 import type { PassportRecord } from '../../passport/domain/contracts';
 
 export interface VerificationRecordRepository {
-  nextId(): string;
   getById(recordId: string): Promise<PassportRecord | null>;
   listByStatus(status: PassportRecord['status']): Promise<PassportRecord[]>;
   save(record: PassportRecord): Promise<void>;
+}
+
+export interface VerificationDecisionRepository {
+  append(decision: {
+    decisionType:
+      | 'VERIFIED'
+      | 'REJECTED'
+      | 'REQUESTED_CLARIFICATION'
+      | 'OVERRIDDEN';
+    passportRecordId: string;
+    priorStatus: PassportRecord['status'];
+    newStatus: PassportRecord['status'];
+    decisionReason?: string;
+    actorUserId: string;
+    actorRoleCode: RoleCode;
+    actedAt: string;
+  }): Promise<void>;
 }
 
 export interface VerificationAuditWriter {

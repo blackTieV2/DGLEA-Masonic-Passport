@@ -20,7 +20,7 @@ export interface ClarificationRequest {
 
 export interface OverrideRecordRequest {
   recordId: string;
-  overrideTo: VerificationDecisionStatus;
+  targetStatus: VerificationDecisionStatus;
   reason: string;
   actor: CurrentUserContext;
 }

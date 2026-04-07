@@ -1,6 +1,6 @@
-/*
- * Foundation bootstrap entrypoint.
- * Runtime wiring will be introduced incrementally as modules are implemented.
- */
+import { composeInMemoryApp } from './composition';
 
-console.log('DGLEA backend foundation bootstrap ready.');
+const app = composeInMemoryApp();
+
+console.log('DGLEA backend composition ready.');
+console.log('Endpoints wired:', Object.keys(app));
