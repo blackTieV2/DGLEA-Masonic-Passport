@@ -1,5 +1,5 @@
 
-````md
+
 # DGLEA Masonic Passport
 
 A district-governed mentoring and progression platform for the District Grand Lodge of the Eastern Archipelago (DGLEA).
@@ -167,5 +167,5 @@ The immediate goal is to establish:
 
 before deeper feature implementation begins.
 
-````
+
 
