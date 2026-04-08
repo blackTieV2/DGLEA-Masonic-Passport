@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.dglea.passport.ui.AuthViewModelTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-04-07T07:37:01.202Z" hostname="ALEXPC" time="0.106">
+  <properties/>
+  <testcase name="sign in updates user state" classname="com.dglea.passport.ui.AuthViewModelTest" time="0.104"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
