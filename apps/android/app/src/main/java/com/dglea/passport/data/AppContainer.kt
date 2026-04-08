@@ -1,12 +1,8 @@
 package com.dglea.passport.data
 
 import android.content.Context
-import com.dglea.passport.network.AuthInterceptor
 import com.dglea.passport.network.BackendApi
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import com.dglea.passport.network.NetworkClientFactory
 
 class AppContainer(context: Context, baseUrl: String) {
     private val sessionStore: SessionStore = SharedPrefsSessionStore(
@@ -14,18 +10,7 @@ class AppContainer(context: Context, baseUrl: String) {
     )
 
     private val api: BackendApi by lazy {
-        val logger = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
-        val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor { sessionStore.accessToken })
-            .addInterceptor(logger)
-            .build()
-
-        Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .client(client)
-            .addConverterFactory(MoshiConverterFactory.create())
-            .build()
-            .create(BackendApi::class.java)
+        NetworkClientFactory.createBackendApi(baseUrl) { sessionStore.accessToken }
     }
 
     val authRepository: AuthRepository by lazy { AuthRepository(api, sessionStore) }
