@@ -77,41 +77,37 @@ May access exceptional corrective tooling where necessary, but this must be rare
 
 The workflow uses the following states:
 
-- `draft`
-- `submitted`
-- `needs_clarification`
-- `verified`
-- `rejected`
-- `overridden`
-- `superseded`
-- `archived`
+- `DRAFT`
+- `SUBMITTED`
+- `NEEDS_CLARIFICATION`
+- `VERIFIED`
+- `REJECTED`
+- `SUPERSEDED`
+- `ARCHIVED`
 
 ---
 
 ## 5. State Definitions
 
-### 5.1 `draft`
+### 5.1 `DRAFT`
 A record being prepared but not yet submitted for mentor review.
 
-### 5.2 `submitted`
+### 5.2 `SUBMITTED`
 A record formally sent for mentor review. It is awaiting a verification action.
 
-### 5.3 `needs_clarification`
+### 5.3 `NEEDS_CLARIFICATION`
 A mentor has reviewed the submission but cannot verify it yet because it is incomplete, unclear, or requires correction.
 
-### 5.4 `verified`
+### 5.4 `VERIFIED`
 The submission has been accepted by an authorised verifier and now counts as an official progress record.
 
-### 5.5 `rejected`
+### 5.5 `REJECTED`
 The submission has been reviewed and declined. It does not count as official progress.
 
-### 5.6 `overridden`
-A prior mentor decision has been replaced by an authorised Lodge Mentor override. This state exists to preserve audit truth and governance.
-
-### 5.7 `superseded`
+### 5.6 `SUPERSEDED`
 A previously valid record has been replaced by a newer corrected record, while retaining the history of the earlier one.
 
-### 5.8 `archived`
+### 5.7 `ARCHIVED`
 A record is retained for history but no longer participates in active workflow. This is an administrative state, not a normal user state.
 
 ---
@@ -120,36 +116,37 @@ A record is retained for history but no longer participates in active workflow. 
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Draft
+    [*] --> DRAFT
 
-    Draft --> Submitted : Brother submits
-    Draft --> Archived : Admin archive invalid draft
+    DRAFT --> SUBMITTED : Brother submits
+    DRAFT --> ARCHIVED : Admin archive invalid draft
 
-    Submitted --> Verified : Mentor verifies
-    Submitted --> Rejected : Mentor rejects
-    Submitted --> NeedsClarification : Mentor requests clarification
-    Submitted --> Overridden : Lodge Mentor override of prior action
+    SUBMITTED --> VERIFIED : Mentor verifies
+    SUBMITTED --> REJECTED : Mentor rejects
+    SUBMITTED --> NEEDS_CLARIFICATION : Mentor requests clarification
+    SUBMITTED --> VERIFIED : Lodge Mentor override to accepted
+    SUBMITTED --> REJECTED : Lodge Mentor override to rejected
+    SUBMITTED --> SUPERSEDED : Lodge Mentor override to superseded
 
-    NeedsClarification --> Draft : Brother edits / resaves
-    NeedsClarification --> Submitted : Brother resubmits directly
-    NeedsClarification --> Rejected : Mentor rejects after follow-up
-    NeedsClarification --> Verified : Mentor verifies after clarification
-    NeedsClarification --> Overridden : Lodge Mentor override
+    NEEDS_CLARIFICATION --> DRAFT : Brother edits / resaves
+    NEEDS_CLARIFICATION --> SUBMITTED : Brother resubmits directly
+    NEEDS_CLARIFICATION --> REJECTED : Mentor rejects after follow-up
+    NEEDS_CLARIFICATION --> VERIFIED : Mentor verifies after clarification
+    NEEDS_CLARIFICATION --> REJECTED : Lodge Mentor override to rejected
+    NEEDS_CLARIFICATION --> VERIFIED : Lodge Mentor override to accepted
+    NEEDS_CLARIFICATION --> SUPERSEDED : Lodge Mentor override to superseded
 
-    Rejected --> Draft : Brother creates revised version
-    Rejected --> Archived : Admin archive
-    Rejected --> Overridden : Lodge Mentor override
+    REJECTED --> DRAFT : Brother creates revised version
+    REJECTED --> ARCHIVED : Admin archive
+    REJECTED --> VERIFIED : Lodge Mentor override to accepted
+    REJECTED --> SUPERSEDED : Lodge Mentor override to superseded
 
-    Verified --> Superseded : Controlled correction path
-    Verified --> Archived : Admin archive exceptional case
-    Verified --> Overridden : Lodge Mentor exceptional override
+    VERIFIED --> SUPERSEDED : Controlled correction path
+    VERIFIED --> ARCHIVED : Admin archive exceptional case
+    VERIFIED --> REJECTED : Lodge Mentor exceptional override
 
-    Overridden --> Verified : Final accepted outcome
-    Overridden --> Rejected : Final overridden rejection
-    Overridden --> Superseded : Corrective replacement path
-
-    Superseded --> Archived : Historical retention
-    Archived --> [*]
+    SUPERSEDED --> ARCHIVED : Historical retention
+    ARCHIVED --> [*]
 ```
 
 ---
@@ -159,21 +156,21 @@ stateDiagram-v2
 ### 7.1 Normal Path
 The normal path should be:
 
-`draft -> submitted -> verified`
+`DRAFT -> SUBMITTED -> VERIFIED`
 
 This is the default success path and should be fast.
 
 ### 7.2 Clarification Path
 Where a mentor sees potential merit but not enough clarity:
 
-`submitted -> needs_clarification -> submitted -> verified`
+`SUBMITTED -> NEEDS_CLARIFICATION -> SUBMITTED -> VERIFIED`
 
 This should be preferred over immediate rejection when the issue is missing detail rather than substantive failure.
 
 ### 7.3 Rejection Path
 Where the submission is not acceptable:
 
-`submitted -> rejected`
+`SUBMITTED -> REJECTED`
 
 A rejected item does not count toward official progress.
 
@@ -182,7 +179,7 @@ Once a record is verified, later factual correction should not erase history sil
 
 Use:
 
-`verified -> superseded`
+`VERIFIED -> SUPERSEDED`
 
 not direct destructive editing.
 
@@ -193,7 +190,7 @@ Override is exceptional, not routine. It exists because the Lodge Mentor is acco
 
 ## 8. Transition Rules
 
-### 8.1 `draft -> submitted`
+### 8.1 `DRAFT -> SUBMITTED`
 Triggered by:
 - Brother
 - mentor acting on behalf of Brother where enabled
@@ -204,7 +201,7 @@ Requirements:
 - submitting actor recorded
 - target verification scope resolvable
 
-### 8.2 `submitted -> verified`
+### 8.2 `SUBMITTED -> VERIFIED`
 Triggered by:
 - authorised Personal Mentor under lodge policy
 - authorised Lodge Mentor under lodge policy
@@ -215,7 +212,7 @@ Requirements:
 - record locked against casual editing
 - official progress counters updated
 
-### 8.3 `submitted -> rejected`
+### 8.3 `SUBMITTED -> REJECTED`
 Triggered by:
 - authorised verifier
 
@@ -224,7 +221,7 @@ Requirements:
 - actor and timestamp recorded
 - record remains visible historically
 
-### 8.4 `submitted -> needs_clarification`
+### 8.4 `SUBMITTED -> NEEDS_CLARIFICATION`
 Triggered by:
 - authorised verifier
 
@@ -241,7 +238,7 @@ Requirements:
 - original clarification request preserved
 - version history maintained
 
-### 8.6 `needs_clarification -> submitted`
+### 8.6 `NEEDS_CLARIFICATION -> SUBMITTED`
 Triggered by:
 - Brother resubmits after changes
 
@@ -250,7 +247,7 @@ Requirements:
 - optionally version increment
 - prior clarification note retained
 
-### 8.7 `verified -> superseded`
+### 8.7 `VERIFIED -> SUPERSEDED`
 Triggered by:
 - controlled correction path only
 - usually Lodge Mentor or admin-assisted correction
@@ -260,7 +257,7 @@ Requirements:
 - reason required
 - prior verified record preserved as historical truth
 
-### 8.8 `* -> overridden`
+### 8.8 `* -> (VERIFIED | REJECTED | SUPERSEDED) via override`
 Triggered by:
 - authorised Lodge Mentor only in normal operation
 - exceptional admin tooling only under strict audit
@@ -285,14 +282,13 @@ Requirements:
 
 | State | Who Can Create | Who Can Edit | Who Can Exit the State |
 |---|---|---|---|
-| `draft` | Brother / authorised mentor-on-behalf | Brother / authorised creator | Brother / admin archive |
-| `submitted` | Brother / authorised mentor-on-behalf | No casual edit | Authorised verifier |
-| `needs_clarification` | Authorised verifier | No direct content edit by verifier | Brother resubmits, verifier rejects/verifies |
-| `verified` | Authorised verifier | No direct casual edit | Controlled correction / override / archive |
-| `rejected` | Authorised verifier | No direct casual edit | Brother creates revised version, Lodge Mentor override, admin archive |
-| `overridden` | Lodge Mentor / exceptional admin | No casual edit | Final target state selected |
-| `superseded` | Controlled correction flow | No casual edit | Admin archive only |
-| `archived` | Admin only | No | Terminal |
+| `DRAFT` | Brother / authorised mentor-on-behalf | Brother / authorised creator | Brother / admin archive |
+| `SUBMITTED` | Brother / authorised mentor-on-behalf | No casual edit | Authorised verifier |
+| `NEEDS_CLARIFICATION` | Authorised verifier | No direct content edit by verifier | Brother resubmits, verifier rejects/verifies |
+| `VERIFIED` | Authorised verifier | No direct casual edit | Controlled correction / override / archive |
+| `REJECTED` | Authorised verifier | No direct casual edit | Brother creates revised version, Lodge Mentor override, admin archive |
+| `SUPERSEDED` | Controlled correction flow | No casual edit | Admin archive only |
+| `ARCHIVED` | Admin only | No | Terminal |
 
 ---
 
@@ -323,13 +319,13 @@ Additional requirements:
 
 | Transition | Notification Target | Notification Type |
 |---|---|---|
-| `draft -> submitted` | Personal Mentor and/or Lodge Mentor | new submission alert |
-| `submitted -> verified` | Brother | verification completed |
-| `submitted -> rejected` | Brother | rejection notice with reason summary |
-| `submitted -> needs_clarification` | Brother | clarification request |
-| `needs_clarification -> submitted` | Relevant verifier(s) | resubmission alert |
-| `* -> overridden` | affected parties as configured | override notification |
-| inactivity while `submitted` | verifier(s) | stale pending reminder |
+| `DRAFT -> SUBMITTED` | Personal Mentor and/or Lodge Mentor | new submission alert |
+| `SUBMITTED -> VERIFIED` | Brother | verification completed |
+| `SUBMITTED -> REJECTED` | Brother | rejection notice with reason summary |
+| `SUBMITTED -> NEEDS_CLARIFICATION` | Brother | clarification request |
+| `NEEDS_CLARIFICATION -> SUBMITTED` | Relevant verifier(s) | resubmission alert |
+| `* -> (VERIFIED/REJECTED/SUPERSEDED) via override` | affected parties as configured | override notification |
+| inactivity while `SUBMITTED` | verifier(s) | stale pending reminder |
 
 ---
 
@@ -339,7 +335,7 @@ Additional requirements:
 A Brother cannot verify his own record.
 
 ### BR-2
-A self-submitted record does not count as official progress until `verified`.
+A self-submitted record does not count as official progress until `VERIFIED`.
 
 ### BR-3
 A rejected record must not increment verified completion metrics.
@@ -372,9 +368,9 @@ The analytics layer must distinguish clearly between:
 
 ### Important warning
 Do not collapse:
-- `submitted`
-- `verified`
-- `needs_clarification`
+- `SUBMITTED`
+- `VERIFIED`
+- `NEEDS_CLARIFICATION`
 
 into one generic “active” bucket for district analytics. That would destroy operational meaning.
 
@@ -385,7 +381,7 @@ into one generic “active” bucket for district analytics. That would destroy 
 These are operational defaults, not hard constitutional rules.
 
 - submitted items should normally be reviewed within a defined service window
-- stale `submitted` items should trigger reminders
+- stale `SUBMITTED` items should trigger reminders
 - repeated clarification loops should be surfaced to Lodge Mentor
 - unresolved exceptions should appear on lodge dashboards
 
@@ -414,7 +410,7 @@ Historical audit must remain intact even if future verification rules change.
 
 Do **not** do the following:
 
-1. do not let `submitted` count as equivalent to `verified`;
+1. do not let `SUBMITTED` count as equivalent to `VERIFIED`;
 2. do not allow direct destructive editing of verified records;
 3. do not allow silent override without mandatory reason capture;
 4. do not allow district roles to become routine operational bottlenecks;
@@ -427,12 +423,12 @@ Do **not** do the following:
 
 For MVP, the strongest practical workflow is:
 
-- Brother creates `draft`
-- Brother submits -> `submitted`
-- Personal Mentor or Lodge Mentor acts -> `verified`, `rejected`, or `needs_clarification`
+- Brother creates `DRAFT`
+- Brother submits -> `SUBMITTED`
+- Personal Mentor or Lodge Mentor acts -> `VERIFIED`, `REJECTED`, or `NEEDS_CLARIFICATION`
 - Lodge Mentor can override where necessary
 - verified items become official
-- corrections create `superseded`, not silent overwrites
+- corrections create `SUPERSEDED`, not silent overwrites
 
 ---
 
