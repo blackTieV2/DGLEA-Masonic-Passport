@@ -24,6 +24,7 @@ fun MyPassportScreen(
     onLoadSummary: (memberProfileId: String) -> Unit,
     onCreateDraft: (memberProfileId: String, districtId: String, lodgeId: String, sectionTemplateId: String, templateItemId: String, note: String?) -> Unit,
     onSubmitDraft: () -> Unit,
+    onSignOut: () -> Unit,
 ) {
     val memberProfileId = remember { mutableStateOf("mp_1") }
     val districtId = remember { mutableStateOf("dist_1") }
@@ -36,6 +37,8 @@ fun MyPassportScreen(
         Text("Signed in: ${user.displayName} (${user.email})")
         Text("My Passport Summary (Brother)")
         Text("Latest record status: ${lastRecord?.status ?: "none"}")
+
+        Button(onClick = onSignOut, modifier = Modifier.padding(top = 8.dp)) { Text("Sign Out") }
 
         OutlinedTextField(memberProfileId.value, { memberProfileId.value = it }, label = { Text("Member Profile Id") }, modifier = Modifier.fillMaxWidth())
         OutlinedTextField(districtId.value, { districtId.value = it }, label = { Text("District Id") }, modifier = Modifier.fillMaxWidth())

@@ -32,4 +32,8 @@ class AuthRepository(
     }
 
     fun hasSessionToken(): Boolean = !sessionStore.accessToken.isNullOrBlank()
+
+    fun signOut() {
+        sessionStore.accessToken = null
+    }
 }

@@ -27,6 +27,7 @@ fun MentorVerificationScreen(
     onVerify: (recordId: String) -> Unit,
     onReject: (recordId: String, reason: String) -> Unit,
     onClarification: (recordId: String, reason: String) -> Unit,
+    onSignOut: () -> Unit,
 ) {
     val selectedRecordId = remember { mutableStateOf("") }
     val reason = remember { mutableStateOf("") }
@@ -42,6 +43,8 @@ fun MentorVerificationScreen(
         Text("Mentor verification: ${user.displayName} (${user.email})")
         Text("Pending queue items: ${queue.size}")
         Text("Last decision status: ${lastDecision?.status ?: "none"}")
+
+        Button(onClick = onSignOut, modifier = Modifier.padding(top = 8.dp)) { Text("Sign Out") }
 
         Button(onClick = onRefreshQueue, modifier = Modifier.padding(top = 8.dp)) {
             Text("Refresh Queue")

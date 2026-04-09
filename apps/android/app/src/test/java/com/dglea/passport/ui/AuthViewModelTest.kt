@@ -57,4 +57,33 @@ class AuthViewModelTest {
         assertEquals("usr_brother", vm.state.value.user?.id)
         assertEquals(null, vm.state.value.error)
     }
+
+    @Test
+    fun `sign out clears user state`() = runTest {
+        val sessionStore = InMemorySessionStore()
+        val api = object : BackendApi {
+            override suspend fun login(request: LoginRequest): LoginResponse =
+                LoginResponse("token", UserDto("usr_brother", request.email, "Brother", "ACTIVE"))
+
+            override suspend fun me(): UserDto = UserDto("usr_brother", "brother@example.org", "Brother", "ACTIVE")
+            override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
+                BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "NOT_STARTED")))
+            override suspend fun verificationQueue(): VerificationQueueResponse =
+                VerificationQueueResponse(emptyList<VerificationQueueItemDto>(), 1, 0, 0, 1)
+            override suspend fun verify(recordId: String): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun reject(recordId: String, request: ActionReasonRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun requestClarification(recordId: String, request: ActionReasonRequest): PassportRecordDto { throw NotImplementedError() }
+        }
+
+        val vm = AuthViewModel(AuthRepository(api, sessionStore))
+        vm.signIn("brother@example.org", "pass")
+        dispatcher.scheduler.advanceUntilIdle()
+        vm.signOut()
+
+        assertEquals(null, vm.state.value.user)
+        assertEquals(null, sessionStore.accessToken)
+    }
+
 }

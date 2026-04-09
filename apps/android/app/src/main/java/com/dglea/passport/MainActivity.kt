@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
                             onVerify = mentorVm::verify,
                             onReject = mentorVm::reject,
                             onClarification = mentorVm::requestClarification,
+                            onSignOut = authVm::signOut,
                         )
                     } else {
                         MyPassportScreen(
@@ -68,6 +69,7 @@ class MainActivity : ComponentActivity() {
                             onLoadSummary = passportVm::loadSummary,
                             onCreateDraft = passportVm::createDraft,
                             onSubmitDraft = passportVm::submitLastDraft,
+                            onSignOut = authVm::signOut,
                         )
                     }
                 }

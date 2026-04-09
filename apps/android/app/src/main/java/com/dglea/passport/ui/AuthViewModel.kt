@@ -36,6 +36,12 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         refreshCurrentUser()
     }
 
+    fun signOut() {
+        repository.signOut()
+        restoreAttempted = false
+        _state.value = AuthUiState()
+    }
+
     fun refreshCurrentUser() {
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
