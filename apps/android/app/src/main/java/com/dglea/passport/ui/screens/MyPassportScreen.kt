@@ -2,7 +2,10 @@ package com.dglea.passport.ui.screens
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -38,7 +41,12 @@ fun MyPassportScreen(
 
     val needsClarification = summary?.sections?.any { it.pendingAction == "RESPOND_TO_CLARIFICATION" } == true
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .navigationBarsPadding()
+            .verticalScroll(rememberScrollState()),
+    ) {
         Text("Signed in: ${user.displayName} (${user.email})")
         Text("My Passport Summary (Brother)")
         Text("Latest record status: ${lastRecord?.status ?: "No record yet"}")
