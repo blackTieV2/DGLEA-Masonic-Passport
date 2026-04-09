@@ -515,12 +515,12 @@ Every progress item shall have a clear state model.
 
 ### 13.1 Required States
 
-- `draft`
-- `submitted`
-- `verified`
-- `rejected`
-- `superseded`
-- `archived` (admin use only)
+- `DRAFT`
+- `SUBMITTED`
+- `VERIFIED`
+- `REJECTED`
+- `SUPERSEDED`
+- `ARCHIVED` (admin use only)
 
 ### 13.2 Why This Matters
 
