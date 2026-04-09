@@ -42,7 +42,7 @@ fun MentorVerificationScreen(
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Mentor verification: ${user.displayName} (${user.email})")
         Text("Pending queue items: ${queue.size}")
-        Text("Last decision status: ${lastDecision?.status ?: "none"}")
+        Text("Last decision status: ${lastDecision?.status ?: "No actions yet"}")
 
         Button(onClick = onSignOut, modifier = Modifier.padding(top = 8.dp)) { Text("Sign Out") }
 
@@ -50,11 +50,18 @@ fun MentorVerificationScreen(
             Text("Refresh Queue")
         }
 
-        queue.forEach { item ->
+        if (queue.isEmpty()) {
             Text(
-                text = "${item.passportRecordId} • member ${item.memberProfileId} • ${item.currentStatus}",
-                modifier = Modifier.padding(top = 4.dp),
+                text = "No pending verification items right now.",
+                modifier = Modifier.padding(top = 8.dp),
             )
+        } else {
+            queue.forEach { item ->
+                Text(
+                    text = "${item.passportRecordId} • member ${item.memberProfileId} • ${item.currentStatus}",
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
         }
 
         OutlinedTextField(

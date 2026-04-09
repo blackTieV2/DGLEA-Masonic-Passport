@@ -102,3 +102,27 @@ Build debug APK:
 - Member profile id can be entered explicitly in this thin slice.
 - Default seeded profile used in local flow is commonly `mp_1`.
 - Session token persistence is local (SharedPreferences-backed store).
+
+
+## Manual regression checklist (MVP)
+
+Run this quick checklist after local changes:
+
+1. **Brother create/submit**
+   - Sign in as `brother@example.org` / `pass`.
+   - Refresh summary.
+   - Create draft record.
+   - Submit draft and confirm status updates.
+
+2. **Mentor verify/reject/clarification**
+   - Sign out.
+   - Sign in as `mentor@example.org` / `pass`.
+   - Refresh verification queue.
+   - Verify one submitted record.
+   - Reject a submitted record with reason.
+   - Request clarification on a submitted record with reason.
+
+3. **Sign-out and account switching**
+   - Sign out from mentor screen and confirm return to sign-in screen.
+   - Sign in as brother again without reinstalling app.
+   - Sign out from brother screen and sign in as mentor again.

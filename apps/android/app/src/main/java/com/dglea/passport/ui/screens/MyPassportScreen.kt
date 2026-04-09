@@ -36,7 +36,7 @@ fun MyPassportScreen(
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Signed in: ${user.displayName} (${user.email})")
         Text("My Passport Summary (Brother)")
-        Text("Latest record status: ${lastRecord?.status ?: "none"}")
+        Text("Latest record status: ${lastRecord?.status ?: "No record yet"}")
 
         Button(onClick = onSignOut, modifier = Modifier.padding(top = 8.dp)) { Text("Sign Out") }
 
