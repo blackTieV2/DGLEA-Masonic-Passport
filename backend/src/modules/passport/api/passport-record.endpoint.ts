@@ -77,6 +77,7 @@ export class PassportRecordEndpoint {
         latestStatus: section.latestStatus,
         lastActivityAt: section.lastActivityAt,
         pendingAction: section.pendingAction,
+        latestReviewReason: section.latestReviewReason,
       })),
     };
   }

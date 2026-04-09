@@ -51,6 +51,7 @@ data class SectionSummaryDto(
     val latestStatus: String? = null,
     val lastActivityAt: String? = null,
     val pendingAction: String? = null,
+    val latestReviewReason: String? = null,
 )
 
 data class VerificationQueueResponse(

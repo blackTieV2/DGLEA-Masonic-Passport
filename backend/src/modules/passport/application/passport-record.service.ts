@@ -146,6 +146,7 @@ export class PassportRecordService {
       latestStatus?: PassportRecord['status'];
       lastActivityAt?: string;
       pendingAction?: 'SUBMIT_DRAFT' | 'AWAITING_REVIEW' | 'RESPOND_TO_CLARIFICATION';
+      latestReviewReason?: string;
     }>;
   }> {
     const records = await this.recordRepo.listByMemberProfileId(input.memberProfileId);
@@ -181,6 +182,7 @@ export class PassportRecordService {
           latestStatus: latest.status,
           lastActivityAt: latest.updatedAt,
           pendingAction,
+          latestReviewReason: latest.reviewReason,
         };
       }),
     };

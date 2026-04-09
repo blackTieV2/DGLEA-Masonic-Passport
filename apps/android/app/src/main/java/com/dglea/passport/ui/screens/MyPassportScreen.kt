@@ -52,10 +52,15 @@ fun MyPassportScreen(
         }
 
         summary?.sections?.forEach { section ->
+            val showReviewReason =
+                (section.latestStatus == "REJECTED" || section.latestStatus == "NEEDS_CLARIFICATION") &&
+                    !section.latestReviewReason.isNullOrBlank()
+
             Text(
                 text = "${section.sectionName} (${section.sectionCode}) • ${section.progressState}" +
                   (section.latestStatus?.let { " • latest: $it" } ?: "") +
-                  (section.pendingAction?.let { " • action: $it" } ?: ""),
+                  (section.pendingAction?.let { " • action: $it" } ?: "") +
+                  (if (showReviewReason) " • mentor note: ${section.latestReviewReason}" else ""),
                 modifier = Modifier.padding(top = 4.dp),
             )
         }

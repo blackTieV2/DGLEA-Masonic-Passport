@@ -51,6 +51,7 @@ export interface PassportSectionSummaryResponse {
   latestStatus?: PassportRecordStatus;
   lastActivityAt?: string;
   pendingAction?: 'SUBMIT_DRAFT' | 'AWAITING_REVIEW' | 'RESPOND_TO_CLARIFICATION';
+  latestReviewReason?: string;
 }
 
 export interface BrotherPassportSummaryResponse {

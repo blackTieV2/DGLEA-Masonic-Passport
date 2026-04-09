@@ -1631,6 +1631,9 @@ components:
           type: string
           nullable: true
           enum: [SUBMIT_DRAFT, AWAITING_REVIEW, RESPOND_TO_CLARIFICATION]
+        latestReviewReason:
+          type: string
+          nullable: true
 
     MentorDashboard:
       type: object
