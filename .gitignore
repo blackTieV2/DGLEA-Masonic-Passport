@@ -1,0 +1,47 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vs/
+.idea/
+*.iml
+
+# Node / JS / TS
+node_modules/
+dist/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Android / Gradle
+.gradle/
+.idea/
+**/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+apps/android/.gradle/
+apps/android/.idea/
+
+# Kotlin / Java
+*.class
+out/
+
+# IntelliJ / Android Studio
+.idea_modules/
+
+# macOS / Windows misc
+Desktop.ini
+
+# Generated reports / temp
+tmp/
+temp/
+*.tmp
