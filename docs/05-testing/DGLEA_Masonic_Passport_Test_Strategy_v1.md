@@ -97,7 +97,7 @@ Target journeys:
 - mentor verifies item
 - mentor requests clarification and Brother resubmits
 - Lodge Mentor override
-- Lodge Admin onboard flow
+- Lodge Administrator onboard flow
 - District Mentor analytics flow
 
 ## 5.4 Exploratory / Manual Testing
@@ -118,7 +118,7 @@ This is the highest-priority domain.
 - Personal Mentor can access assigned Brothers only
 - Lodge Mentor can access only lodge-scoped records
 - District Mentor sees analytics scope, not unrestricted private notes
-- District Admin access is auditable
+- District Administrator access is auditable
 
 ### Suggested test matrix
 - same-role same-lodge
@@ -144,15 +144,15 @@ The second highest-priority domain.
 - supersede preserves old truth rather than destroying it
 
 ### Required state transition coverage
-- `draft -> submitted`
-- `submitted -> verified`
-- `submitted -> rejected`
-- `submitted -> needs_clarification`
-- `needs_clarification -> submitted`
-- `needs_clarification -> verified`
-- `rejected -> revised submission path`
-- `verified -> superseded`
-- `* -> overridden` where allowed
+- `DRAFT -> SUBMITTED`
+- `SUBMITTED -> VERIFIED`
+- `SUBMITTED -> REJECTED`
+- `SUBMITTED -> NEEDS_CLARIFICATION`
+- `NEEDS_CLARIFICATION -> SUBMITTED`
+- `NEEDS_CLARIFICATION -> VERIFIED`
+- `REJECTED -> DRAFT (revised submission path)`
+- `VERIFIED -> SUPERSEDED`
+- `* -> OVERRIDDEN` where allowed
 
 ---
 
@@ -183,7 +183,7 @@ The second highest-priority domain.
 
 ### Must prove:
 - dashboards show correct counts
-- `submitted` is not treated as equivalent to `verified`
+- `SUBMITTED` is not treated as equivalent to `VERIFIED`
 - clarification items are not miscounted as failures by default
 - district drill-down obeys role limits
 - exports reflect correct scope and date ranges
@@ -240,7 +240,7 @@ Recommended MVP E2E journeys:
 2. Personal Mentor sign in -> verify assigned submission
 3. Brother resubmits after clarification
 4. Lodge Mentor override
-5. Lodge Admin creates member and assigns mentor
+5. Lodge Administrator creates member and assigns mentor
 6. District Mentor views analytics
 
 ---
@@ -362,7 +362,7 @@ Focus on:
 - can act as fallback verifier
 - can override with explicit reason
 
-## 12.4 Lodge Admin
+## 12.4 Lodge Administrator
 - can onboard Brother
 - can assign mentor
 - can update lodge configuration safely
