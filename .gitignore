@@ -22,11 +22,14 @@ pnpm-debug.log*
 
 # Android / Gradle
 .gradle/
+.idea/
 **/build/
 local.properties
 captures/
 .externalNativeBuild/
 .cxx/
+apps/android/.gradle/
+apps/android/.idea/
 
 # Kotlin / Java
 *.class
