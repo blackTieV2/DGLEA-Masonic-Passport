@@ -15,6 +15,12 @@ class ErrorMappingTest {
     }
 
     @Test
+    fun invalid_state_transition_maps_to_refresh_message() {
+        val ex = HttpException(Response.error<String>(409, "{\"code\":\"INVALID_STATE_TRANSITION\"}".toResponseBody()))
+        assertEquals("Record state changed on server. Refresh queue and try again.", ex.toUiMessage("fallback"))
+    }
+
+    @Test
     fun unknown_host_maps_to_backend_unavailable_message() {
         val ex = UnknownHostException("no host")
         assertEquals(

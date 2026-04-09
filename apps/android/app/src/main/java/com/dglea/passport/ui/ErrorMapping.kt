@@ -11,10 +11,15 @@ fun Throwable.toUiMessage(defaultMessage: String): String {
             400 -> "Invalid request. Please review your input."
             401 -> "Session expired or unauthorized. Please sign in again."
             403 -> "You do not have permission for this action."
+            409 -> "Record state changed on server. Refresh queue and try again."
             in 500..599 -> "Backend is unavailable right now. Please try again shortly."
             else -> {
                 val body = response()?.errorBody()?.string()?.takeIf { it.isNotBlank() }
-                body ?: "HTTP ${code()}"
+                when {
+                    body?.contains("INVALID_STATE_TRANSITION") == true -> "Record state changed on server. Refresh queue and try again."
+                    body != null -> body
+                    else -> "HTTP ${code()}"
+                }
             }
         }
     }

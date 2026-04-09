@@ -7,6 +7,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,6 +21,7 @@ fun MentorVerificationScreen(
     user: UserDto,
     queue: List<VerificationQueueItemDto>,
     lastDecision: PassportRecordDto?,
+    actionNonce: Int,
     error: String?,
     onRefreshQueue: () -> Unit,
     onVerify: (recordId: String) -> Unit,
@@ -28,6 +30,13 @@ fun MentorVerificationScreen(
 ) {
     val selectedRecordId = remember { mutableStateOf("") }
     val reason = remember { mutableStateOf("") }
+
+    LaunchedEffect(actionNonce) {
+        if (actionNonce > 0) {
+            selectedRecordId.value = ""
+            reason.value = ""
+        }
+    }
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Mentor verification: ${user.displayName} (${user.email})")

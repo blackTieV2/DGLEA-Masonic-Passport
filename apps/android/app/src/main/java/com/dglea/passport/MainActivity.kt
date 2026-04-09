@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
                             user = authState.user!!,
                             queue = mentorState.queue,
                             lastDecision = mentorState.lastDecision,
+                            actionNonce = mentorState.actionNonce,
                             error = mentorState.error,
                             onRefreshQueue = mentorVm::refreshQueue,
                             onVerify = mentorVm::verify,
