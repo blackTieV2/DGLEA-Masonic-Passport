@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity() {
                             error = passportState.error,
                             onLoadSummary = passportVm::loadSummary,
                             onCreateDraft = passportVm::createDraft,
+                            onUpdateClarificationResponse = passportVm::updateClarificationResponse,
                             onSubmitDraft = passportVm::submitLastDraft,
                             onSignOut = authVm::signOut,
                         )

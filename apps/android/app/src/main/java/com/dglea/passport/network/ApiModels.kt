@@ -24,6 +24,7 @@ data class CreateDraftRequest(
 )
 
 data class ActionReasonRequest(val reason: String)
+data class UpdateRecordRequest(val note: String? = null, val eventDate: String? = null)
 
 data class PassportRecordDto(
     val id: String,

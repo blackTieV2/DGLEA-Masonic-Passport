@@ -77,8 +77,8 @@ export function createDraftRecord(input: {
 }
 
 export function updateDraftRecord(record: PassportRecord, input: { note?: string; eventDate?: string; nowIso: string }): PassportRecord {
-  if (record.status !== 'DRAFT') {
-    throw new InvalidStateTransitionError('Only DRAFT records can be updated via draft update path.');
+  if (record.status !== 'DRAFT' && record.status !== 'NEEDS_CLARIFICATION') {
+    throw new InvalidStateTransitionError('Only DRAFT or NEEDS_CLARIFICATION records can be updated via draft update path.');
   }
 
   return {

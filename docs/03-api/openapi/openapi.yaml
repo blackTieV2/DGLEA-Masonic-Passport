@@ -490,7 +490,7 @@ paths:
 
     patch:
       tags: [PassportRecords]
-      summary: Update draft passport record
+      summary: Update draft/clarification passport record
       description: |
         Server enforces that VERIFIED, SUPERSEDED, or ARCHIVED records are not
         casually edited via this endpoint.

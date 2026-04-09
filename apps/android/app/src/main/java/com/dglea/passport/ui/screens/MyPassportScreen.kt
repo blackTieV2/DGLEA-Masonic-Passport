@@ -11,8 +11,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dglea.passport.network.PassportRecordDto
 import com.dglea.passport.network.BrotherPassportSummaryDto
+import com.dglea.passport.network.PassportRecordDto
 import com.dglea.passport.network.UserDto
 
 @Composable
@@ -23,6 +23,7 @@ fun MyPassportScreen(
     error: String?,
     onLoadSummary: (memberProfileId: String) -> Unit,
     onCreateDraft: (memberProfileId: String, districtId: String, lodgeId: String, sectionTemplateId: String, templateItemId: String, note: String?) -> Unit,
+    onUpdateClarificationResponse: (recordId: String, note: String?) -> Unit,
     onSubmitDraft: () -> Unit,
     onSignOut: () -> Unit,
 ) {
@@ -32,6 +33,10 @@ fun MyPassportScreen(
     val sectionTemplateId = remember { mutableStateOf("sec_1") }
     val templateItemId = remember { mutableStateOf("ti_1") }
     val note = remember { mutableStateOf("") }
+    val clarificationRecordId = remember { mutableStateOf("") }
+    val clarificationNote = remember { mutableStateOf("") }
+
+    val needsClarification = summary?.sections?.any { it.pendingAction == "RESPOND_TO_CLARIFICATION" } == true
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text("Signed in: ${user.displayName} (${user.email})")
@@ -78,6 +83,37 @@ fun MyPassportScreen(
             },
             modifier = Modifier.padding(top = 12.dp),
         ) { Text("Create Draft") }
+
+        if (needsClarification) {
+            OutlinedTextField(
+                value = clarificationRecordId.value,
+                onValueChange = { clarificationRecordId.value = it },
+                label = { Text("Clarification Record Id") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+            )
+            OutlinedTextField(
+                value = clarificationNote.value,
+                onValueChange = { clarificationNote.value = it },
+                label = { Text("Clarification Response") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+            )
+
+            Button(
+                onClick = {
+                    onUpdateClarificationResponse(
+                        clarificationRecordId.value,
+                        clarificationNote.value.ifBlank { null },
+                    )
+                },
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                Text("Save Clarification Response")
+            }
+        }
 
         Button(onClick = onSubmitDraft, modifier = Modifier.padding(top = 8.dp)) { Text("Submit Draft") }
 

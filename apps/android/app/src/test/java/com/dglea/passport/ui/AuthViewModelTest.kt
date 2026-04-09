@@ -10,6 +10,7 @@ import com.dglea.passport.network.LoginRequest
 import com.dglea.passport.network.LoginResponse
 import com.dglea.passport.network.PassportRecordDto
 import com.dglea.passport.network.UserDto
+import com.dglea.passport.network.UpdateRecordRequest
 import com.dglea.passport.network.VerificationQueueItemDto
 import com.dglea.passport.network.VerificationQueueResponse
 import com.dglea.passport.network.SectionSummaryDto
@@ -39,6 +40,7 @@ class AuthViewModelTest {
 
             override suspend fun me(): UserDto = UserDto("usr_brother", "brother@example.org", "Brother", "ACTIVE")
             override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto { throw NotImplementedError() }
             override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
             override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
                 BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "NOT_STARTED")))
@@ -67,6 +69,7 @@ class AuthViewModelTest {
 
             override suspend fun me(): UserDto = UserDto("usr_brother", "brother@example.org", "Brother", "ACTIVE")
             override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto { throw NotImplementedError() }
             override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
             override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
                 BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "NOT_STARTED")))

@@ -9,6 +9,7 @@ import com.dglea.passport.network.LoginRequest
 import com.dglea.passport.network.LoginResponse
 import com.dglea.passport.network.PassportRecordDto
 import com.dglea.passport.network.UserDto
+import com.dglea.passport.network.UpdateRecordRequest
 import com.dglea.passport.network.VerificationQueueItemDto
 import com.dglea.passport.network.VerificationQueueResponse
 import com.dglea.passport.network.SectionSummaryDto
@@ -47,6 +48,7 @@ class PassportViewModelTest {
             override suspend fun login(request: LoginRequest): LoginResponse { throw NotImplementedError() }
             override suspend fun me(): UserDto { throw NotImplementedError() }
             override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto = latest
+            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto = latest.copy(note = request.note)
             override suspend fun submit(recordId: String): PassportRecordDto {
                 latest = latest.copy(status = "SUBMITTED")
                 return latest

@@ -39,6 +39,15 @@ class PassportViewModel(private val repository: PassportRepository) : ViewModel(
         }
     }
 
+    fun updateClarificationResponse(recordId: String, note: String?) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(loading = true, error = null)
+            runCatching { repository.updateClarificationResponse(recordId, note) }
+                .onSuccess { updated -> _state.value = _state.value.copy(loading = false, lastRecord = updated) }
+                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Update response failed")) }
+        }
+    }
+
     fun submitLastDraft() {
         val last = _state.value.lastRecord ?: return
         viewModelScope.launch {

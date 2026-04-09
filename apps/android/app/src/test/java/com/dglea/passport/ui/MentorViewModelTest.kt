@@ -10,6 +10,7 @@ import com.dglea.passport.network.LoginResponse
 import com.dglea.passport.network.PassportRecordDto
 import com.dglea.passport.network.SectionSummaryDto
 import com.dglea.passport.network.UserDto
+import com.dglea.passport.network.UpdateRecordRequest
 import com.dglea.passport.network.VerificationQueueItemDto
 import com.dglea.passport.network.VerificationQueueResponse
 import kotlinx.coroutines.Dispatchers
@@ -46,6 +47,7 @@ class MentorViewModelTest {
             override suspend fun login(request: LoginRequest): LoginResponse { throw NotImplementedError() }
             override suspend fun me(): UserDto { throw NotImplementedError() }
             override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto { throw NotImplementedError() }
             override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
             override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
                 BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "IN_PROGRESS")))
@@ -108,6 +110,7 @@ class MentorViewModelTest {
             override suspend fun login(request: LoginRequest): LoginResponse { throw NotImplementedError() }
             override suspend fun me(): UserDto { throw NotImplementedError() }
             override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto { throw NotImplementedError() }
             override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
             override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
                 BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "IN_PROGRESS")))

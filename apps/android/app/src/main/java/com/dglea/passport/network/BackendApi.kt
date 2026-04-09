@@ -2,6 +2,7 @@ package com.dglea.passport.network
 
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -16,6 +17,12 @@ interface BackendApi {
     suspend fun createDraft(
         @Path("memberId") memberId: String,
         @Body request: CreateDraftRequest,
+    ): PassportRecordDto
+
+    @PATCH("passport-records/{recordId}")
+    suspend fun updateRecord(
+        @Path("recordId") recordId: String,
+        @Body request: UpdateRecordRequest,
     ): PassportRecordDto
 
     @POST("passport-records/{recordId}/submit")
