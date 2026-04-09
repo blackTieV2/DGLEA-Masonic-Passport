@@ -13,7 +13,7 @@ class AuthRepository(
         return try {
             val response = api.login(LoginRequest(email, password))
             sessionStore.accessToken = response.accessToken
-            response.user
+            response.user.copy(roles = response.roles)
         } catch (e: Throwable) {
             sessionStore.accessToken = null
             throw e

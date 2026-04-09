@@ -14,7 +14,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.dglea.passport.data.AppContainer
 import com.dglea.passport.ui.AuthViewModel
+import com.dglea.passport.ui.MentorViewModel
 import com.dglea.passport.ui.PassportViewModel
+import com.dglea.passport.ui.screens.MentorVerificationScreen
 import com.dglea.passport.ui.screens.MyPassportScreen
 import com.dglea.passport.ui.screens.SignInScreen
 
@@ -27,12 +29,14 @@ class MainActivity : ComponentActivity() {
 
         val authVm = ViewModelProvider(this, vmFactory { AuthViewModel(container.authRepository) })[AuthViewModel::class.java]
         val passportVm = ViewModelProvider(this, vmFactory { PassportViewModel(container.passportRepository) })[PassportViewModel::class.java]
+        val mentorVm = ViewModelProvider(this, vmFactory { MentorViewModel(container.mentorRepository) })[MentorViewModel::class.java]
 
         setContent {
             MaterialTheme {
                 Surface {
                     val authState by authVm.state.collectAsState()
                     val passportState by passportVm.state.collectAsState()
+                    val mentorState by mentorVm.state.collectAsState()
 
                     LaunchedEffect(Unit) {
                         authVm.restoreSessionIfPresent()
@@ -42,6 +46,17 @@ class MainActivity : ComponentActivity() {
                         SignInScreen(
                             onSignIn = authVm::signIn,
                             error = authState.error,
+                        )
+                    } else if (authState.user!!.roles.any { it == "LODGE_MENTOR" }) {
+                        MentorVerificationScreen(
+                            user = authState.user!!,
+                            queue = mentorState.queue,
+                            lastDecision = mentorState.lastDecision,
+                            error = mentorState.error,
+                            onRefreshQueue = mentorVm::refreshQueue,
+                            onVerify = mentorVm::verify,
+                            onReject = mentorVm::reject,
+                            onClarification = mentorVm::requestClarification,
                         )
                     } else {
                         MyPassportScreen(

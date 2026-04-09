@@ -23,4 +23,22 @@ interface BackendApi {
 
     @GET("members/{memberId}/passport-summary")
     suspend fun passportSummary(@Path("memberId") memberId: String): BrotherPassportSummaryDto
+
+    @GET("verification-queue")
+    suspend fun verificationQueue(): VerificationQueueResponse
+
+    @POST("passport-records/{recordId}/verify")
+    suspend fun verify(@Path("recordId") recordId: String): PassportRecordDto
+
+    @POST("passport-records/{recordId}/reject")
+    suspend fun reject(
+        @Path("recordId") recordId: String,
+        @Body request: ActionReasonRequest,
+    ): PassportRecordDto
+
+    @POST("passport-records/{recordId}/clarification")
+    suspend fun requestClarification(
+        @Path("recordId") recordId: String,
+        @Body request: ActionReasonRequest,
+    ): PassportRecordDto
 }

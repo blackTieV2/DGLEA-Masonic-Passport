@@ -6,17 +6,26 @@ This README is intentionally practical for contributors who are **not Android sp
 
 ## What this app currently does
 
-This slice intentionally implements only Brother flow:
+This slice currently implements two thin flows:
+
+**Brother flow**
 1. Sign in
 2. Fetch current user
 3. View **My Passport** summary
 4. Create draft passport record
 5. Submit draft for verification
 
+**Mentor verification flow (minimal)**
+1. Sign in as mentor-capable user
+2. View pending verification queue
+3. Verify a submitted record
+4. Reject a submitted record with reason
+5. Request clarification with reason
+
 ### Out of scope (for now)
 - Dashboard/analytics views
 - Lodge admin workflows
-- Mentor workflow UI
+- Broad mentor dashboard/reporting UI beyond the minimal verification actions
 - Broad product polish beyond the core Brother path
 
 ## Tech stack (minimal, production-minded)
