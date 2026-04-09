@@ -19,6 +19,8 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _state = MutableStateFlow(AuthUiState())
     val state: StateFlow<AuthUiState> = _state.asStateFlow()
 
+    private var restoreAttempted = false
+
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             _state.value = AuthUiState(loading = true)
@@ -28,12 +30,18 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun restoreSessionIfPresent() {
+        if (restoreAttempted || !repository.hasSessionToken()) return
+        restoreAttempted = true
+        refreshCurrentUser()
+    }
+
     fun refreshCurrentUser() {
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             runCatching { repository.currentUser() }
                 .onSuccess { user -> _state.value = AuthUiState(user = user) }
-                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Failed")) }
+                .onFailure { e -> _state.value = AuthUiState(error = e.toUiMessage("Failed")) }
         }
     }
 }

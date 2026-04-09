@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
@@ -32,6 +33,10 @@ class MainActivity : ComponentActivity() {
                 Surface {
                     val authState by authVm.state.collectAsState()
                     val passportState by passportVm.state.collectAsState()
+
+                    LaunchedEffect(Unit) {
+                        authVm.restoreSessionIfPresent()
+                    }
 
                     if (authState.user == null) {
                         SignInScreen(
