@@ -1,8 +1,0 @@
-com.dglea.passport.app-pngs-0 C:\Users\alex.maroske\GitHub\DGLEA-Masonic-Passport\apps\android\app\build\generated\res\pngs\debug
-com.dglea.passport.app-resValues-1 C:\Users\alex.maroske\GitHub\DGLEA-Masonic-Passport\apps\android\app\build\generated\res\resValues\debug
-com.dglea.passport.app-updated_navigation_xml-2 C:\Users\alex.maroske\GitHub\DGLEA-Masonic-Passport\apps\android\app\build\generated\updated_navigation_xml\debug
-com.dglea.passport.app-packageDebugResources-3 C:\Users\alex.maroske\GitHub\DGLEA-Masonic-Passport\apps\android\app\build\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.dglea.passport.app-packageDebugResources-4 C:\Users\alex.maroske\GitHub\DGLEA-Masonic-Passport\apps\android\app\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.dglea.passport.app-debug-5 C:\Users\alex.maroske\GitHub\DGLEA-Masonic-Passport\apps\android\app\build\intermediates\merged_res\debug\mergeDebugResources
-com.dglea.passport.app-debug-6 C:\Users\alex.maroske\GitHub\DGLEA-Masonic-Passport\apps\android\app\src\debug\res
-com.dglea.passport.app-main-7 C:\Users\alex.maroske\GitHub\DGLEA-Masonic-Passport\apps\android\app\src\main\res
