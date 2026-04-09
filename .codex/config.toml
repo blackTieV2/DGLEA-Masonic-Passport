@@ -1,0 +1,66 @@
+# DGLEA Masonic Passport — project-scoped Codex configuration
+#
+# Keep this file minimal and project-specific.
+# Put personal preferences in ~/.codex/config.toml instead.
+#
+# Notes from OpenAI Codex docs:
+# - Project config is loaded from .codex/config.toml
+# - Project config is only loaded for trusted projects
+# - Root keys must appear before tables in TOML
+
+###############################################################################
+# Core model selection
+###############################################################################
+
+# Recommended example model from OpenAI Codex docs
+model = "gpt-5.4"
+
+# Use the built-in OpenAI provider
+model_provider = "openai"
+
+###############################################################################
+# Project root detection
+###############################################################################
+
+# Treat the repo root as the project root when .git is present
+project_root_markers = [".git"]
+
+###############################################################################
+# Optional instruction-file fallback behavior
+###############################################################################
+
+# AGENTS.md is already the standard instruction file, so no fallback is needed.
+# Only uncomment this if you later decide to support additional filenames.
+#
+# project_doc_fallback_filenames = ["TEAM_GUIDE.md", ".agents.md"]
+# project_doc_max_bytes = 65536
+
+###############################################################################
+# Optional features
+###############################################################################
+
+[features]
+# Keep experimental hooks off for now.
+# Turn this on only if you later add a .codex/hooks.json file intentionally.
+codex_hooks = false
+
+###############################################################################
+# Optional subagent wiring
+###############################################################################
+
+# Leave this minimal for v1.
+# Codex already includes built-in agents such as default / worker / explorer.
+# Add project-scoped custom agents later only if you genuinely need them.
+#
+# Example future shape:
+#
+# [agents.implementation]
+# description = "Execution-focused implementation agent for DGLEA Masonic Passport"
+# config_file = ".codex/agents/implementation.toml"
+
+###############################################################################
+# Project guidance
+###############################################################################
+
+# This repository uses AGENTS.md at repo root for persistent project rules.
+# Do not duplicate AGENTS.md content here unless you have a very specific reason.
