@@ -79,8 +79,9 @@ Build debug APK:
 
 1. Start an Android Emulator (AVD Manager).
 2. Ensure backend is running on your host machine.
-3. For Android emulator networking, app base URL should be `http://10.0.2.2:3000/`.
-4. Run app from Android Studio (`app` configuration).
+3. For Android emulator networking, app base URL should be `http://10.0.2.2:3000/` (`10.0.2.2` routes from emulator to your host machine `localhost`).
+4. Local dev HTTP is explicitly enabled only for `10.0.2.2` via `app/src/main/res/xml/network_security_config.xml`; global cleartext remains disabled.
+5. Run app from Android Studio (`app` configuration).
 
 ## API endpoints used by this slice
 - `POST /auth/login`
