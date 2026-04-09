@@ -11,7 +11,7 @@ info:
     - Verification workflow transitions are explicit endpoints.
     - District/lodge/member scope checks are mandatory server-side.
 servers:
-  - url: /api/v1
+  - url: /
     description: Version 1 API
 
 tags:
