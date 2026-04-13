@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                             onLoadSummary = passportVm::loadSummary,
                             onCreateDraft = passportVm::createDraft,
                             onUpdateClarificationResponse = passportVm::updateClarificationResponse,
-                            onSubmitDraft = passportVm::submitLastDraft,
+                            onSubmitDraft = passportVm::submitDraft,
                             onSignOut = authVm::signOut,
                         )
                     }

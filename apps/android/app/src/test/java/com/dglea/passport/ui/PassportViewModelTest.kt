@@ -68,7 +68,7 @@ class PassportViewModelTest {
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals("DRAFT", vm.state.value.lastRecord?.status)
 
-        vm.submitLastDraft()
+        vm.submitDraft()
         dispatcher.scheduler.advanceUntilIdle()
         assertEquals("SUBMITTED", vm.state.value.lastRecord?.status)
     }

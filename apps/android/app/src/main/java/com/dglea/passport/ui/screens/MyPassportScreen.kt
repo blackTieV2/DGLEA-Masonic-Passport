@@ -10,6 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,7 +28,7 @@ fun MyPassportScreen(
     onLoadSummary: (memberProfileId: String) -> Unit,
     onCreateDraft: (memberProfileId: String, districtId: String, lodgeId: String, sectionTemplateId: String, templateItemId: String, note: String?) -> Unit,
     onUpdateClarificationResponse: (recordId: String, note: String?) -> Unit,
-    onSubmitDraft: () -> Unit,
+    onSubmitDraft: (recordId: String?) -> Unit,
     onSignOut: () -> Unit,
 ) {
     val memberProfileId = remember { mutableStateOf("mp_1") }
@@ -40,6 +41,11 @@ fun MyPassportScreen(
     val clarificationNote = remember { mutableStateOf("") }
 
     val needsClarification = summary?.sections?.any { it.pendingAction == "RESPOND_TO_CLARIFICATION" } == true
+    LaunchedEffect(needsClarification, lastRecord?.id) {
+        if (needsClarification && clarificationRecordId.value.isBlank() && !lastRecord?.id.isNullOrBlank()) {
+            clarificationRecordId.value = lastRecord?.id.orEmpty()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -123,7 +129,13 @@ fun MyPassportScreen(
             }
         }
 
-        Button(onClick = onSubmitDraft, modifier = Modifier.padding(top = 8.dp)) { Text("Submit Draft") }
+        Button(
+            onClick = {
+                val targetRecordId = if (needsClarification) clarificationRecordId.value else null
+                onSubmitDraft(targetRecordId)
+            },
+            modifier = Modifier.padding(top = 8.dp),
+        ) { Text("Submit Draft") }
 
         if (!error.isNullOrBlank()) {
             Text(text = error, modifier = Modifier.padding(top = 8.dp))

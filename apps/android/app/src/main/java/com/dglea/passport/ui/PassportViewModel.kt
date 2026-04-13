@@ -48,11 +48,11 @@ class PassportViewModel(private val repository: PassportRepository) : ViewModel(
         }
     }
 
-    fun submitLastDraft() {
-        val last = _state.value.lastRecord ?: return
+    fun submitDraft(recordId: String? = null) {
+        val targetRecordId = recordId?.takeIf { it.isNotBlank() } ?: _state.value.lastRecord?.id ?: return
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
-            runCatching { repository.submit(last.id) }
+            runCatching { repository.submit(targetRecordId) }
                 .onSuccess { submitted -> _state.value = PassportUiState(lastRecord = submitted) }
                 .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Submit failed")) }
         }
