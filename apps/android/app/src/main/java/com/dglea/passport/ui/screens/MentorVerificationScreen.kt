@@ -1,5 +1,7 @@
 package com.dglea.passport.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dglea.passport.network.PassportRecordDto
 import com.dglea.passport.network.UserDto
@@ -57,6 +60,7 @@ fun MentorVerificationScreen(
             )
         } else {
             queue.forEach { item ->
+                val isSelected = selectedRecordId.value == item.passportRecordId
                 val details = buildString {
                     append("${item.passportRecordId} • member ${item.memberProfileId} • ${item.currentStatus}")
                     if (!item.note.isNullOrBlank()) {
@@ -67,8 +71,13 @@ fun MentorVerificationScreen(
                     }
                 }
                 Text(
-                    text = details,
-                    modifier = Modifier.padding(top = 4.dp),
+                    text = details + if (isSelected) " • selected" else "",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .background(if (isSelected) Color(0xFFEDE7F6) else Color.Transparent)
+                        .clickable { selectedRecordId.value = item.passportRecordId }
+                        .padding(8.dp),
                 )
             }
         }

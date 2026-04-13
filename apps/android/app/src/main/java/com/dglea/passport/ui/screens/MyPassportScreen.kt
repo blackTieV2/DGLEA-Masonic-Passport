@@ -1,5 +1,7 @@
 package com.dglea.passport.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -14,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dglea.passport.network.BrotherPassportSummaryDto
 import com.dglea.passport.network.PassportRecordDto
@@ -79,13 +82,24 @@ fun MyPassportScreen(
             val showReviewReason =
                 (section.latestStatus == "REJECTED" || section.latestStatus == "NEEDS_CLARIFICATION") &&
                     !section.latestReviewReason.isNullOrBlank()
+            val isClarificationSection = section.pendingAction == "RESPOND_TO_CLARIFICATION" && !section.latestRecordId.isNullOrBlank()
+            val isSelectedClarificationRecord = isClarificationSection && clarificationRecordId.value == section.latestRecordId
 
             Text(
                 text = "${section.sectionName} (${section.sectionCode}) • ${section.progressState}" +
                   (section.latestStatus?.let { " • latest: $it" } ?: "") +
                   (section.pendingAction?.let { " • action: $it" } ?: "") +
-                  (if (showReviewReason) " • mentor note: ${section.latestReviewReason}" else ""),
-                modifier = Modifier.padding(top = 4.dp),
+                  (if (showReviewReason) " • mentor note: ${section.latestReviewReason}" else "") +
+                  (if (isClarificationSection) " • tap to select record ${section.latestRecordId}" else "") +
+                  (if (isSelectedClarificationRecord) " • selected" else ""),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .background(if (isSelectedClarificationRecord) Color(0xFFE8F5E9) else Color.Transparent)
+                    .clickable(enabled = isClarificationSection) {
+                        clarificationRecordId.value = section.latestRecordId.orEmpty()
+                    }
+                    .padding(4.dp),
             )
         }
 
