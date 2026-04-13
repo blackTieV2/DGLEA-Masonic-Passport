@@ -111,7 +111,7 @@ District/system governance role for operational support, configuration, and audi
 
 ## 7. Core Record Permissions Matrix
 
-| Capability | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Admin / Secretary | District Mentor | District Admin / System Admin |
+| Capability | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Administrator / Secretary | District Mentor | District Administrator / System Administrator |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | View own member profile | Y | N | N | N | N | N | C |
 | View Brother profile | Own only | A | L | L (summary-focused) | L | D (limited drill-down) | C |
@@ -167,7 +167,7 @@ District Mentor access should bias toward:
 
 It should **not** default to private mentoring notes or unrestricted operational detail.
 
-### 8.7 District Admin / System Admin
+### 8.7 District Administrator / System Administrator
 This is a high-trust operational role. Use should be auditable and controlled.
 
 ---
@@ -176,7 +176,7 @@ This is a high-trust operational role. Use should be auditable and controlled.
 
 Not all data should be equally visible.
 
-| Data Type | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Admin | District Mentor | District Admin |
+| Data Type | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Administrator / Secretary | District Mentor | District Administrator / System Administrator |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Standard progress item | Own only | A | L | L (summary) | L | D (limited) | C |
 | Verification note | Own item only where allowed | A | L | Summary only | L | D (limited summary) | C |
@@ -199,7 +199,7 @@ They should **not** be district-visible by default.
 
 This matrix is narrower than the full access matrix because verification is the most sensitive operational action.
 
-| Action | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Admin | District Mentor | District Admin |
+| Action | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Administrator / Secretary | District Mentor | District Administrator / System Administrator |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Verify submission | N | A / lodge policy | L / lodge policy | N | N | N | C |
 | Reject submission | N | A / lodge policy | L / lodge policy | N | N | N | C |
@@ -220,7 +220,7 @@ This is the safest default because:
 
 ## 11. Administrative Permissions Matrix
 
-| Administrative Capability | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Admin | District Mentor | District Admin |
+| Administrative Capability | Brother | Personal Mentor | Lodge Mentor | Lodge Leadership Reviewer | Lodge Administrator / Secretary | District Mentor | District Administrator / System Administrator |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Create Brother profile | N | N | Optional assisted | N | Y | N | Y |
 | Assign Personal Mentor | N | N | Y | N | Y | N | Y |
@@ -261,7 +261,7 @@ Access where:
 Access where:
 - `record.member_id in assigned_member_ids(current_user)`
 
-### Lodge Mentor / Lodge Admin / Lodge Leadership Reviewer
+### Lodge-Scoped Roles (Lodge Mentor, Lodge Administrator / Secretary, Lodge Leadership Reviewer)
 Access where:
 - `record.lodge_id in lodge_ids_for_user(current_user)`
 
@@ -270,7 +270,7 @@ Access where:
 - analytics and approved drill-down views are district-authorised
 - private mentoring note tables remain excluded by default
 
-### District Admin
+### District Administrator / System Administrator
 Access where:
 - authorised by high-trust system role
 - audit logging is mandatory
@@ -304,7 +304,7 @@ The engine should respect allowed policy variants without changing the underlyin
 - Lodge Mentor: all Brothers in lodge
 - Lodge Leadership Reviewer: summary/read-only lodge visibility
 - District Mentor: analytics + exception drill-down only
-- District Admin: controlled full administrative access
+- District Administrator / System Administrator: controlled full administrative access
 
 ### 15.2 Verification
 - default policy: Personal Mentor **or** Lodge Mentor may verify
