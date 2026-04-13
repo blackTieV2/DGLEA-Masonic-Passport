@@ -1,16 +1,29 @@
 package com.dglea.passport.ui.screens
 
+<<<<<<< codex/review-repository-documentation-and-plan-implementation-u84y0k
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+=======
+>>>>>>> main
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
+<<<<<<< codex/review-repository-documentation-and-plan-implementation-u84y0k
+import androidx.compose.material3.Surface
+=======
+>>>>>>> main
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+<<<<<<< codex/review-repository-documentation-and-plan-implementation-u84y0k
+import androidx.compose.ui.graphics.Color
+=======
+>>>>>>> main
 import androidx.compose.ui.unit.dp
 import com.dglea.passport.network.PassportRecordDto
 import com.dglea.passport.network.UserDto
@@ -57,6 +70,10 @@ fun MentorVerificationScreen(
             )
         } else {
             queue.forEach { item ->
+<<<<<<< codex/review-repository-documentation-and-plan-implementation-u84y0k
+                val isSelected = selectedRecordId.value == item.passportRecordId
+=======
+>>>>>>> main
                 val details = buildString {
                     append("${item.passportRecordId} • member ${item.memberProfileId} • ${item.currentStatus}")
                     if (!item.note.isNullOrBlank()) {
@@ -66,10 +83,26 @@ fun MentorVerificationScreen(
                         append(" • mentor reason: ${item.reviewReason}")
                     }
                 }
+<<<<<<< codex/review-repository-documentation-and-plan-implementation-u84y0k
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp)
+                        .clickable { selectedRecordId.value = item.passportRecordId },
+                ) {
+                    Text(
+                        text = details + if (isSelected) " • selected" else "",
+                        modifier = Modifier
+                            .background(if (isSelected) Color(0xFFEDE7F6) else Color.Transparent)
+                            .padding(8.dp),
+                    )
+                }
+=======
                 Text(
                     text = details,
                     modifier = Modifier.padding(top = 4.dp),
                 )
+>>>>>>> main
             }
         }
 
