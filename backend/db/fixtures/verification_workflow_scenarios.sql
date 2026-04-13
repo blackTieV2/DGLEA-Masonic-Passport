@@ -1,0 +1,15 @@
+-- verification_workflow_scenarios.sql
+-- Placeholder fixture for lifecycle transition tests.
+--
+-- Target scenarios (to be implemented later):
+-- - DRAFT -> SUBMITTED -> VERIFIED
+-- - SUBMITTED -> NEEDS_CLARIFICATION -> SUBMITTED -> VERIFIED
+-- - SUBMITTED -> REJECTED
+-- - VERIFIED -> SUPERSEDED
+-- - * -> override to VERIFIED/REJECTED/SUPERSEDED (audited via verification_decisions)
+
+BEGIN;
+
+-- Placeholder only. No executable fixture rows yet.
+
+COMMIT;

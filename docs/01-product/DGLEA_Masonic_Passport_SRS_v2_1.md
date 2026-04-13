@@ -182,13 +182,13 @@ A lodge-level leadership role requiring readiness visibility but not routine edi
 
 ### 7.2 Administrative Roles
 
-#### 7.2.1 Lodge Admin / Secretary
+#### 7.2.1 Lodge Administrator / Secretary
 Responsible for setup, maintenance, and administrative corrections within a lodge.
 
 #### 7.2.2 District Mentor
 A district oversight role primarily concerned with adoption, effectiveness, exceptions, and trends across lodges.
 
-#### 7.2.3 District Admin / System Admin
+#### 7.2.3 District Administrator / System Administrator
 A system management role responsible for tenant management, support, audits, and configuration.
 
 ---
@@ -209,9 +209,9 @@ Each user shall belong to one or more organisational scopes:
 1. A Brother shall only access his own passport and related records.
 2. A Personal Mentor shall only access records for Brothers assigned to him, unless additionally authorised by lodge role.
 3. A Lodge Mentor shall access records for Brothers within his own lodge.
-4. A Worshipful Master or Lodge Reviewer shall access summary and readiness views for Brothers in his lodge.
+4. A Worshipful Master or Lodge Leadership Reviewer shall access summary and readiness views for Brothers in his lodge.
 5. A District Mentor shall access district-wide analytics, exception views, and limited drill-down views as explicitly permitted.
-6. A District Admin shall access cross-lodge administration and audit interfaces.
+6. A District Administrator shall access cross-lodge administration and audit interfaces.
 
 ### 8.3 Privacy Principle
 The system shall distinguish between:
@@ -344,17 +344,17 @@ For lodge-specific additions, the system shall store:
 ### 12.1 Required Record States
 All user-submitted progress records shall support the following states:
 
-- `draft`
-- `submitted`
-- `verified`
-- `rejected`
-- `needs_clarification`
-- `superseded`
-- `overridden`
-- `archived`
+- `DRAFT`
+- `SUBMITTED`
+- `VERIFIED`
+- `REJECTED`
+- `NEEDS_CLARIFICATION`
+- `SUPERSEDED`
+- `OVERRIDDEN`
+- `ARCHIVED`
 
 ### 12.2 Verification Principle
-A record entered by a Brother shall not count as an official progress record until it has reached the `verified` state.
+A record entered by a Brother shall not count as an official progress record until it has reached the `VERIFIED` state.
 
 ### 12.3 Override Principle
 A Lodge Mentor shall be able to override or finalise a decision where lodge policy permits, and the system shall preserve both the original action and the override in the audit trail.
@@ -451,7 +451,7 @@ The system shall provide a Personal Mentor dashboard showing assigned Brothers, 
 The system shall provide a Lodge Mentor dashboard showing lodge adoption, overdue reviews, readiness candidates, and reporting status.
 
 #### FR-26
-The system shall provide a Worshipful Master / Lodge Reviewer dashboard showing section completion and readiness summaries.
+The system shall provide a Worshipful Master / Lodge Leadership Reviewer dashboard showing section completion and readiness summaries.
 
 #### FR-27
 The system shall provide a District Mentor dashboard showing lodge participation, adoption, activity levels, overdue mentoring indicators, and cross-lodge trends.
@@ -558,7 +558,7 @@ Any feature delivered behind a toggle shall define minimum rollback behaviour an
 - Verify: yes
 - Override: yes, where policy permits
 
-### 14.4 Worshipful Master / Lodge Reviewer
+### 14.4 Worshipful Master / Lodge Leadership Reviewer
 - View: lodge summary and readiness views
 - Edit: no routine edit rights
 - Verify: not by default
@@ -568,7 +568,7 @@ Any feature delivered behind a toggle shall define minimum rollback behaviour an
 - Edit: no routine operational editing
 - Verify: no routine verification
 
-### 14.6 District Admin / System Admin
+### 14.6 District Administrator / System Administrator
 - View/Edit: system configuration, tenancy, audits, support tools
 - Operational verification: no by default unless explicitly delegated
 
@@ -579,9 +579,9 @@ Any feature delivered behind a toggle shall define minimum rollback behaviour an
 ### 15.1 Standard Submission Workflow
 1. Brother selects an item or activity.
 2. Brother enters event date and optional note.
-3. System stores the record as `submitted`.
+3. System stores the record as `SUBMITTED`.
 4. System notifies the relevant Personal Mentor and/or Lodge Mentor.
-5. Authorised mentor reviews and marks the record as `verified`, `rejected`, or `needs_clarification`.
+5. Authorised mentor reviews and marks the record as `VERIFIED`, `REJECTED`, or `NEEDS_CLARIFICATION`.
 6. System updates dashboards and audit trail.
 
 ### 15.2 Lodge Without Personal Mentor Workflow
@@ -783,7 +783,7 @@ The system shall be considered fit for MVP acceptance only if all of the followi
 6. District-level analytics work across lodge boundaries without violating tenancy rules.
 7. Audit logging is operational.
 8. Reporting outputs can support lodge and district annual reporting.
-9. Submitted records are visibly distinct from verified records.
+9. SUBMITTED records are visibly distinct from verified records.
 10. The system does not store ritual secrets or full ritual text.
 
 ---
