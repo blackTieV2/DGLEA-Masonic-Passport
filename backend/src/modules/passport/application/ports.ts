@@ -42,11 +42,18 @@ export interface AuditEventWriter {
 
 export interface NotificationEventHook {
   trigger(event: {
-    type: 'PASSPORT_RECORD_SUBMITTED';
+    type:
+      | 'PASSPORT_RECORD_SUBMITTED'
+      | 'PASSPORT_RECORD_VERIFIED'
+      | 'PASSPORT_RECORD_REJECTED'
+      | 'PASSPORT_RECORD_CLARIFICATION_REQUESTED';
     recordId: string;
+    recipientUserId?: string;
+    recipientRole?: 'MENTOR';
     memberProfileId: string;
     lodgeId: string;
     districtId: string;
+    reason?: string;
     occurredAt: string;
   }): Promise<void>;
 }

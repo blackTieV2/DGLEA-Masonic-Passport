@@ -128,6 +128,7 @@ export class PassportRecordService {
     await this.notificationHook.trigger({
       type: 'PASSPORT_RECORD_SUBMITTED',
       recordId: submitted.id,
+      recipientRole: 'MENTOR',
       memberProfileId: submitted.memberProfileId,
       lodgeId: submitted.lodgeId,
       districtId: submitted.districtId,

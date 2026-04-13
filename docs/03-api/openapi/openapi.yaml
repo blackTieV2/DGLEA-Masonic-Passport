@@ -755,6 +755,20 @@ paths:
         '403':
           $ref: '#/components/responses/ForbiddenError'
 
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications for current user
+      responses:
+        '200':
+          description: Notification list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+        '401':
+          $ref: '#/components/responses/UnauthenticatedError'
+
   /me/dashboard:
     get:
       tags: [Dashboards]
@@ -1650,6 +1664,34 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VerificationQueueItem'
+
+    NotificationItem:
+      type: object
+      required: [type, recordId, memberProfileId, lodgeId, districtId, occurredAt]
+      properties:
+        type:
+          type: string
+          enum:
+            - PASSPORT_RECORD_SUBMITTED
+            - PASSPORT_RECORD_VERIFIED
+            - PASSPORT_RECORD_REJECTED
+            - PASSPORT_RECORD_CLARIFICATION_REQUESTED
+        recordId: { type: string }
+        memberProfileId: { type: string }
+        lodgeId: { type: string }
+        districtId: { type: string }
+        reason: { type: string, nullable: true }
+        occurredAt: { type: string, format: date-time }
+
+    NotificationList:
+      type: object
+      required: [items, totalItems]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationItem'
+        totalItems: { type: integer }
 
     LodgeDashboard:
       type: object

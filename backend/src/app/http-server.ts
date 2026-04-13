@@ -305,5 +305,21 @@ export function buildHttpServer(app: AppComposition = composeInMemoryApp()): Fas
     }
   });
 
+  server.get('/notifications', async (request, reply) => {
+    const auth = await requireAuth(request, reply, app);
+    if (!auth) return;
+
+    try {
+      const roleCodes = auth.actorContext.roles.filter((role) => role.active).map((role) => role.roleCode);
+      const items = await app.listNotifications({
+        actorUserId: auth.actorUserId,
+        roleCodes,
+      });
+      reply.send({ items, totalItems: items.length });
+    } catch (error) {
+      toHttpError(error, reply);
+    }
+  });
+
   return server;
 }

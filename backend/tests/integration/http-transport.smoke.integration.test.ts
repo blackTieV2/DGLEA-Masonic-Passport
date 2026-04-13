@@ -73,6 +73,17 @@ describe('http transport integration', () => {
 
     await server.inject({ method: 'POST', url: `/passport-records/${draftId}/submit`, headers: { authorization: `Bearer ${brotherToken}` } });
 
+    const mentorNotificationsAfterSubmit = await server.inject({
+      method: 'GET',
+      url: '/notifications',
+      headers: { authorization: `Bearer ${mentorToken}` },
+    });
+    expect(mentorNotificationsAfterSubmit.statusCode).toBe(200);
+    expect(mentorNotificationsAfterSubmit.json().items[0]).toMatchObject({
+      type: 'PASSPORT_RECORD_SUBMITTED',
+      recordId: draftId,
+    });
+
     const clarified = await server.inject({
       method: 'POST',
       url: `/passport-records/${draftId}/clarification`,
@@ -81,6 +92,17 @@ describe('http transport integration', () => {
     });
     expect(clarified.statusCode).toBe(200);
     expect(clarified.json().status).toBe('NEEDS_CLARIFICATION');
+
+    const brotherNotificationsAfterClarification = await server.inject({
+      method: 'GET',
+      url: '/notifications',
+      headers: { authorization: `Bearer ${brotherToken}` },
+    });
+    expect(brotherNotificationsAfterClarification.statusCode).toBe(200);
+    expect(brotherNotificationsAfterClarification.json().items[0]).toMatchObject({
+      type: 'PASSPORT_RECORD_CLARIFICATION_REQUESTED',
+      recordId: draftId,
+    });
 
     const clarifiedResponse = await server.inject({
       method: 'PATCH',
@@ -110,6 +132,17 @@ describe('http transport integration', () => {
     const verified = await server.inject({ method: 'POST', url: `/passport-records/${draftId}/verify`, headers: { authorization: `Bearer ${mentorToken}` } });
     expect(verified.statusCode).toBe(200);
     expect(verified.json().status).toBe('VERIFIED');
+
+    const brotherNotificationsAfterVerify = await server.inject({
+      method: 'GET',
+      url: '/notifications',
+      headers: { authorization: `Bearer ${brotherToken}` },
+    });
+    expect(brotherNotificationsAfterVerify.statusCode).toBe(200);
+    expect(brotherNotificationsAfterVerify.json().items[0]).toMatchObject({
+      type: 'PASSPORT_RECORD_VERIFIED',
+      recordId: draftId,
+    });
 
     const summary = await server.inject({
       method: 'GET',

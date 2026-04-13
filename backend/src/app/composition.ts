@@ -60,6 +60,15 @@ export interface AppComposition {
   verification: VerificationEndpoint;
   tokenProvider: SimpleTokenProvider;
   resolveCurrentUserContext(userId: string): Promise<CurrentUserContext | null>;
+  listNotifications(input: { actorUserId: string; roleCodes: string[] }): Promise<Array<{
+    type: string;
+    recordId: string;
+    memberProfileId: string;
+    lodgeId: string;
+    districtId: string;
+    reason?: string;
+    occurredAt: string;
+  }>>;
 }
 
 export function composeInMemoryApp(): AppComposition {
@@ -81,7 +90,7 @@ export function composeInMemoryApp(): AppComposition {
   const decisionRepo = new InMemoryVerificationDecisionRepository();
 
   const passportService = new PassportRecordService(recordRepo, templateRepo, auditWriter, notificationHook, clock);
-  const verificationService = new VerificationWorkflowService(recordRepo, decisionRepo, auditWriter, clock);
+  const verificationService = new VerificationWorkflowService(recordRepo, decisionRepo, auditWriter, clock, notificationHook);
 
   return {
     authSession: new AuthSessionEndpoint(authSessionService),
@@ -90,6 +99,15 @@ export function composeInMemoryApp(): AppComposition {
     verification: new VerificationEndpoint(verificationService),
     tokenProvider,
     resolveCurrentUserContext: (userId: string) => identityRepo.getCurrentUserContextByUserId(userId),
+    listNotifications: async ({ actorUserId, roleCodes }) =>
+      notificationHook.events
+        .filter((event) =>
+          event.recipientUserId
+            ? event.recipientUserId === actorUserId
+            : event.recipientRole === 'MENTOR' && roleCodes.some((role) => role === 'PERSONAL_MENTOR' || role === 'LODGE_MENTOR'),
+        )
+        .slice()
+        .reverse(),
   };
 }
 
@@ -110,7 +128,7 @@ export function composePostgresApp(sql: SqlClient): AppComposition {
   const decisionRepo = new PostgresVerificationDecisionRepository(sql);
 
   const passportService = new PassportRecordService(recordRepo, templateRepo, auditWriter, notificationHook, clock);
-  const verificationService = new VerificationWorkflowService(recordRepo, decisionRepo, auditWriter, clock);
+  const verificationService = new VerificationWorkflowService(recordRepo, decisionRepo, auditWriter, clock, notificationHook);
 
   return {
     authSession: new AuthSessionEndpoint(authSessionService),
@@ -119,5 +137,6 @@ export function composePostgresApp(sql: SqlClient): AppComposition {
     verification: new VerificationEndpoint(verificationService),
     tokenProvider,
     resolveCurrentUserContext: (userId: string) => identityRepo.getCurrentUserContextByUserId(userId),
+    listNotifications: async () => [],
   };
 }

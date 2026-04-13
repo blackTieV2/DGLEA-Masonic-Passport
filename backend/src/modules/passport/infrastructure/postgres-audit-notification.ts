@@ -64,7 +64,17 @@ export class PostgresAuditEventWriter implements AuditEventWriter, VerificationA
 }
 
 export class PostgresNotificationEventHook implements NotificationEventHook {
-  async trigger(): Promise<void> {
+  async trigger(_event: {
+    type: 'PASSPORT_RECORD_SUBMITTED' | 'PASSPORT_RECORD_VERIFIED' | 'PASSPORT_RECORD_REJECTED' | 'PASSPORT_RECORD_CLARIFICATION_REQUESTED';
+    recordId: string;
+    recipientUserId?: string;
+    recipientRole?: 'MENTOR';
+    memberProfileId: string;
+    lodgeId: string;
+    districtId: string;
+    reason?: string;
+    occurredAt: string;
+  }): Promise<void> {
     // Deferred: notifications persistence/outbox implementation is out of scope for this stabilisation pass.
   }
 }

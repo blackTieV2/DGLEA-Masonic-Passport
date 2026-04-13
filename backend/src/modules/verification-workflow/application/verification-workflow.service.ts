@@ -2,6 +2,7 @@ import { ForbiddenError, NotFoundError } from '../../../shared/utilities/errors'
 import type { CurrentUserContext, RoleCode } from '../../../shared/contracts/authorization';
 import { hasCapability } from '../../identity-access/domain/permissions';
 import { assertAssignedMemberScope, assertLodgeScope } from '../../identity-access/domain/scope-enforcement';
+import type { NotificationEventHook } from '../../passport/application/ports';
 import type { PassportRecord } from '../../passport/domain/contracts';
 import {
   applyOverrideDecision,
@@ -54,6 +55,7 @@ export class VerificationWorkflowService {
     private readonly decisionRepo: VerificationDecisionRepository,
     private readonly audit: VerificationAuditWriter,
     private readonly clock: VerificationClockPort,
+    private readonly notificationHook: NotificationEventHook = { trigger: async () => {} },
     private readonly policy: VerificationAuthorizationPolicy = new DefaultVerificationAuthorizationPolicy(),
   ) {}
 
@@ -80,6 +82,15 @@ export class VerificationWorkflowService {
       actorUserId: input.actor.identity.userId,
       priorStatus: existing.status,
       newStatus: verified.status,
+      occurredAt: nowIso,
+    });
+    await this.notificationHook.trigger({
+      type: 'PASSPORT_RECORD_VERIFIED',
+      recordId: verified.id,
+      recipientUserId: existing.createdByUserId,
+      memberProfileId: verified.memberProfileId,
+      lodgeId: verified.lodgeId,
+      districtId: verified.districtId,
       occurredAt: nowIso,
     });
 
@@ -113,6 +124,16 @@ export class VerificationWorkflowService {
       reason: rejected.reviewReason,
       occurredAt: nowIso,
     });
+    await this.notificationHook.trigger({
+      type: 'PASSPORT_RECORD_REJECTED',
+      recordId: rejected.id,
+      recipientUserId: existing.createdByUserId,
+      memberProfileId: rejected.memberProfileId,
+      lodgeId: rejected.lodgeId,
+      districtId: rejected.districtId,
+      reason: rejected.reviewReason,
+      occurredAt: nowIso,
+    });
 
     return rejected;
   }
@@ -141,6 +162,16 @@ export class VerificationWorkflowService {
       actorUserId: input.actor.identity.userId,
       priorStatus: existing.status,
       newStatus: needsClarification.status,
+      reason: needsClarification.reviewReason,
+      occurredAt: nowIso,
+    });
+    await this.notificationHook.trigger({
+      type: 'PASSPORT_RECORD_CLARIFICATION_REQUESTED',
+      recordId: needsClarification.id,
+      recipientUserId: existing.createdByUserId,
+      memberProfileId: needsClarification.memberProfileId,
+      lodgeId: needsClarification.lodgeId,
+      districtId: needsClarification.districtId,
       reason: needsClarification.reviewReason,
       occurredAt: nowIso,
     });

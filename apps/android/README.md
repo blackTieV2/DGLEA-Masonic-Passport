@@ -126,3 +126,9 @@ Run this quick checklist after local changes:
    - Sign out from mentor screen and confirm return to sign-in screen.
    - Sign in as brother again without reinstalling app.
    - Sign out from brother screen and sign in as mentor again.
+
+4. **Clarification response loop**
+   - Mentor requests clarification with reason for submitted record.
+   - Brother signs in, refreshes summary, confirms `RESPOND_TO_CLARIFICATION`.
+   - Brother confirms/enters clarification record id, saves clarification response note, and resubmits.
+   - Mentor refreshes queue and verifies updated brother note is visible.
