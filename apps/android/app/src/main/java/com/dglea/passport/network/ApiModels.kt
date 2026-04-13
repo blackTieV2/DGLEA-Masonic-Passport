@@ -69,6 +69,8 @@ data class VerificationQueueItemDto(
     val memberProfileId: String,
     val lodgeId: String,
     val currentStatus: String,
+    val note: String? = null,
+    val reviewReason: String? = null,
     val submittedAt: String? = null,
     val isStale: Boolean = false,
 )

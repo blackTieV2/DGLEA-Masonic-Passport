@@ -82,9 +82,30 @@ describe('http transport integration', () => {
     expect(clarified.statusCode).toBe(200);
     expect(clarified.json().status).toBe('NEEDS_CLARIFICATION');
 
+    const clarifiedResponse = await server.inject({
+      method: 'PATCH',
+      url: `/passport-records/${draftId}`,
+      headers: { authorization: `Bearer ${brotherToken}` },
+      payload: { note: 'Uploaded additional details for mentor review' },
+    });
+    expect(clarifiedResponse.statusCode).toBe(200);
+    expect(clarifiedResponse.json().note).toBe('Uploaded additional details for mentor review');
+
     const resubmitted = await server.inject({ method: 'POST', url: `/passport-records/${draftId}/submit`, headers: { authorization: `Bearer ${brotherToken}` } });
     expect(resubmitted.statusCode).toBe(200);
     expect(resubmitted.json().status).toBe('SUBMITTED');
+
+    const queue = await server.inject({
+      method: 'GET',
+      url: '/verification-queue',
+      headers: { authorization: `Bearer ${mentorToken}` },
+    });
+    expect(queue.statusCode).toBe(200);
+    expect(queue.json().items[0]).toMatchObject({
+      passportRecordId: draftId,
+      currentStatus: 'SUBMITTED',
+      note: 'Uploaded additional details for mentor review',
+    });
 
     const verified = await server.inject({ method: 'POST', url: `/passport-records/${draftId}/verify`, headers: { authorization: `Bearer ${mentorToken}` } });
     expect(verified.statusCode).toBe(200);

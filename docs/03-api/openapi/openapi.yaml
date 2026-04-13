@@ -1587,6 +1587,8 @@ components:
         lodgeId: { type: string }
         currentStatus:
           $ref: '#/components/schemas/PassportRecordStatus'
+        note: { type: string, nullable: true }
+        reviewReason: { type: string, nullable: true }
         submittedAt: { type: string, format: date-time }
         staleAfterAt: { type: string, format: date-time, nullable: true }
         isStale: { type: boolean }

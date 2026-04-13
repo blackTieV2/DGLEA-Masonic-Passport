@@ -294,6 +294,8 @@ export function buildHttpServer(app: AppComposition = composeInMemoryApp()): Fas
         memberProfileId: record.memberProfileId,
         lodgeId: record.lodgeId,
         currentStatus: record.status,
+        note: record.note,
+        reviewReason: record.reviewReason,
         submittedAt: record.submittedAt ?? record.updatedAt,
         isStale: false,
       }));

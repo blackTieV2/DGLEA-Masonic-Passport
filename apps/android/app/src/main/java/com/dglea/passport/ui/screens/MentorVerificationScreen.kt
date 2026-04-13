@@ -57,8 +57,17 @@ fun MentorVerificationScreen(
             )
         } else {
             queue.forEach { item ->
+                val details = buildString {
+                    append("${item.passportRecordId} • member ${item.memberProfileId} • ${item.currentStatus}")
+                    if (!item.note.isNullOrBlank()) {
+                        append(" • brother note: ${item.note}")
+                    }
+                    if (!item.reviewReason.isNullOrBlank()) {
+                        append(" • mentor reason: ${item.reviewReason}")
+                    }
+                }
                 Text(
-                    text = "${item.passportRecordId} • member ${item.memberProfileId} • ${item.currentStatus}",
+                    text = details,
                     modifier = Modifier.padding(top = 4.dp),
                 )
             }
