@@ -111,7 +111,7 @@ A “pretty app with no trustworthy workflow” is not success.
 ## E2 — Lodge and District Administration
 
 ### Story E2-S1 — Admin can create and manage lodges
-**As a** District Admin  
+**As a** District Administrator  
 **I want** to create and manage lodge records  
 **So that** the district structure exists in the system.
 
@@ -120,8 +120,8 @@ A “pretty app with no trustworthy workflow” is not success.
 - lodge can be activated/deactivated
 - lodge configuration can be edited
 
-### Story E2-S2 — Lodge Admin can onboard member profiles
-**As a** Lodge Admin  
+### Story E2-S2 — Lodge Administrator can onboard member profiles
+**As a** Lodge Administrator  
 **I want** to create and update member profiles  
 **So that** Brothers can start using the passport.
 
@@ -132,7 +132,7 @@ A “pretty app with no trustworthy workflow” is not success.
 - milestone dates can be updated via controlled admin flow
 
 ### Story E2-S3 — Admin can assign mentor roles
-**As a** Lodge Admin or District Admin  
+**As a** Lodge Administrator or District Administrator  
 **I want** to assign mentor roles  
 **So that** the workflow routes correctly.
 
@@ -156,7 +156,7 @@ A “pretty app with no trustworthy workflow” is not success.
 - core items are queryable by section
 
 ### Story E3-S2 — Lodge can define governed supplements
-**As a** Lodge Mentor or Lodge Admin  
+**As a** Lodge Mentor or Lodge Administrator  
 **I want** to add lodge-specific supplementary items  
 **So that** local lodge needs can be supported without changing the district core.
 
@@ -324,7 +324,7 @@ A “pretty app with no trustworthy workflow” is not success.
 ## E9 — Audit and Admin Corrections
 
 ### Story E9-S1 — System audits every critical workflow action
-**As a** District Admin  
+**As a** District Administrator  
 **I want** auditable workflow history  
 **So that** trust and traceability are preserved.
 
@@ -333,7 +333,7 @@ A “pretty app with no trustworthy workflow” is not success.
 - audit event captures actor, role, timestamp, prior state, new state
 
 ### Story E9-S2 — Admin can perform controlled correction
-**As a** Lodge Admin or District Admin  
+**As a** Lodge Administrator or District Administrator  
 **I want** a controlled correction path  
 **So that** factual mistakes can be fixed without erasing history.
 
@@ -347,7 +347,7 @@ A “pretty app with no trustworthy workflow” is not success.
 ## E10 — Reporting and Export
 
 ### Story E10-S1 — Lodge can export progress summary
-**As a** Lodge Mentor or Lodge Admin  
+**As a** Lodge Mentor or Lodge Administrator  
 **I want** a lodge report export  
 **So that** I can support committee and annual review needs.
 
@@ -370,7 +370,7 @@ A “pretty app with no trustworthy workflow” is not success.
 ## E11 — Feature Flag and Rollout Controls
 
 ### Story E11-S1 — System supports role/lodge feature targeting
-**As a** District Admin  
+**As a** District Administrator  
 **I want** to enable features for selected lodges or roles  
 **So that** rollout can be controlled safely.
 
@@ -434,7 +434,7 @@ A “pretty app with no trustworthy workflow” is not success.
 
 The MVP is done when:
 1. a Brother can sign in and see his passport;
-2. a Lodge Admin can onboard a Brother and assign mentors;
+2. a Lodge Administrator can onboard a Brother and assign mentors;
 3. a Brother can create and submit a passport entry;
 4. a mentor can verify, reject, or request clarification;
 5. the Lodge Mentor can see pending/stale items across the lodge;
