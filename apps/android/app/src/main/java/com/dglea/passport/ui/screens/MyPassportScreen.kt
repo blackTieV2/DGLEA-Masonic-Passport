@@ -40,10 +40,15 @@ fun MyPassportScreen(
     val clarificationRecordId = remember { mutableStateOf("") }
     val clarificationNote = remember { mutableStateOf("") }
 
-    val needsClarification = summary?.sections?.any { it.pendingAction == "RESPOND_TO_CLARIFICATION" } == true
-    LaunchedEffect(needsClarification, lastRecord?.id) {
-        if (needsClarification && clarificationRecordId.value.isBlank() && !lastRecord?.id.isNullOrBlank()) {
-            clarificationRecordId.value = lastRecord?.id.orEmpty()
+    val clarificationSection = summary?.sections?.firstOrNull { it.pendingAction == "RESPOND_TO_CLARIFICATION" }
+    val needsClarification = clarificationSection != null
+
+    LaunchedEffect(needsClarification, clarificationSection?.latestRecordId, lastRecord?.id) {
+        if (needsClarification && clarificationRecordId.value.isBlank()) {
+            clarificationRecordId.value =
+                clarificationSection?.latestRecordId
+                    ?: lastRecord?.id
+                    ?: ""
         }
     }
 
@@ -84,19 +89,21 @@ fun MyPassportScreen(
             )
         }
 
-        Button(
-            onClick = {
-                onCreateDraft(
-                    memberProfileId.value,
-                    districtId.value,
-                    lodgeId.value,
-                    sectionTemplateId.value,
-                    templateItemId.value,
-                    note.value.ifBlank { null },
-                )
-            },
-            modifier = Modifier.padding(top = 12.dp),
-        ) { Text("Create Draft") }
+        if (!needsClarification) {
+            Button(
+                onClick = {
+                    onCreateDraft(
+                        memberProfileId.value,
+                        districtId.value,
+                        lodgeId.value,
+                        sectionTemplateId.value,
+                        templateItemId.value,
+                        note.value.ifBlank { null },
+                    )
+                },
+                modifier = Modifier.padding(top = 12.dp),
+            ) { Text("Create Draft") }
+        }
 
         if (needsClarification) {
             OutlinedTextField(

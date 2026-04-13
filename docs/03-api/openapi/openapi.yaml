@@ -1626,6 +1626,9 @@ components:
         progressState:
           type: string
           enum: [NOT_STARTED, IN_PROGRESS, VERIFIED]
+        latestRecordId:
+          type: string
+          nullable: true
         latestStatus:
           $ref: '#/components/schemas/PassportRecordStatus'
         lastActivityAt: { type: string, format: date-time, nullable: true }

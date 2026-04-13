@@ -143,6 +143,7 @@ export class PassportRecordService {
       sectionCode: string;
       sectionName: string;
       progressState: 'NOT_STARTED' | 'IN_PROGRESS' | 'VERIFIED';
+      latestRecordId?: string;
       latestStatus?: PassportRecord['status'];
       lastActivityAt?: string;
       pendingAction?: 'SUBMIT_DRAFT' | 'AWAITING_REVIEW' | 'RESPOND_TO_CLARIFICATION';
@@ -179,6 +180,7 @@ export class PassportRecordService {
         return {
           ...section,
           progressState,
+          latestRecordId: latest.id,
           latestStatus: latest.status,
           lastActivityAt: latest.updatedAt,
           pendingAction,

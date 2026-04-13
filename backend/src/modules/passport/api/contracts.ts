@@ -48,6 +48,7 @@ export interface PassportSectionSummaryResponse {
   sectionCode: string;
   sectionName: string;
   progressState: 'NOT_STARTED' | 'IN_PROGRESS' | 'VERIFIED';
+  latestRecordId?: string;
   latestStatus?: PassportRecordStatus;
   lastActivityAt?: string;
   pendingAction?: 'SUBMIT_DRAFT' | 'AWAITING_REVIEW' | 'RESPOND_TO_CLARIFICATION';

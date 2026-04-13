@@ -49,6 +49,7 @@ data class SectionSummaryDto(
     val sectionCode: String,
     val sectionName: String,
     val progressState: String,
+    val latestRecordId: String? = null,
     val latestStatus: String? = null,
     val lastActivityAt: String? = null,
     val pendingAction: String? = null,

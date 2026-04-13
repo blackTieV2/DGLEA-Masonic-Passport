@@ -74,6 +74,7 @@ export class PassportRecordEndpoint {
         sectionCode: section.sectionCode,
         sectionName: section.sectionName,
         progressState: section.progressState,
+        latestRecordId: section.latestRecordId,
         latestStatus: section.latestStatus,
         lastActivityAt: section.lastActivityAt,
         pendingAction: section.pendingAction,

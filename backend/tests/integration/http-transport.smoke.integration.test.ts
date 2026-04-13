@@ -121,6 +121,7 @@ describe('http transport integration', () => {
     expect(summary.json().sections[0]).toMatchObject({
       sectionCode: 'EA',
       progressState: 'VERIFIED',
+      latestRecordId: draftId,
       latestStatus: 'VERIFIED',
     });
 
