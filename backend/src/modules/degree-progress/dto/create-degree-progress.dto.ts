@@ -15,8 +15,4 @@ export class CreateDegreeProgressDto {
   @IsString()
   @IsOptional()
   mentorNotes?: string;
-
-  @IsUUID()
-  @IsOptional()
-  approvedBy?: string;
 }

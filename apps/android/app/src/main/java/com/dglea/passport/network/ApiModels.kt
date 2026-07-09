@@ -159,7 +159,6 @@ data class CreateDegreeProgressRequest(
     val degreeType: String,
     val status: String? = null,
     val mentorNotes: String? = null,
-    val approvedBy: String? = null,
 )
 
 data class UpdateDegreeProgressRequest(

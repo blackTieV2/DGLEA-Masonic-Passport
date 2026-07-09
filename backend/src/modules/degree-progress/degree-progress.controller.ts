@@ -55,8 +55,11 @@ export class DegreeProgressController {
   }
 
   @Delete(":id")
-  remove(@Param("id", ParseUUIDPipe) id: string) {
-    return this.degreeProgressService.remove(id);
+  remove(
+    @Param("id", ParseUUIDPipe) id: string,
+    @CurrentUser() user: CurrentUserType,
+  ) {
+    return this.degreeProgressService.remove(id, user);
   }
 
   @Patch(":id/ready-for-sign-off")

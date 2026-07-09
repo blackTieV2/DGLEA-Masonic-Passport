@@ -14,6 +14,13 @@ import com.dglea.passport.network.ReadyForSignOffDegreeProgressRequest
 import com.dglea.passport.network.ApproveDegreeProgressRequest
 import com.dglea.passport.network.ReopenDegreeProgressRequest
 
+/**
+ * Gateway to profile and degree-progress endpoints.
+ *
+ * NOTE: The authenticated actor identity is determined by the backend session
+ * (Firebase token / dev header). The Android client does not send actor IDs or
+ * role fields; it relies on the backend guard for permission enforcement.
+ */
 class ProfilesRepository(private val api: BackendApi) {
 
     // Brother profiles

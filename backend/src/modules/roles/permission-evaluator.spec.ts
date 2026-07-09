@@ -170,6 +170,79 @@ describe("PermissionEvaluator", () => {
     });
   });
 
+  describe("canApproveDegreeProgress", () => {
+    it("denies a Brother", async () => {
+      const user = userWithRoles([{ role: Role.BROTHER, scopeType: ScopeType.GLOBAL }]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(false);
+    });
+
+    it("allows a Personal Mentor to approve an assigned Brother", async () => {
+      const user = userWithRoles([{ role: Role.PERSONAL_MENTOR, scopeType: ScopeType.GLOBAL }]);
+      mockPrisma.mentorAssignment.findFirst.mockResolvedValue({ id: "assignment-1" });
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(true);
+    });
+
+    it("denies a Personal Mentor from approving an unassigned Brother", async () => {
+      const user = userWithRoles([{ role: Role.PERSONAL_MENTOR, scopeType: ScopeType.GLOBAL }]);
+      mockPrisma.mentorAssignment.findFirst.mockResolvedValue(null);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(false);
+    });
+
+    it("allows a Lodge Mentor to approve Brothers in their own Lodge", async () => {
+      const user = userWithRoles([
+        { role: Role.LODGE_MENTOR, scopeType: ScopeType.LODGE, scopeId: "lodge-1" },
+      ]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(true);
+    });
+
+    it("denies a Lodge Mentor from approving Brothers in another Lodge", async () => {
+      const user = userWithRoles([
+        { role: Role.LODGE_MENTOR, scopeType: ScopeType.LODGE, scopeId: "lodge-2" },
+      ]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(false);
+    });
+
+    it("allows a Lodge Admin to approve Brothers in their own Lodge", async () => {
+      const user = userWithRoles([
+        { role: Role.LODGE_ADMIN, scopeType: ScopeType.LODGE, scopeId: "lodge-1" },
+      ]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(true);
+    });
+
+    it("allows a WM/Leadership user to approve Brothers in their own Lodge", async () => {
+      const user = userWithRoles([
+        { role: Role.WM_LODGE_LEADERSHIP, scopeType: ScopeType.LODGE, scopeId: "lodge-1" },
+      ]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(true);
+    });
+
+    it("allows a District Mentor to approve Brothers in their District", async () => {
+      const user = userWithRoles([
+        { role: Role.DISTRICT_MENTOR, scopeType: ScopeType.DISTRICT, scopeId: "district-1" },
+      ]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(true);
+    });
+
+    it("denies a District Mentor from approving Brothers in another District", async () => {
+      const user = userWithRoles([
+        { role: Role.DISTRICT_MENTOR, scopeType: ScopeType.DISTRICT, scopeId: "district-2" },
+      ]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(false);
+    });
+
+    it("allows a District Admin to approve Brothers in their District", async () => {
+      const user = userWithRoles([
+        { role: Role.DISTRICT_ADMIN, scopeType: ScopeType.DISTRICT, scopeId: "district-1" },
+      ]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(true);
+    });
+
+    it("allows a System Admin to approve any Brother", async () => {
+      const user = userWithRoles([{ role: Role.SYSTEM_ADMIN, scopeType: ScopeType.GLOBAL }]);
+      await expect(evaluator.canApproveDegreeProgress(user, "brother-1")).resolves.toBe(true);
+    });
+  });
+
   describe("canAssignMentor", () => {
     it("allows District Admin to assign mentors in its District", async () => {
       const user = userWithRoles([

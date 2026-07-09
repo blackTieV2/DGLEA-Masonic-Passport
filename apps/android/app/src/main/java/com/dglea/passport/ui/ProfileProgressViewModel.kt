@@ -22,6 +22,12 @@ data class ProfileProgressUiState(
     val error: String? = null,
 )
 
+/**
+ * ViewModel for the profile/progress admin screen.
+ *
+ * NOTE: Role checks and actor identity live on the backend. This ViewModel only
+ * triggers repository actions; it never sends hard-coded actor IDs or roles.
+ */
 class ProfileProgressViewModel(private val repository: ProfilesRepository) : ViewModel() {
     private val _state = MutableStateFlow(ProfileProgressUiState())
     val state: StateFlow<ProfileProgressUiState> = _state.asStateFlow()
