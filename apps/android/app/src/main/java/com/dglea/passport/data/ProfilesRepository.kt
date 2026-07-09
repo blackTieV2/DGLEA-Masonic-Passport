@@ -10,6 +10,9 @@ import com.dglea.passport.network.LodgeProfileDto
 import com.dglea.passport.network.UpdateBrotherProfileRequest
 import com.dglea.passport.network.UpdateDegreeProgressRequest
 import com.dglea.passport.network.UpdateLodgeProfileRequest
+import com.dglea.passport.network.ReadyForSignOffDegreeProgressRequest
+import com.dglea.passport.network.ApproveDegreeProgressRequest
+import com.dglea.passport.network.ReopenDegreeProgressRequest
 
 class ProfilesRepository(private val api: BackendApi) {
 
@@ -57,4 +60,19 @@ class ProfilesRepository(private val api: BackendApi) {
     ): DegreeProgressDto = api.updateDegreeProgress(id, request)
 
     suspend fun deleteDegreeProgress(id: String) = api.deleteDegreeProgress(id)
+
+    suspend fun markDegreeProgressReadyForSignOff(
+        id: String,
+        request: ReadyForSignOffDegreeProgressRequest = ReadyForSignOffDegreeProgressRequest(),
+    ): DegreeProgressDto = api.readyForSignOffDegreeProgress(id, request)
+
+    suspend fun approveDegreeProgress(
+        id: String,
+        request: ApproveDegreeProgressRequest = ApproveDegreeProgressRequest(),
+    ): DegreeProgressDto = api.approveDegreeProgress(id, request)
+
+    suspend fun reopenDegreeProgress(
+        id: String,
+        request: ReopenDegreeProgressRequest = ReopenDegreeProgressRequest(),
+    ): DegreeProgressDto = api.reopenDegreeProgress(id, request)
 }

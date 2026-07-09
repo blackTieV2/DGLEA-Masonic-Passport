@@ -145,8 +145,13 @@ data class DegreeProgressDto(
     val degreeType: String,
     val status: String,
     val mentorNotes: String? = null,
+    val submittedAt: String? = null,
+    val submittedBy: String? = null,
     val approvedBy: String? = null,
     val approvedAt: String? = null,
+    val approvalNotes: String? = null,
+    val reopenedAt: String? = null,
+    val reopenedBy: String? = null,
 )
 
 data class CreateDegreeProgressRequest(
@@ -160,8 +165,13 @@ data class CreateDegreeProgressRequest(
 data class UpdateDegreeProgressRequest(
     val status: String? = null,
     val mentorNotes: String? = null,
-    val approvedBy: String? = null,
 )
+
+data class ReadyForSignOffDegreeProgressRequest(val placeholder: String? = null)
+
+data class ApproveDegreeProgressRequest(val approvalNotes: String? = null)
+
+data class ReopenDegreeProgressRequest(val placeholder: String? = null)
 
 data class ReviewDto(
     val id: String,

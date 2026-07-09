@@ -103,6 +103,24 @@ interface BackendApi {
 
     @DELETE("degree-progress/{id}")
     suspend fun deleteDegreeProgress(@Path("id") id: String)
+
+    @PATCH("degree-progress/{id}/ready-for-sign-off")
+    suspend fun readyForSignOffDegreeProgress(
+        @Path("id") id: String,
+        @Body request: ReadyForSignOffDegreeProgressRequest,
+    ): DegreeProgressDto
+
+    @PATCH("degree-progress/{id}/approve")
+    suspend fun approveDegreeProgress(
+        @Path("id") id: String,
+        @Body request: ApproveDegreeProgressRequest,
+    ): DegreeProgressDto
+
+    @PATCH("degree-progress/{id}/reopen")
+    suspend fun reopenDegreeProgress(
+        @Path("id") id: String,
+        @Body request: ReopenDegreeProgressRequest,
+    ): DegreeProgressDto
 }
 
 data class ReviewActionResultDto(
