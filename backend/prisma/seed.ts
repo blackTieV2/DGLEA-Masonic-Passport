@@ -194,8 +194,10 @@ async function main(): Promise<void> {
       {
         brotherProfileId: profileEa.id,
         degreeType: DegreeType.ENTERED_APPRENTICE,
-        status: DegreeStatus.IN_PROGRESS,
+        status: DegreeStatus.READY_FOR_SIGN_OFF,
         mentorNotes: "Started EA journey.",
+        submittedAt: new Date("2026-06-01"),
+        submittedBy: brotherEa.id,
       },
       {
         brotherProfileId: profileFc.id,

@@ -115,6 +115,22 @@ export class PermissionEvaluator {
     return this.canTransitionStage(user, brotherProfileId);
   }
 
+  async canApproveDegreeProgress(
+    user: CurrentUser,
+    brotherProfileId: string,
+  ): Promise<boolean> {
+    const context = await this.loadBrotherContext(brotherProfileId);
+    if (!context) return false;
+
+    if (await this.isPersonalMentorOf(user.id, brotherProfileId)) return true;
+    if (this.hasLodgeMentorRole(user, context.lodgeId)) return true;
+    if (this.hasLodgeAdminScope(user, context.lodgeId)) return true;
+    if (this.hasDistrictReadScope(user, context.districtId)) return true;
+    if (this.hasRole(user, Role.SYSTEM_ADMIN)) return true;
+
+    return false;
+  }
+
   private hasLodgeMentorScope(user: CurrentUser, lodgeId: string): boolean {
     return user.roles.some(
       (r) =>
@@ -127,6 +143,14 @@ export class PermissionEvaluator {
     return user.roles.some(
       (r) =>
         r.role === Role.LODGE_MENTOR &&
+        ((r.scopeType === ScopeType.LODGE && r.scopeId === lodgeId) || r.scopeType === ScopeType.GLOBAL),
+    );
+  }
+
+  private hasLodgeAdminScope(user: CurrentUser, lodgeId: string): boolean {
+    return user.roles.some(
+      (r) =>
+        (r.role === Role.LODGE_ADMIN || r.role === Role.WM_LODGE_LEADERSHIP) &&
         ((r.scopeType === ScopeType.LODGE && r.scopeId === lodgeId) || r.scopeType === ScopeType.GLOBAL),
     );
   }

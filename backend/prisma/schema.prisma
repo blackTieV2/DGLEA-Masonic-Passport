@@ -236,8 +236,13 @@ model DegreeProgress {
   degreeType       DegreeType   @map("degree_type")
   status           DegreeStatus @default(NOT_STARTED)
   mentorNotes      String?      @map("mentor_notes")
+  submittedAt      DateTime?    @map("submitted_at")
+  submittedBy      String?      @map("submitted_by") @db.Uuid
   approvedBy       String?      @map("approved_by") @db.Uuid
   approvedAt       DateTime?    @map("approved_at")
+  approvalNotes    String?      @map("approval_notes")
+  reopenedAt       DateTime?    @map("reopened_at")
+  reopenedBy       String?      @map("reopened_by") @db.Uuid
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")
 

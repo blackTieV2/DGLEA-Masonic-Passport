@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsEnum, IsOptional, IsString } from "class-validator";
 import { DegreeStatus } from "@prisma/client";
 
 export class UpdateDegreeProgressDto {
@@ -9,8 +9,4 @@ export class UpdateDegreeProgressDto {
   @IsString()
   @IsOptional()
   mentorNotes?: string;
-
-  @IsUUID()
-  @IsOptional()
-  approvedBy?: string;
 }
