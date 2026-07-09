@@ -31,6 +31,24 @@ enum Stage {
   @@map("stage")
 }
 
+enum DegreeType {
+  ENTERED_APPRENTICE
+  FELLOW_CRAFT
+  MASTER_MASON
+  ROYAL_ARCH_PREPARATION
+
+  @@map("degree_type")
+}
+
+enum DegreeStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  READY_FOR_SIGN_OFF
+  SIGNED_OFF
+
+  @@map("degree_status")
+}
+
 enum ProgressStatus {
   LOCKED
   NOT_STARTED
@@ -177,6 +195,10 @@ model BrotherProfile {
   datePassed          DateTime? @map("date_passed")
   dateRaised          DateTime? @map("date_raised")
   solomonRegisteredOn DateTime? @map("solomon_registered_on")
+  fullName            String?   @map("full_name")
+  preferredName       String?   @map("preferred_name")
+  email               String?
+  phone               String?
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
@@ -184,6 +206,7 @@ model BrotherProfile {
   lodge              Lodge               @relation(fields: [lodgeId], references: [id])
   mentorAssignments  MentorAssignment[]
   passportProgress   PassportProgress[]
+  degreeProgress     DegreeProgress[]
   mentorSessions     MentorSession[]
   visitations        Visitation[]
   ritualPerformances RitualPerformance[]
@@ -192,6 +215,38 @@ model BrotherProfile {
   @@index([lodgeId])
   @@index([currentStage])
   @@map("brother_profiles")
+}
+
+model LodgeProfile {
+  id               String   @id @default(uuid()) @db.Uuid
+  lodgeName        String   @map("lodge_name")
+  lodgeNumber      String   @unique @map("lodge_number")
+  district         String?
+  meetingLocation  String?  @map("meeting_location")
+  secretaryContact String?  @map("secretary_contact")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("lodge_profiles")
+}
+
+model DegreeProgress {
+  id               String       @id @default(uuid()) @db.Uuid
+  brotherProfileId String       @map("brother_profile_id") @db.Uuid
+  degreeType       DegreeType   @map("degree_type")
+  status           DegreeStatus @default(NOT_STARTED)
+  mentorNotes      String?      @map("mentor_notes")
+  approvedBy       String?      @map("approved_by") @db.Uuid
+  approvedAt       DateTime?    @map("approved_at")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  brotherProfile BrotherProfile @relation(fields: [brotherProfileId], references: [id], onDelete: Restrict)
+
+  @@index([brotherProfileId])
+  @@index([degreeType])
+  @@unique([brotherProfileId, degreeType])
+  @@map("degree_progress")
 }
 
 model MentorAssignment {

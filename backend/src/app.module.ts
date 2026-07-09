@@ -7,6 +7,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { OrganisationsModule } from "./modules/organisations/organisations.module";
 import { RolesModule } from "./modules/roles/roles.module";
 import { BrothersModule } from "./modules/brothers/brothers.module";
+import { BrotherProfilesModule } from "./modules/brother-profiles/brother-profiles.module";
 import { PassportModule } from "./modules/passport/passport.module";
 import { ProgressModule } from "./modules/progress/progress.module";
 import { ReviewsModule } from "./modules/reviews/reviews.module";
@@ -16,6 +17,8 @@ import { ProgressionModule } from "./modules/progression/progression.module";
 import { NotificationsModule } from "./modules/notifications/notifications.module";
 import { ReportingModule } from "./modules/reporting/reporting.module";
 import { AuditModule } from "./modules/audit/audit.module";
+import { LodgeProfilesModule } from "./modules/lodge-profiles/lodge-profiles.module";
+import { DegreeProgressModule } from "./modules/degree-progress/degree-progress.module";
 import { FirebaseAuthGuard } from "./common/guards/firebase-auth.guard";
 import { PrismaModule } from "./common/prisma/prisma.module";
 
@@ -29,6 +32,7 @@ import { PrismaModule } from "./common/prisma/prisma.module";
     OrganisationsModule,
     RolesModule,
     BrothersModule,
+    BrotherProfilesModule,
     PassportModule,
     ProgressModule,
     ReviewsModule,
@@ -38,6 +42,8 @@ import { PrismaModule } from "./common/prisma/prisma.module";
     NotificationsModule,
     ReportingModule,
     AuditModule,
+    LodgeProfilesModule,
+    DegreeProgressModule,
   ],
   providers: [
     {
