@@ -1,4 +1,4 @@
-import { PrismaClient, Role, Stage, AssignmentType, ProgressStatus, ScopeType } from "@prisma/client";
+import { PrismaClient, Role, Stage, AssignmentType, ProgressStatus, ScopeType, DegreeType, DegreeStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +11,7 @@ async function main(): Promise<void> {
   await prisma.auditEvent.deleteMany();
   await prisma.notification.deleteMany();
   await prisma.review.deleteMany();
+  await prisma.degreeProgress.deleteMany();
   await prisma.passportProgress.deleteMany();
   await prisma.milestoneTemplate.deleteMany();
   await prisma.passportSection.deleteMany();
@@ -21,6 +22,7 @@ async function main(): Promise<void> {
   await prisma.sectionSignoff.deleteMany();
   await prisma.mentorAssignment.deleteMany();
   await prisma.brotherProfile.deleteMany();
+  await prisma.lodgeProfile.deleteMany();
   await prisma.roleAssignment.deleteMany();
   await prisma.user.deleteMany();
   await prisma.lodge.deleteMany();
@@ -51,6 +53,26 @@ async function main(): Promise<void> {
       meetingLocation: "Penang",
       active: true,
     },
+  });
+
+  // Passport-visible lodge profiles
+  await prisma.lodgeProfile.createMany({
+    data: [
+      {
+        lodgeName: lodge1.lodgeName,
+        lodgeNumber: lodge1.lodgeNumber,
+        district: district.name,
+        meetingLocation: lodge1.meetingLocation,
+        secretaryContact: "secretary.l001@example.local",
+      },
+      {
+        lodgeName: lodge2.lodgeName,
+        lodgeNumber: lodge2.lodgeNumber,
+        district: district.name,
+        meetingLocation: lodge2.meetingLocation,
+        secretaryContact: "secretary.l002@example.local",
+      },
+    ],
   });
 
   const brotherEa = await prisma.user.create({
@@ -163,6 +185,36 @@ async function main(): Promise<void> {
       { brotherProfileId: profileEa.id, mentorUserId: personalMentor.id, assignmentType: AssignmentType.PERSONAL_MENTOR },
       { brotherProfileId: profileFc.id, mentorUserId: personalMentor.id, assignmentType: AssignmentType.PERSONAL_MENTOR },
       { brotherProfileId: profileMm.id, mentorUserId: personalMentor.id, assignmentType: AssignmentType.PERSONAL_MENTOR },
+    ],
+  });
+
+  // Initial degree progress rows for each Brother
+  await prisma.degreeProgress.createMany({
+    data: [
+      {
+        brotherProfileId: profileEa.id,
+        degreeType: DegreeType.ENTERED_APPRENTICE,
+        status: DegreeStatus.IN_PROGRESS,
+        mentorNotes: "Started EA journey.",
+      },
+      {
+        brotherProfileId: profileFc.id,
+        degreeType: DegreeType.FELLOW_CRAFT,
+        status: DegreeStatus.IN_PROGRESS,
+        mentorNotes: "Started FC journey.",
+      },
+      {
+        brotherProfileId: profileMm.id,
+        degreeType: DegreeType.MASTER_MASON,
+        status: DegreeStatus.SIGNED_OFF,
+        approvedBy: lodgeMentor.id,
+        approvedAt: new Date("2024-04-20"),
+      },
+      {
+        brotherProfileId: profileMm.id,
+        degreeType: DegreeType.ROYAL_ARCH_PREPARATION,
+        status: DegreeStatus.NOT_STARTED,
+      },
     ],
   });
 

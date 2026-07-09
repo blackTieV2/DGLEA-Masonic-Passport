@@ -88,7 +88,79 @@ data class BrotherProfileDto(
     val datePassed: String? = null,
     val dateRaised: String? = null,
     val solomonRegisteredOn: String? = null,
+    val fullName: String? = null,
+    val preferredName: String? = null,
+    val email: String? = null,
+    val phone: String? = null,
     val lodge: LodgeDto? = null,
+)
+
+data class CreateBrotherProfileRequest(
+    val userId: String,
+    val lodgeId: String,
+    val currentStage: String? = null,
+    val fullName: String? = null,
+    val preferredName: String? = null,
+    val email: String? = null,
+    val phone: String? = null,
+)
+
+data class UpdateBrotherProfileRequest(
+    val lodgeId: String? = null,
+    val currentStage: String? = null,
+    val fullName: String? = null,
+    val preferredName: String? = null,
+    val email: String? = null,
+    val phone: String? = null,
+)
+
+data class LodgeProfileDto(
+    val id: String,
+    val lodgeName: String,
+    val lodgeNumber: String,
+    val district: String? = null,
+    val meetingLocation: String? = null,
+    val secretaryContact: String? = null,
+)
+
+data class CreateLodgeProfileRequest(
+    val lodgeName: String,
+    val lodgeNumber: String,
+    val district: String? = null,
+    val meetingLocation: String? = null,
+    val secretaryContact: String? = null,
+)
+
+data class UpdateLodgeProfileRequest(
+    val lodgeName: String? = null,
+    val lodgeNumber: String? = null,
+    val district: String? = null,
+    val meetingLocation: String? = null,
+    val secretaryContact: String? = null,
+)
+
+data class DegreeProgressDto(
+    val id: String,
+    val brotherProfileId: String,
+    val degreeType: String,
+    val status: String,
+    val mentorNotes: String? = null,
+    val approvedBy: String? = null,
+    val approvedAt: String? = null,
+)
+
+data class CreateDegreeProgressRequest(
+    val brotherProfileId: String,
+    val degreeType: String,
+    val status: String? = null,
+    val mentorNotes: String? = null,
+    val approvedBy: String? = null,
+)
+
+data class UpdateDegreeProgressRequest(
+    val status: String? = null,
+    val mentorNotes: String? = null,
+    val approvedBy: String? = null,
 )
 
 data class ReviewDto(
