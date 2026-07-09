@@ -20,6 +20,7 @@ import { AuditModule } from "./modules/audit/audit.module";
 import { LodgeProfilesModule } from "./modules/lodge-profiles/lodge-profiles.module";
 import { DegreeProgressModule } from "./modules/degree-progress/degree-progress.module";
 import { ExportsModule } from "./modules/exports/exports.module";
+import { ReferencePagesModule } from "./modules/reference-pages/reference-pages.module";
 import { FirebaseAuthGuard } from "./common/guards/firebase-auth.guard";
 import { PrismaModule } from "./common/prisma/prisma.module";
 
@@ -46,6 +47,7 @@ import { PrismaModule } from "./common/prisma/prisma.module";
     LodgeProfilesModule,
     DegreeProgressModule,
     ExportsModule,
+    ReferencePagesModule,
   ],
   providers: [
     {
