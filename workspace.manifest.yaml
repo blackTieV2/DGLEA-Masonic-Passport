@@ -1,0 +1,64 @@
+workspace:
+  name: DGLEA Masonic Passport
+  type: model-neutral-agent-workspace
+  version: 1.0
+  created_at: "2026-06-29T13:05:11Z"
+  mode: takeover
+  canonical_entrypoint: AGENTS.md
+  router: CONTEXT.md
+  stages:
+    - id: 00-triage
+      path: stages/00-triage
+      contract: stages/00-triage/CONTEXT.md
+      manifest: stages/00-triage/stage.manifest.yaml
+    - id: 01-intake
+      path: stages/01-intake
+      contract: stages/01-intake/CONTEXT.md
+      manifest: stages/01-intake/stage.manifest.yaml
+    - id: 02-research
+      path: stages/02-research
+      contract: stages/02-research/CONTEXT.md
+      manifest: stages/02-research/stage.manifest.yaml
+    - id: 03-design
+      path: stages/03-design
+      contract: stages/03-design/CONTEXT.md
+      manifest: stages/03-design/stage.manifest.yaml
+    - id: 04-build
+      path: stages/04-build
+      contract: stages/04-build/CONTEXT.md
+      manifest: stages/04-build/stage.manifest.yaml
+    - id: 05-qa
+      path: stages/05-qa
+      contract: stages/05-qa/CONTEXT.md
+      manifest: stages/05-qa/stage.manifest.yaml
+    - id: 06-handoff
+      path: stages/06-handoff
+      contract: stages/06-handoff/CONTEXT.md
+      manifest: stages/06-handoff/stage.manifest.yaml
+  config:
+    - _config/project-identity.md
+    - _config/operating-principles.md
+    - _config/voice-rules.md
+    - _config/coding-standards.md
+    - _config/access-policy.md
+    - _config/naming-conventions.md
+  durable_knowledge: shared/knowledge/okf
+  shared_tooling:
+    - shared/tooling/tool-prereqs.md
+    - shared/tooling/connectors.md
+    - shared/tooling/commands.md
+    - shared/tooling/environment.md
+  adapters: model-adapters
+  runs: runs
+  archive: archive
+  existing_code:
+    - apps/android
+    - apps/web-admin
+    - backend
+    - shared/contracts
+    - infra
+    - scripts
+  existing_docs:
+    - docs
+  preserved_original:
+    - archive/original-agents.md

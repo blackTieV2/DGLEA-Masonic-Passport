@@ -1,0 +1,35 @@
+stage: 05-qa
+purpose: Validate implementation against requirements and workspace rules
+inputs:
+  - layer: 0
+    path: ../../AGENTS.md
+    required: true
+  - layer: 1
+    path: ../../CONTEXT.md
+    required: true
+  - layer: 2
+    path: ../03-design/output/acceptance-criteria.md
+    required: true
+  - layer: 2
+    path: ../04-build/output/
+    required: true
+  - layer: 3
+    path: ../../_config/naming-conventions.md
+    required: true
+  - layer: 3
+    path: ../../_config/access-policy.md
+    required: true
+outputs:
+  - path: output/qa-report.md
+    format: markdown
+    required: true
+  - path: output/defects.md
+    format: markdown
+    required: true
+  - path: output/remediation-actions.md
+    format: markdown
+    required: true
+  - path: output/acceptance-decision.md
+    format: markdown
+    required: true
+review_gate: true

@@ -1,0 +1,32 @@
+stage: 04-build
+purpose: Implement the design through code, schema, config, or UI changes
+inputs:
+  - layer: 0
+    path: ../../AGENTS.md
+    required: true
+  - layer: 1
+    path: ../../CONTEXT.md
+    required: true
+  - layer: 2
+    path: ../03-design/output/design-spec.md
+    required: true
+  - layer: 2
+    path: ../03-design/output/implementation-plan.md
+    required: true
+  - layer: 3
+    path: ../../_config/coding-standards.md
+    required: true
+  - layer: 3
+    path: ../../shared/knowledge/okf/
+    required: false
+outputs:
+  - path: output/changed-files.md
+    format: markdown
+    required: true
+  - path: output/build-notes.md
+    format: markdown
+    required: true
+  - path: output/test-results.md
+    format: markdown
+    required: true
+review_gate: true

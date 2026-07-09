@@ -5,47 +5,49 @@ import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface BackendApi {
-    @POST("auth/login")
-    suspend fun login(@Body request: LoginRequest): LoginResponse
-
     @GET("me")
-    suspend fun me(): UserDto
+    suspend fun me(): MeProfileDto
 
-    @POST("members/{memberId}/passport-records")
-    suspend fun createDraft(
-        @Path("memberId") memberId: String,
-        @Body request: CreateDraftRequest,
-    ): PassportRecordDto
+    @GET("me/passport")
+    suspend fun myPassport(): BrotherPassportDto
 
-    @PATCH("passport-records/{recordId}")
-    suspend fun updateRecord(
-        @Path("recordId") recordId: String,
-        @Body request: UpdateRecordRequest,
-    ): PassportRecordDto
+    @PATCH("progress/{progressId}/draft")
+    suspend fun updateDraft(
+        @Path("progressId") progressId: String,
+        @Body request: UpdateDraftRequest,
+    ): PassportProgressDto
 
-    @POST("passport-records/{recordId}/submit")
-    suspend fun submit(@Path("recordId") recordId: String): PassportRecordDto
+    @POST("progress/{progressId}/submit")
+    suspend fun submit(@Path("progressId") progressId: String): PassportProgressDto
 
-    @GET("members/{memberId}/passport-summary")
-    suspend fun passportSummary(@Path("memberId") memberId: String): BrotherPassportSummaryDto
+    @POST("progress/{progressId}/clarification-response")
+    suspend fun clarificationResponse(
+        @Path("progressId") progressId: String,
+        @Body request: ClarificationResponseRequest,
+    ): PassportProgressDto
 
-    @GET("verification-queue")
-    suspend fun verificationQueue(): VerificationQueueResponse
+    @GET("mentor/review-queue")
+    suspend fun reviewQueue(
+        @Query("brotherProfileId") brotherProfileId: String? = null,
+    ): List<PassportProgressDto>
 
-    @POST("passport-records/{recordId}/verify")
-    suspend fun verify(@Path("recordId") recordId: String): PassportRecordDto
+    @POST("progress/{progressId}/review")
+    suspend fun review(
+        @Path("progressId") progressId: String,
+        @Body request: ReviewActionRequest,
+    ): ReviewActionResultDto
 
-    @POST("passport-records/{recordId}/reject")
-    suspend fun reject(
-        @Path("recordId") recordId: String,
-        @Body request: ActionReasonRequest,
-    ): PassportRecordDto
+    @GET("notifications")
+    suspend fun notifications(): List<NotificationDto>
 
-    @POST("passport-records/{recordId}/clarification")
-    suspend fun requestClarification(
-        @Path("recordId") recordId: String,
-        @Body request: ActionReasonRequest,
-    ): PassportRecordDto
+    @PATCH("notifications/{id}/read")
+    suspend fun markNotificationRead(@Path("id") id: String)
 }
+
+data class ReviewActionResultDto(
+    val review: ReviewDto,
+    val progress: PassportProgressDto,
+)

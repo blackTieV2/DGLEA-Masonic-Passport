@@ -1,0 +1,35 @@
+stage: 02-research
+purpose: Gather and structure context for the current run
+inputs:
+  - layer: 0
+    path: ../../AGENTS.md
+    required: true
+  - layer: 1
+    path: ../../CONTEXT.md
+    required: true
+  - layer: 2
+    path: ../01-intake/output/project-brief.md
+    required: true
+  - layer: 3
+    path: ../../_config/
+    required: true
+  - layer: 3
+    path: ../../shared/knowledge/okf/
+    required: true
+  - layer: 4
+    path: references/
+    required: false
+outputs:
+  - path: output/research-memo.md
+    format: markdown
+    required: true
+  - path: output/source-list.md
+    format: markdown
+    required: true
+  - path: output/knowledge-candidates.md
+    format: markdown
+    required: true
+  - path: output/open-questions.md
+    format: markdown
+    required: false
+review_gate: true

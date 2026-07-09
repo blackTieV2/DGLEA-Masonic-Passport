@@ -1,5 +1,6 @@
 package com.dglea.passport.network
 
+import com.dglea.passport.data.InMemorySessionStore
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -8,19 +9,21 @@ import org.junit.Test
 
 class NetworkClientFactoryTest {
     @Test
-    fun login_serializesBody_and_deserializesResponse() = runTest {
+    fun me_serializesSessionHeaders_and_deserializesResponse() = runTest {
         val server = MockWebServer()
         server.enqueue(
             MockResponse().setResponseCode(200).setBody(
                 """
                 {
-                  "accessToken":"token_123",
-                  "user":{
-                    "id":"u_1",
-                    "email":"brother@example.com",
-                    "displayName":"Brother One",
-                    "status":"active"
-                  }
+                  "id":"usr_1",
+                  "email":"brother@example.local",
+                  "displayName":"Brother One",
+                  "roles":[
+                    {"role":"BROTHER","scopeType":"GLOBAL","scopeId":null}
+                  ],
+                  "brotherProfileId":"bp_1",
+                  "lodgeId":"lodge_1",
+                  "currentStage":"ENTERED_APPRENTICE"
                 }
                 """.trimIndent(),
             ),
@@ -28,25 +31,21 @@ class NetworkClientFactoryTest {
         server.start()
 
         try {
-            val api = NetworkClientFactory.createBackendApi(server.url("/").toString()) { null }
+            val sessionStore = InMemorySessionStore().apply {
+                bearerToken = "token_123"
+                devFirebaseUid = "dev-brother-ea"
+            }
+            val api = NetworkClientFactory.createBackendApi(server.url("/").toString(), sessionStore)
 
-            val response = api.login(
-                LoginRequest(
-                    email = "brother@example.com",
-                    password = "secret",
-                ),
-            )
+            val response = api.me()
 
             val request = server.takeRequest()
-            assertEquals("POST", request.method)
-            assertEquals("/auth/login", request.path)
-            assertEquals(
-                "{\"email\":\"brother@example.com\",\"password\":\"secret\"}",
-                request.body.readUtf8(),
-            )
-
-            assertEquals("token_123", response.accessToken)
-            assertEquals("u_1", response.user.id)
+            assertEquals("GET", request.method)
+            assertEquals("/me", request.path)
+            assertEquals("Bearer token_123", request.getHeader("Authorization"))
+            assertEquals("dev-brother-ea", request.getHeader("X-Dev-Auth-Firebase-Uid"))
+            assertEquals("usr_1", response.id)
+            assertEquals("ENTERED_APPRENTICE", response.currentStage)
         } finally {
             server.shutdown()
         }

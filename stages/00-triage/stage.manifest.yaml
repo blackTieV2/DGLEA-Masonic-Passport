@@ -1,0 +1,17 @@
+stage: 00-triage
+purpose: Determine task intent and route to the correct next stage
+inputs:
+  - layer: 0
+    path: ../../AGENTS.md
+    required: true
+  - layer: 1
+    path: ../../CONTEXT.md
+    required: true
+outputs:
+  - path: output/triage-note.md
+    format: markdown
+    required: true
+  - path: output/assumptions.md
+    format: markdown
+    required: false
+review_gate: true

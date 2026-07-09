@@ -1,0 +1,32 @@
+stage: 01-intake
+purpose: Capture and normalize the project brief
+inputs:
+  - layer: 0
+    path: ../../AGENTS.md
+    required: true
+  - layer: 1
+    path: ../../CONTEXT.md
+    required: true
+  - layer: 2
+    path: ../00-triage/output/triage-note.md
+    required: false
+  - layer: 3
+    path: ../../_config/project-identity.md
+    required: true
+  - layer: 4
+    path: references/
+    required: false
+outputs:
+  - path: output/project-brief.md
+    format: markdown
+    required: true
+  - path: output/scope-boundaries.md
+    format: markdown
+    required: true
+  - path: output/success-criteria.md
+    format: markdown
+    required: true
+  - path: output/open-questions.md
+    format: markdown
+    required: true
+review_gate: true

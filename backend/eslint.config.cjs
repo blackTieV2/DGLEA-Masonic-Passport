@@ -1,23 +1,32 @@
-const tseslint = require('@typescript-eslint/eslint-plugin');
-const tsParser = require('@typescript-eslint/parser');
+const tseslint = require("@typescript-eslint/eslint-plugin");
+const tsparser = require("@typescript-eslint/parser");
 
 module.exports = [
   {
-    files: ['src/**/*.ts', 'tests/**/*.ts'],
-    ignores: ['dist/**'],
+    files: ["src/**/*.ts", "test/**/*.ts", "prisma/**/*.ts"],
     languageOptions: {
-      parser: tsParser,
+      parser: tsparser,
       parserOptions: {
-        project: './tsconfig.json',
-        tsconfigRootDir: __dirname,
+        project: "./tsconfig.json",
+        sourceType: "module",
+        ecmaVersion: 2021,
       },
     },
     plugins: {
-      '@typescript-eslint': tseslint,
+      "@typescript-eslint": tseslint,
     },
     rules: {
-      'no-console': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      ...tseslint.configs.recommended.rules,
+      ...tseslint.configs["recommended-requiring-type-checking"].rules,
+      "@typescript-eslint/interface-name-prefix": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     },
+  },
+  {
+    ignores: ["dist/**", "node_modules/**", "coverage/**"],
   },
 ];

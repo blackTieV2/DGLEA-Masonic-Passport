@@ -1,0 +1,38 @@
+stage: 03-design
+purpose: Convert requirements into a design specification
+inputs:
+  - layer: 0
+    path: ../../AGENTS.md
+    required: true
+  - layer: 1
+    path: ../../CONTEXT.md
+    required: true
+  - layer: 2
+    path: ../02-research/output/research-memo.md
+    required: true
+  - layer: 3
+    path: ../../_config/operating-principles.md
+    required: true
+  - layer: 3
+    path: ../../_config/access-policy.md
+    required: true
+  - layer: 3
+    path: ../../shared/knowledge/okf/domains/
+    required: true
+  - layer: 3
+    path: ../../shared/knowledge/okf/systems/
+    required: true
+outputs:
+  - path: output/design-spec.md
+    format: markdown
+    required: true
+  - path: output/implementation-plan.md
+    format: markdown
+    required: true
+  - path: output/acceptance-criteria.md
+    format: markdown
+    required: true
+  - path: output/risks-and-constraints.md
+    format: markdown
+    required: true
+review_gate: true

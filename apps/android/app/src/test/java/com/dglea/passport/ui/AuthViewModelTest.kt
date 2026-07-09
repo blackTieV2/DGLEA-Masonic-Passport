@@ -2,18 +2,23 @@ package com.dglea.passport.ui
 
 import com.dglea.passport.data.AuthRepository
 import com.dglea.passport.data.InMemorySessionStore
-import com.dglea.passport.network.ActionReasonRequest
 import com.dglea.passport.network.BackendApi
-import com.dglea.passport.network.CreateDraftRequest
-import com.dglea.passport.network.BrotherPassportSummaryDto
-import com.dglea.passport.network.LoginRequest
-import com.dglea.passport.network.LoginResponse
-import com.dglea.passport.network.PassportRecordDto
-import com.dglea.passport.network.UserDto
-import com.dglea.passport.network.UpdateRecordRequest
-import com.dglea.passport.network.VerificationQueueItemDto
-import com.dglea.passport.network.VerificationQueueResponse
-import com.dglea.passport.network.SectionSummaryDto
+import com.dglea.passport.network.BrotherPassportDto
+import com.dglea.passport.network.BrotherPassportProfileDto
+import com.dglea.passport.network.BrotherProfileDto
+import com.dglea.passport.network.LodgeDto
+import com.dglea.passport.network.MeProfileDto
+import com.dglea.passport.network.MilestoneTemplateDto
+import com.dglea.passport.network.NotificationDto
+import com.dglea.passport.network.PassportProgressDto
+import com.dglea.passport.network.PassportTemplateDto
+import com.dglea.passport.network.PassportSectionDto
+import com.dglea.passport.network.ReviewActionResultDto
+import com.dglea.passport.network.ReviewActionRequest
+import com.dglea.passport.network.ReviewDto
+import com.dglea.passport.network.RoleAssignmentDto
+import com.dglea.passport.network.SectionSignoffDto
+import com.dglea.passport.network.UpdateDraftRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -33,60 +38,90 @@ class AuthViewModelTest {
     @After fun teardown() { Dispatchers.resetMain() }
 
     @Test
-    fun `sign in updates user state`() = runTest {
+    fun `connect loads current user`() = runTest {
         val api = object : BackendApi {
-            override suspend fun login(request: LoginRequest): LoginResponse =
-                LoginResponse("token", UserDto("usr_brother", request.email, "Brother", "ACTIVE"))
+            override suspend fun me(): MeProfileDto =
+                MeProfileDto(
+                    id = "usr_brother",
+                    email = "brother@example.org",
+                    displayName = "Brother",
+                    roles = listOf(RoleAssignmentDto("BROTHER", "GLOBAL")),
+                    brotherProfileId = "bp_1",
+                    lodgeId = "lodge_1",
+                    currentStage = "ENTERED_APPRENTICE",
+                )
 
-            override suspend fun me(): UserDto = UserDto("usr_brother", "brother@example.org", "Brother", "ACTIVE")
-            override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
-                BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "NOT_STARTED")))
+            override suspend fun myPassport(): BrotherPassportDto =
+                BrotherPassportDto(
+                    profile = BrotherPassportProfileDto(
+                        id = "bp_1",
+                        currentStage = "ENTERED_APPRENTICE",
+                        lodge = LodgeDto("lodge_1", "dist_1", "Lodge One", "L-001"),
+                    ),
+                    template = PassportTemplateDto("tpl_1", "1.0.0"),
+                    progress = emptyList(),
+                    signoffs = emptyList(),
+                )
 
-            override suspend fun verificationQueue(): VerificationQueueResponse =
-                VerificationQueueResponse(emptyList<VerificationQueueItemDto>(), 1, 0, 0, 1)
-            override suspend fun verify(recordId: String): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun reject(recordId: String, request: ActionReasonRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun requestClarification(recordId: String, request: ActionReasonRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun updateDraft(progressId: String, request: UpdateDraftRequest): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun submit(progressId: String): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun clarificationResponse(progressId: String, request: com.dglea.passport.network.ClarificationResponseRequest): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun reviewQueue(brotherProfileId: String?): List<PassportProgressDto> = emptyList()
+            override suspend fun review(progressId: String, request: ReviewActionRequest): ReviewActionResultDto { throw NotImplementedError() }
+            override suspend fun notifications(): List<NotificationDto> = emptyList()
+            override suspend fun markNotificationRead(id: String) = Unit
         }
 
-        val vm = AuthViewModel(AuthRepository(api, InMemorySessionStore()))
-        vm.signIn("brother@example.org", "pass")
+        val sessionStore = InMemorySessionStore()
+        val vm = AuthViewModel(AuthRepository(api, sessionStore))
+
+        vm.connect("dev-brother-ea", null)
         dispatcher.scheduler.advanceUntilIdle()
 
         assertEquals("usr_brother", vm.state.value.user?.id)
+        assertEquals("dev-brother-ea", sessionStore.devFirebaseUid)
         assertEquals(null, vm.state.value.error)
     }
 
     @Test
-    fun `sign out clears user state`() = runTest {
-        val sessionStore = InMemorySessionStore()
+    fun `sign out clears session`() = runTest {
         val api = object : BackendApi {
-            override suspend fun login(request: LoginRequest): LoginResponse =
-                LoginResponse("token", UserDto("usr_brother", request.email, "Brother", "ACTIVE"))
+            override suspend fun me(): MeProfileDto =
+                MeProfileDto(
+                    id = "usr_brother",
+                    email = "brother@example.org",
+                    displayName = "Brother",
+                )
 
-            override suspend fun me(): UserDto = UserDto("usr_brother", "brother@example.org", "Brother", "ACTIVE")
-            override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
-                BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "NOT_STARTED")))
-            override suspend fun verificationQueue(): VerificationQueueResponse =
-                VerificationQueueResponse(emptyList<VerificationQueueItemDto>(), 1, 0, 0, 1)
-            override suspend fun verify(recordId: String): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun reject(recordId: String, request: ActionReasonRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun requestClarification(recordId: String, request: ActionReasonRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun myPassport(): BrotherPassportDto =
+                BrotherPassportDto(
+                    profile = BrotherPassportProfileDto(
+                        id = "bp_1",
+                        currentStage = "ENTERED_APPRENTICE",
+                        lodge = LodgeDto("lodge_1", "dist_1", "Lodge One", "L-001"),
+                    ),
+                    template = PassportTemplateDto("tpl_1", "1.0.0"),
+                    progress = emptyList(),
+                    signoffs = emptyList(),
+                )
+
+            override suspend fun updateDraft(progressId: String, request: UpdateDraftRequest): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun submit(progressId: String): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun clarificationResponse(progressId: String, request: com.dglea.passport.network.ClarificationResponseRequest): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun reviewQueue(brotherProfileId: String?): List<PassportProgressDto> = emptyList()
+            override suspend fun review(progressId: String, request: ReviewActionRequest): ReviewActionResultDto { throw NotImplementedError() }
+            override suspend fun notifications(): List<NotificationDto> = emptyList()
+            override suspend fun markNotificationRead(id: String) = Unit
         }
 
+        val sessionStore = InMemorySessionStore()
         val vm = AuthViewModel(AuthRepository(api, sessionStore))
-        vm.signIn("brother@example.org", "pass")
+
+        vm.connect("dev-brother-ea", null)
         dispatcher.scheduler.advanceUntilIdle()
         vm.signOut()
 
         assertEquals(null, vm.state.value.user)
-        assertEquals(null, sessionStore.accessToken)
+        assertEquals(false, sessionStore.hasSession())
     }
-
 }

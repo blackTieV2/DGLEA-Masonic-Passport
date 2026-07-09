@@ -1,128 +1,98 @@
 package com.dglea.passport.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.dglea.passport.network.PassportRecordDto
-import com.dglea.passport.network.UserDto
-import com.dglea.passport.network.VerificationQueueItemDto
+import com.dglea.passport.network.MeProfileDto
+import com.dglea.passport.network.PassportProgressDto
+import com.dglea.passport.network.ReviewActionResultDto
+import java.util.Locale
 
 @Composable
 fun MentorVerificationScreen(
-    user: UserDto,
-    queue: List<VerificationQueueItemDto>,
-    lastDecision: PassportRecordDto?,
-    actionNonce: Int,
+    user: MeProfileDto,
+    queue: List<PassportProgressDto>,
+    lastDecision: ReviewActionResultDto?,
     error: String?,
     onRefreshQueue: () -> Unit,
-    onVerify: (recordId: String) -> Unit,
-    onReject: (recordId: String, reason: String) -> Unit,
-    onClarification: (recordId: String, reason: String) -> Unit,
+    onVerify: (progressId: String) -> Unit,
+    onReject: (progressId: String, reason: String) -> Unit,
+    onClarification: (progressId: String, reason: String) -> Unit,
     onSignOut: () -> Unit,
 ) {
-    val selectedRecordId = remember { mutableStateOf("") }
-    val reason = remember { mutableStateOf("") }
+    val reasonByProgress = remember { mutableStateMapOf<String, String>() }
+    val selectedProgressId = remember { mutableStateOf("") }
 
-    LaunchedEffect(actionNonce) {
-        if (actionNonce > 0) {
-            selectedRecordId.value = ""
-            reason.value = ""
-        }
-    }
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text("Mentor: ${user.displayName}")
+        Text(user.email)
+        Text("Queue size: ${queue.size}")
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("Mentor verification: ${user.displayName} (${user.email})")
-        Text("Pending queue items: ${queue.size}")
-        Text("Last decision status: ${lastDecision?.status ?: "No actions yet"}")
+        Button(onClick = onRefreshQueue) { Text("Refresh Queue") }
+        Button(onClick = onSignOut) { Text("Sign Out") }
 
-        Button(onClick = onSignOut, modifier = Modifier.padding(top = 8.dp)) { Text("Sign Out") }
+        queue.forEach { item ->
+            val milestone = item.milestoneTemplate?.title ?: item.id
+            val brotherName = item.brotherProfile?.lodge?.lodgeName ?: item.brotherProfileId
+            val reasonState = reasonByProgress.getOrPut(item.id) { item.draftNote.orEmpty() }
 
-        Button(onClick = onRefreshQueue, modifier = Modifier.padding(top = 8.dp)) {
-            Text("Refresh Queue")
-        }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(),
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text("${brotherName.uppercase(Locale.ROOT)} • $milestone")
+                    Text("Status: ${item.status}")
+                    item.brotherProfile?.currentStage?.let { Text("Current stage: $it") }
+                    item.draftNote?.let { Text("Draft note: $it") }
+                    item.reviews.firstOrNull()?.reason?.let { Text("Latest review reason: $it") }
 
-        if (queue.isEmpty()) {
-            Text(
-                text = "No pending verification items right now.",
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        } else {
-            queue.forEach { item ->
-                val isSelected = selectedRecordId.value == item.passportRecordId
-                val details = buildString {
-                    append("${item.passportRecordId} • member ${item.memberProfileId} • ${item.currentStatus}")
-                    if (!item.note.isNullOrBlank()) {
-                        append(" • brother note: ${item.note}")
+                    OutlinedTextField(
+                        value = reasonState,
+                        onValueChange = { reasonByProgress[item.id] = it },
+                        label = { Text("Reason / note") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    Button(onClick = { selectedProgressId.value = item.id }) {
+                        Text(if (selectedProgressId.value == item.id) "Selected" else "Select")
                     }
-                    if (!item.reviewReason.isNullOrBlank()) {
-                        append(" • mentor reason: ${item.reviewReason}")
-                    }
+
+                    Button(onClick = { onVerify(item.id) }) { Text("Verify") }
+                    Button(onClick = { onReject(item.id, reasonByProgress[item.id].orEmpty()) }) { Text("Reject") }
+                    Button(onClick = { onClarification(item.id, reasonByProgress[item.id].orEmpty()) }) { Text("Request clarification") }
                 }
-                Text(
-                    text = details + if (isSelected) " • selected" else "",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp)
-                        .background(if (isSelected) Color(0xFFEDE7F6) else Color.Transparent)
-                        .clickable { selectedRecordId.value = item.passportRecordId }
-                        .padding(8.dp),
-                )
             }
         }
 
-        OutlinedTextField(
-            value = selectedRecordId.value,
-            onValueChange = { selectedRecordId.value = it },
-            label = { Text("Record Id") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 12.dp),
-        )
-
-        OutlinedTextField(
-            value = reason.value,
-            onValueChange = { reason.value = it },
-            label = { Text("Reason (reject/clarification)") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-        )
-
-        Button(
-            onClick = { onVerify(selectedRecordId.value) },
-            modifier = Modifier.padding(top = 12.dp),
-        ) {
-            Text("Verify")
-        }
-
-        Button(
-            onClick = { onReject(selectedRecordId.value, reason.value) },
-            modifier = Modifier.padding(top = 8.dp),
-        ) {
-            Text("Reject")
-        }
-
-        Button(
-            onClick = { onClarification(selectedRecordId.value, reason.value) },
-            modifier = Modifier.padding(top = 8.dp),
-        ) {
-            Text("Request Clarification")
-        }
-
         if (!error.isNullOrBlank()) {
-            Text(text = error, modifier = Modifier.padding(top = 8.dp))
+            Text(error)
+        }
+
+        if (lastDecision != null) {
+            Text("Last decision: ${lastDecision.review.decision} for ${lastDecision.progress.id}")
         }
     }
 }

@@ -16,12 +16,12 @@ import com.dglea.passport.data.AppContainer
 import com.dglea.passport.ui.AuthViewModel
 import com.dglea.passport.ui.MentorViewModel
 import com.dglea.passport.ui.PassportViewModel
+import com.dglea.passport.ui.screens.ConnectScreen
 import com.dglea.passport.ui.screens.MentorVerificationScreen
 import com.dglea.passport.ui.screens.MyPassportScreen
-import com.dglea.passport.ui.screens.SignInScreen
 
 class MainActivity : ComponentActivity() {
-    private val container by lazy { AppContainer(this, baseUrl = "http://10.0.2.2:3000/") }
+    private val container by lazy { AppContainer(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,18 +42,27 @@ class MainActivity : ComponentActivity() {
                         authVm.restoreSessionIfPresent()
                     }
 
+                    LaunchedEffect(authState.user?.id) {
+                        val user = authState.user ?: return@LaunchedEffect
+                        if (user.roles.any { it.role == "LODGE_MENTOR" || it.role == "DISTRICT_MENTOR" || it.role == "LODGE_REVIEWER" || it.role == "LODGE_ADMIN" }) {
+                            mentorVm.refreshQueue()
+                        } else {
+                            passportVm.refreshPassport()
+                        }
+                    }
+
                     if (authState.user == null) {
-                        SignInScreen(
-                            onSignIn = authVm::signIn,
+                        ConnectScreen(
+                            loading = authState.loading,
                             error = authState.error,
+                            onConnect = authVm::connect,
                         )
-                    } else if (authState.user!!.roles.any { it == "LODGE_MENTOR" }) {
+                    } else if (authState.user!!.roles.any { it.role == "LODGE_MENTOR" || it.role == "DISTRICT_MENTOR" || it.role == "LODGE_REVIEWER" || it.role == "LODGE_ADMIN" }) {
                         MentorVerificationScreen(
                             user = authState.user!!,
                             queue = mentorState.queue,
                             lastDecision = mentorState.lastDecision,
-                            actionNonce = mentorState.actionNonce,
-                            error = mentorState.error,
+                            error = authState.error ?: mentorState.error,
                             onRefreshQueue = mentorVm::refreshQueue,
                             onVerify = mentorVm::verify,
                             onReject = mentorVm::reject,
@@ -63,13 +72,13 @@ class MainActivity : ComponentActivity() {
                     } else {
                         MyPassportScreen(
                             user = authState.user!!,
-                            summary = passportState.summary,
-                            lastRecord = passportState.lastRecord,
-                            error = passportState.error,
-                            onLoadSummary = passportVm::loadSummary,
-                            onCreateDraft = passportVm::createDraft,
-                            onUpdateClarificationResponse = passportVm::updateClarificationResponse,
-                            onSubmitDraft = passportVm::submitDraft,
+                            passport = passportState.passport,
+                            lastMutatedProgress = passportState.lastMutatedProgress,
+                            error = authState.error ?: passportState.error,
+                            onRefreshPassport = passportVm::refreshPassport,
+                            onUpdateDraft = passportVm::updateDraft,
+                            onRespondToClarification = passportVm::respondToClarification,
+                            onSubmitProgress = passportVm::submit,
                             onSignOut = authVm::signOut,
                         )
                     }
