@@ -32,6 +32,7 @@ fun MyPassportScreen(
     onUpdateDraft: (progressId: String, note: String?) -> Unit,
     onRespondToClarification: (progressId: String, response: String) -> Unit,
     onSubmitProgress: (progressId: String) -> Unit,
+    onShowProfiles: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     val draftNotes = remember { mutableStateMapOf<String, String>() }
@@ -58,6 +59,7 @@ fun MyPassportScreen(
         Text("Current stage: ${user.currentStage ?: "Unknown"}")
 
         Button(onClick = onRefreshPassport) { Text("Refresh Passport") }
+        Button(onClick = onShowProfiles) { Text("Profile & Progress") }
         Button(onClick = onSignOut) { Text("Sign Out") }
 
         if (passport == null) {
