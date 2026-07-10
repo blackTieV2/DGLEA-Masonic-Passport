@@ -1,171 +1,99 @@
-
-
 # DGLEA Masonic Passport
 
 A district-governed mentoring and progression platform for the District Grand Lodge of the Eastern Archipelago (DGLEA).
 
-## Project Purpose
+## Project purpose
 
-DGLEA Masonic Passport digitises the district passport and mentoring workflow across approximately 45 lodges.
+The DGLEA Masonic Passport digitises the district passport and mentoring workflow across approximately 45 lodges. It tracks mentoring progress, dates, visits, rituals performed, reviews, and readiness indicators — without storing restricted ritual wording, signs, grips, passwords, or detailed ritual answers.
 
-This is **not** just an Android app. It is a platform consisting of:
+This is **not** just an Android app. It is a platform with:
 
-- Android mobile app for Brothers and mentors
-- Web admin portal for lodge and district oversight
-- Modular-monolith backend
+- Android mobile app for Brothers and mentors (`apps/android`)
+- Web admin portal for lodge and district oversight (`apps/web-admin`)
+- Modular-monolith backend (`backend`)
 - Relational system-of-record database
-- Notification and reporting capability
-- Audit and district analytics
+- Notification, reporting, and district analytics capability
+- Audit and governance controls
 
-## Product Position
-
-The platform exists to support:
-
-- Brother progression tracking
-- Personal Mentor and Lodge Mentor workflow
-- Lodge-level oversight
-- District-level analytics and reporting
-- Auditable verification of progress records
-
-The platform must preserve the district core passport structure while allowing controlled lodge supplements.
-
-## Hard Architectural Constraints
-
-These are non-negotiable for v1:
-
-- Modular monolith backend
-- No microservices
-- No micro frontends
-- Android app and web admin over a shared backend
-- Backend-owned business rules
-- Relational database as primary system of record
-- Role-based access and lodge/district tenancy enforced in the backend
-- Explicit governed verification workflow
-- Self-submitted records are **not** official until verified
-- Verified records must not be destructively overwritten
-- District core items must remain distinct from lodge supplements
-- Private mentoring notes must remain segregated from general progress data
-- No ritual secrets or full ritual text stored in the platform
-
-## Core User Roles
-
-- Brother / Candidate / Mason
-- Personal Mentor
-- Lodge Mentor
-- Lodge Leadership Reviewer
-- Lodge Admin / Secretary
-- District Mentor
-- District Admin
-- System Admin
-
-## Passport Structure
-
-The platform is built around four district core sections:
-
-1. Entered Apprentice
-2. Fellow Craft
-3. Master Mason and Beyond
-4. Preparing for Office
-
-## Repository Structure
+## Repository structure
 
 ```text
-docs/        Product, architecture, API, UX, testing, and ops documentation
-apps/        Android app and web admin portal
-backend/     Modular-monolith backend
-shared/      Stable shared contracts, enums, validation, fixtures
-infra/       Local/staging/prod infrastructure and scripts
-scripts/     Setup, CI, dev, release helper scripts
-````
+docs/           Product, architecture, API, UX, testing, and ops documentation
+apps/           Android app and web admin portal
+backend/        Modular-monolith backend
+shared/         Stable shared contracts, enums, validation, fixtures
+infra/          Local/staging/prod infrastructure and scripts
+scripts/        Setup, CI, dev, release helper scripts
+stages/         Agent workspace stage contracts and outputs
+_config/        Canonical project configuration and principles
+shared/knowledge/okf/   Durable knowledge in Open Knowledge Format
+model-adapters/ Tool-specific entrypoint adapters for LLMs/IDEs
+```
 
-## Key Documentation
+## Workspace usage
+
+This repository now includes a **model-neutral agent workspace**.
+
+- `AGENTS.md` is the canonical entrypoint for any agent.
+- `CONTEXT.md` routes tasks to the correct stage.
+- `stages/<stage>/CONTEXT.md` defines each stage's contract.
+- `_config/` and `shared/knowledge/okf/` hold durable project knowledge.
+
+If you are a human developer, start with the existing docs in `docs/` and the app-specific READMEs in `apps/android/README.md`, `apps/web-admin/README.md`, and `backend/README.md`.
+
+If you are an agent, read `AGENTS.md`, then `CONTEXT.md`, then the contract for the stage you are running.
+
+## Key documentation
 
 ### Product
 
-* `docs/01-product/DGLEA_Masonic_Passport_PRD_v2_1.md`
-* `docs/01-product/DGLEA_Masonic_Passport_SRS_v2_1.md`
-* `docs/01-product/DGLEA_Masonic_Passport_MVP_Backlog_Epics_User_Stories_Acceptance_Criteria_v1.md`
+- `docs/01-product/DGLEA_Masonic_Passport_PRD_v2_1.md`
+- `docs/01-product/DGLEA_Masonic_Passport_SRS_v2_1.md`
+- `docs/01-product/DGLEA_Masonic_Passport_MVP_Backlog_Epics_User_Stories_Acceptance_Criteria_v1.md`
 
 ### Architecture
 
-* `docs/02-architecture/DGLEA_Masonic_Passport_Technical_Architecture_ADR_v1.md`
-* `docs/02-architecture/DGLEA_Masonic_Passport_System_Context_and_Container_Diagrams_v1.md`
-* `docs/02-architecture/DGLEA_Masonic_Passport_Domain_Model_ERD_v1.md`
-* `docs/02-architecture/DGLEA_Masonic_Passport_Permissions_Matrix_v1.md`
-* `docs/02-architecture/DGLEA_Masonic_Passport_Verification_Workflow_State_Diagram_v1.md`
+- `docs/02-architecture/DGLEA_Masonic_Passport_Technical_Architecture_ADR_v1.md`
+- `docs/02-architecture/DGLEA_Masonic_Passport_System_Context_and_Container_Diagrams_v1.md`
+- `docs/02-architecture/DGLEA_Masonic_Passport_Domain_Model_ERD_v1.md`
+- `docs/02-architecture/DGLEA_Masonic_Passport_Permissions_Matrix_v1.md`
+- `docs/02-architecture/DGLEA_Masonic_Passport_Verification_Workflow_State_Diagram_v1.md`
 
 ### API
 
-* `docs/03-api/DGLEA_Masonic_Passport_OpenAPI_Contract_Outline_v1.md`
+- `docs/03-api/DGLEA_Masonic_Passport_OpenAPI_Contract_Outline_v1.md`
 
 ### UX
 
-* `docs/04-ux/DGLEA_Masonic_Passport_Screen_Map_and_Navigation_v1.md`
+- `docs/04-ux/DGLEA_Masonic_Passport_Screen_Map_and_Navigation_v1.md`
 
 ### Testing
 
-* `docs/05-testing/DGLEA_Masonic_Passport_Test_Strategy_v1.md`
+- `docs/05-testing/DGLEA_Masonic_Passport_Test_Strategy_v1.md`
 
-## Engineering Principles
+## Engineering principles
 
-* Prefer explicit names over clever names
-* Build vertical slices, not disconnected layers
-* Put business rules in domain/application logic, not controllers or UI
-* Preserve historical truth
-* Keep permission and workflow logic testable
-* Start simple and production-minded
-* Do not introduce speculative complexity
+- Prefer explicit names over clever names.
+- Build vertical slices, not disconnected layers.
+- Put business rules in domain/application logic, not controllers or UI.
+- Preserve historical truth; do not destructively overwrite verified data.
+- Enforce permissions and scope server-side.
+- Treat verification as an explicit governed workflow.
+- Start simple and production-minded; avoid speculative complexity.
 
-## Recommended Build Order
+## Current phase
 
-1. Freeze naming and workflow states
-2. Formalise OpenAPI
-3. Scaffold backend modules
-4. Scaffold Android app
-5. Scaffold web admin portal
-6. Add DB migrations and seed data
-7. Add backend unit and integration tests
-8. Implement core auth and scope rules
-9. Implement passport draft and submission flow
-10. Implement mentor verification flow
+Backend foundation, Android Brother thin slice, API/runtime alignment, and local developer setup hardening.
 
-## Definition of MVP
+See `repo-roadmap.md` for the high-level roadmap and `stages/00-triage/output/` for the latest takeover notes.
 
-The MVP is successful when:
+## How to hand off
 
-* a Brother can sign in and view his passport
-* a Lodge Admin can onboard a Brother and assign mentors
-* a Brother can create and submit a passport record
-* an authorised mentor can verify, reject, or request clarification
-* the Lodge Mentor can manage the lodge queue
-* the District Mentor can view district analytics
-* critical actions are audited
-* the system works end-to-end without manual database intervention
+1. Ensure the latest run artifacts are in the correct `stages/<stage>/output/` folder.
+2. Update `shared/knowledge/okf/log.md` with durable decisions.
+3. Commit the workspace overlay and stage outputs.
+4. Point the next person or agent to `AGENTS.md`.
 
-## Anti-Patterns to Avoid
+## License
 
-* Generic CRUD without workflow meaning
-* UI-owned business truth
-* Treating submitted as verified
-* Admin equals unrestricted mentoring authority
-* District-wide exposure of private notes
-* Microservices or micro frontends in v1
-* Schema drift caused by inconsistent naming
-
-## Status
-
-This repository is in initial implementation setup phase.
-
-The immediate goal is to establish:
-
-* canonical names
-* formal API contract
-* repo scaffolding
-* backend modular boundaries
-* test skeletons
-* seed data model
-
-before deeper feature implementation begins.
-
-
-
+See `LICENSE`.

@@ -1,0 +1,500 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BROTHER
+  PERSONAL_MENTOR
+  LODGE_MENTOR
+  LODGE_REVIEWER
+  LODGE_ADMIN
+  WM_LODGE_LEADERSHIP
+  DISTRICT_MENTOR
+  DISTRICT_ADMIN
+  SYSTEM_ADMIN
+  LODGE_MEMBERSHIP_OFFICER
+
+  @@map("role")
+}
+
+enum Stage {
+  ENTERED_APPRENTICE
+  FELLOW_CRAFT
+  MASTER_MASON
+  PREPARING_FOR_OFFICE
+
+  @@map("stage")
+}
+
+enum DegreeType {
+  ENTERED_APPRENTICE
+  FELLOW_CRAFT
+  MASTER_MASON
+  ROYAL_ARCH_PREPARATION
+
+  @@map("degree_type")
+}
+
+enum DegreeStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  READY_FOR_SIGN_OFF
+  SIGNED_OFF
+
+  @@map("degree_status")
+}
+
+enum ProgressStatus {
+  LOCKED
+  NOT_STARTED
+  DRAFT
+  SUBMITTED
+  CLARIFICATION_REQUESTED
+  VERIFIED
+  REJECTED
+  COMPLETED
+
+  @@map("progress_status")
+}
+
+enum ReviewDecision {
+  VERIFY
+  REJECT
+  REQUEST_CLARIFICATION
+
+  @@map("review_decision")
+}
+
+enum ScopeType {
+  GLOBAL
+  DISTRICT
+  LODGE
+  BROTHER
+
+  @@map("scope_type")
+}
+
+enum AssignmentType {
+  PERSONAL_MENTOR
+  LODGE_MENTOR
+
+  @@map("assignment_type")
+}
+
+enum ReferenceSection {
+  INTRODUCTION
+  PROFILE
+  EMERGENCY
+  CONDUCT
+  FEES
+  BRETHREN
+  ENTERED_APPRENTICE
+  FELLOW_CRAFT
+  MASTER_MASON
+  ROYAL_ARCH
+  CONSOLIDATION
+  OFFICER_JEWELS
+  ODES
+
+  @@map("reference_section")
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  CREATE
+  UPDATE
+  SUBMIT
+  REVIEW
+  ASSIGN_ROLE
+  REVOKE_ROLE
+  STAGE_TRANSITION
+  EXPORT
+  DELETE
+  BREAK_GLASS_ACCESS
+  PERMISSION_DENIED
+
+  @@map("audit_action")
+}
+
+enum NotificationType {
+  ITEM_SUBMITTED
+  ITEM_VERIFIED
+  ITEM_REJECTED
+  CLARIFICATION_REQUESTED
+  CLARIFICATION_RESPONDED
+  STAGE_TRANSITION
+
+  @@map("notification_type")
+}
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  firebaseUid     String?  @unique @map("firebase_uid")
+  displayName     String   @map("display_name")
+  email           String   @unique
+  phone           String?  @map("phone")
+  preferredName   String?  @map("preferred_name")
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  roleAssignments     RoleAssignment[]
+  brotherProfile      BrotherProfile?
+  mentorAssignmentsAsMentor MentorAssignment[] @relation("MentorUser")
+  reviews             Review[]
+  mentorSessions      MentorSession[]
+  notifications       Notification[]
+  auditEventsAsActor  AuditEvent[]
+
+  @@index([firebaseUid])
+  @@index([email])
+  @@map("users")
+}
+
+model District {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  lodges Lodge[]
+
+  @@map("districts")
+}
+
+model Lodge {
+  id              String   @id @default(uuid()) @db.Uuid
+  districtId      String   @map("district_id") @db.Uuid
+  lodgeName       String   @map("lodge_name")
+  lodgeNumber     String   @unique @map("lodge_number")
+  meetingLocation String?  @map("meeting_location")
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  district       District        @relation(fields: [districtId], references: [id])
+  brotherProfiles BrotherProfile[]
+
+  @@index([districtId])
+  @@map("lodges")
+}
+
+model RoleAssignment {
+  id         String     @id @default(uuid()) @db.Uuid
+  userId     String     @map("user_id") @db.Uuid
+  role       Role
+  scopeType  ScopeType  @map("scope_type")
+  scopeId    String?    @map("scope_id") @db.Uuid
+  activeFrom DateTime   @default(now()) @map("active_from")
+  activeTo   DateTime?  @map("active_to")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([role])
+  @@index([scopeType, scopeId])
+  @@map("role_assignments")
+}
+
+model BrotherProfile {
+  id                  String    @id @default(uuid()) @db.Uuid
+  userId              String    @unique @map("user_id") @db.Uuid
+  lodgeId             String    @map("lodge_id") @db.Uuid
+  currentStage        Stage     @map("current_stage")
+  dateInitiated       DateTime? @map("date_initiated")
+  datePassed          DateTime? @map("date_passed")
+  dateRaised          DateTime? @map("date_raised")
+  solomonRegisteredOn DateTime? @map("solomon_registered_on")
+  fullName            String?   @map("full_name")
+  preferredName       String?   @map("preferred_name")
+  email               String?
+  phone               String?
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  user               User                @relation(fields: [userId], references: [id], onDelete: Restrict)
+  lodge              Lodge               @relation(fields: [lodgeId], references: [id])
+  mentorAssignments  MentorAssignment[]
+  passportProgress   PassportProgress[]
+  degreeProgress     DegreeProgress[]
+  mentorSessions     MentorSession[]
+  visitations        Visitation[]
+  ritualPerformances RitualPerformance[]
+  sectionSignoffs    SectionSignoff[]
+
+  @@index([lodgeId])
+  @@index([currentStage])
+  @@map("brother_profiles")
+}
+
+model LodgeProfile {
+  id               String   @id @default(uuid()) @db.Uuid
+  lodgeName        String   @map("lodge_name")
+  lodgeNumber      String   @unique @map("lodge_number")
+  district         String?
+  meetingLocation  String?  @map("meeting_location")
+  secretaryContact String?  @map("secretary_contact")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("lodge_profiles")
+}
+
+model StaticReferencePage {
+  id              String           @id @default(uuid()) @db.Uuid
+  slug            String           @unique
+  title           String
+  section         ReferenceSection
+  orderIndex      Int              @default(0) @map("order_index")
+  contentMarkdown String?          @map("content_markdown")
+  sourceEdition   String?          @map("source_edition")
+  isActive        Boolean          @default(true) @map("is_active")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  @@index([section])
+  @@index([orderIndex])
+  @@map("static_reference_pages")
+}
+
+model DegreeProgress {
+  id               String       @id @default(uuid()) @db.Uuid
+  brotherProfileId String       @map("brother_profile_id") @db.Uuid
+  degreeType       DegreeType   @map("degree_type")
+  status           DegreeStatus @default(NOT_STARTED)
+  mentorNotes      String?      @map("mentor_notes")
+  submittedAt      DateTime?    @map("submitted_at")
+  submittedBy      String?      @map("submitted_by") @db.Uuid
+  approvedBy       String?      @map("approved_by") @db.Uuid
+  approvedAt       DateTime?    @map("approved_at")
+  approvalNotes    String?      @map("approval_notes")
+  reopenedAt       DateTime?    @map("reopened_at")
+  reopenedBy       String?      @map("reopened_by") @db.Uuid
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  brotherProfile BrotherProfile @relation(fields: [brotherProfileId], references: [id], onDelete: Restrict)
+
+  @@index([brotherProfileId])
+  @@index([degreeType])
+  @@unique([brotherProfileId, degreeType])
+  @@map("degree_progress")
+}
+
+model MentorAssignment {
+  id               String          @id @default(uuid()) @db.Uuid
+  brotherProfileId String          @map("brother_profile_id") @db.Uuid
+  mentorUserId     String          @map("mentor_user_id") @db.Uuid
+  assignmentType   AssignmentType  @map("assignment_type")
+  activeFrom       DateTime        @default(now()) @map("active_from")
+  activeTo         DateTime?       @map("active_to")
+  createdAt        DateTime        @default(now()) @map("created_at")
+
+  brotherProfile BrotherProfile @relation(fields: [brotherProfileId], references: [id], onDelete: Restrict)
+  mentorUser     User           @relation("MentorUser", fields: [mentorUserId], references: [id], onDelete: Restrict)
+
+  @@index([brotherProfileId])
+  @@index([mentorUserId])
+  @@map("mentor_assignments")
+}
+
+model PassportTemplate {
+  id              String   @id @default(uuid()) @db.Uuid
+  version         String
+  sourceReference String?  @map("source_reference")
+  activeFrom      DateTime @map("active_from")
+  active          Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  sections PassportSection[]
+
+  @@map("passport_templates")
+}
+
+model PassportSection {
+  id            String   @id @default(uuid()) @db.Uuid
+  templateId    String   @map("template_id") @db.Uuid
+  code          String
+  title         String
+  sortOrder     Int      @map("sort_order")
+  unlockStage   Stage    @map("unlock_stage")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  template           PassportTemplate    @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  milestoneTemplates MilestoneTemplate[]
+
+  @@index([templateId])
+  @@index([code])
+  @@map("passport_sections")
+}
+
+model MilestoneTemplate {
+  id             String   @id @default(uuid()) @db.Uuid
+  sectionId      String   @map("section_id") @db.Uuid
+  title          String
+  description    String?
+  category       String
+  sortOrder      Int      @map("sort_order")
+  requiresReview Boolean  @default(true) @map("requires_review")
+  targetCount    Int?     @default(1) @map("target_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  section            PassportSection    @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+  passportProgress   PassportProgress[]
+
+  @@index([sectionId])
+  @@map("milestone_templates")
+}
+
+model PassportProgress {
+  id             String         @id @default(uuid()) @db.Uuid
+  brotherProfileId String       @map("brother_profile_id") @db.Uuid
+  milestoneTemplateId String    @map("milestone_template_id") @db.Uuid
+  status         ProgressStatus
+  version        Int            @default(0)
+  draftNote      String?        @map("draft_note")
+  submittedAt    DateTime?      @map("submitted_at")
+  completedAt    DateTime?      @map("completed_at")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  brotherProfile BrotherProfile @relation(fields: [brotherProfileId], references: [id], onDelete: Restrict)
+  milestoneTemplate MilestoneTemplate @relation(fields: [milestoneTemplateId], references: [id])
+  reviews        Review[]
+
+  @@unique([brotherProfileId, milestoneTemplateId])
+  @@index([brotherProfileId])
+  @@index([milestoneTemplateId])
+  @@index([status])
+  @@map("passport_progress")
+}
+
+model Review {
+  id         String         @id @default(uuid()) @db.Uuid
+  progressId String         @map("progress_id") @db.Uuid
+  reviewerUserId String     @map("reviewer_user_id") @db.Uuid
+  decision   ReviewDecision
+  reason     String?
+  createdAt  DateTime       @default(now()) @map("created_at")
+
+  progress   PassportProgress @relation(fields: [progressId], references: [id], onDelete: Restrict)
+  reviewer   User             @relation(fields: [reviewerUserId], references: [id])
+
+  @@index([progressId])
+  @@index([reviewerUserId])
+  @@map("reviews")
+}
+
+model MentorSession {
+  id              String   @id @default(uuid()) @db.Uuid
+  brotherProfileId String  @map("brother_profile_id") @db.Uuid
+  mentorUserId    String   @map("mentor_user_id") @db.Uuid
+  sectionCode     String   @map("section_code")
+  sessionDate     DateTime @map("session_date")
+  topicsSummary   String   @map("topics_summary")
+  nextActions     String?  @map("next_actions")
+  isPrivateNote   Boolean  @default(false) @map("is_private_note")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  brotherProfile BrotherProfile @relation(fields: [brotherProfileId], references: [id], onDelete: Restrict)
+  mentorUser     User           @relation(fields: [mentorUserId], references: [id])
+
+  @@index([brotherProfileId])
+  @@index([mentorUserId])
+  @@map("mentor_sessions")
+}
+
+model Visitation {
+  id                String    @id @default(uuid()) @db.Uuid
+  brotherProfileId  String    @map("brother_profile_id") @db.Uuid
+  sectionCode       String    @map("section_code")
+  lodgeVisited      String    @map("lodge_visited")
+  visitDate         DateTime  @map("visit_date")
+  degreeObserved    String?   @map("degree_observed")
+  debriefCompleted  Boolean   @default(false) @map("debrief_completed")
+  reflection        String?   @map("reflection")
+  createdAt         DateTime  @default(now()) @map("created_at")
+
+  brotherProfile BrotherProfile @relation(fields: [brotherProfileId], references: [id], onDelete: Restrict)
+
+  @@index([brotherProfileId])
+  @@map("visitations")
+}
+
+model RitualPerformance {
+  id              String   @id @default(uuid()) @db.Uuid
+  brotherProfileId String  @map("brother_profile_id") @db.Uuid
+  sectionCode     String   @map("section_code")
+  ritualDate      DateTime @map("ritual_date")
+  ritualLabel     String   @map("ritual_label")
+  verifiedBy      String?  @map("verified_by") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  brotherProfile BrotherProfile @relation(fields: [brotherProfileId], references: [id], onDelete: Restrict)
+
+  @@index([brotherProfileId])
+  @@map("ritual_performances")
+}
+
+model SectionSignoff {
+  id              String   @id @default(uuid()) @db.Uuid
+  brotherProfileId String  @map("brother_profile_id") @db.Uuid
+  sectionCode     String   @map("section_code")
+  signedBy        String   @map("signed_by") @db.Uuid
+  signedAt        DateTime @map("signed_at")
+  outcome         String
+  note            String?
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  brotherProfile BrotherProfile @relation(fields: [brotherProfileId], references: [id], onDelete: Restrict)
+
+  @@index([brotherProfileId])
+  @@index([sectionCode])
+  @@map("section_signoffs")
+}
+
+model Notification {
+  id                 String            @id @default(uuid()) @db.Uuid
+  userId             String            @map("user_id") @db.Uuid
+  type               NotificationType
+  title              String
+  body               String
+  readAt             DateTime?         @map("read_at")
+  relatedResourceType String?          @map("related_resource_type")
+  relatedResourceId  String?           @map("related_resource_id") @db.Uuid
+  createdAt          DateTime          @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model AuditEvent {
+  id           String     @id @default(uuid()) @db.Uuid
+  actorUserId  String?    @map("actor_user_id") @db.Uuid
+  action       AuditAction
+  resourceType String     @map("resource_type")
+  resourceId   String?    @map("resource_id") @db.Uuid
+  scope        String?
+  metadataJson Json       @map("metadata_json")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  actor User? @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([resourceType])
+  @@index([actorUserId])
+  @@index([createdAt])
+  @@map("audit_events")
+}

@@ -1,18 +1,24 @@
 package com.dglea.passport.ui
 
 import com.dglea.passport.data.MentorRepository
-import com.dglea.passport.network.ActionReasonRequest
 import com.dglea.passport.network.BackendApi
-import com.dglea.passport.network.BrotherPassportSummaryDto
-import com.dglea.passport.network.CreateDraftRequest
-import com.dglea.passport.network.LoginRequest
-import com.dglea.passport.network.LoginResponse
-import com.dglea.passport.network.PassportRecordDto
-import com.dglea.passport.network.SectionSummaryDto
-import com.dglea.passport.network.UserDto
-import com.dglea.passport.network.UpdateRecordRequest
-import com.dglea.passport.network.VerificationQueueItemDto
-import com.dglea.passport.network.VerificationQueueResponse
+import com.dglea.passport.network.BrotherPassportDto
+import com.dglea.passport.network.BrotherPassportProfileDto
+import com.dglea.passport.network.BrotherProfileDto
+import com.dglea.passport.network.ClarificationResponseRequest
+import com.dglea.passport.network.LodgeDto
+import com.dglea.passport.network.MeProfileDto
+import com.dglea.passport.network.MilestoneTemplateDto
+import com.dglea.passport.network.NotificationDto
+import com.dglea.passport.network.PassportProgressDto
+import com.dglea.passport.network.PassportTemplateDto
+import com.dglea.passport.network.PassportSectionDto
+import com.dglea.passport.network.ReviewActionRequest
+import com.dglea.passport.network.ReviewActionResultDto
+import com.dglea.passport.network.ReviewDto
+import com.dglea.passport.network.RoleAssignmentDto
+import com.dglea.passport.network.SectionSignoffDto
+import com.dglea.passport.network.UpdateDraftRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -35,61 +41,65 @@ class MentorViewModelTest {
     fun `queue and verification actions update state`() = runTest {
         val api = object : BackendApi {
             private val queue = listOf(
-                VerificationQueueItemDto(
-                    id = "vq_pr_1",
-                    passportRecordId = "pr_1",
-                    memberProfileId = "mp_1",
-                    lodgeId = "lodge_1",
-                    currentStatus = "SUBMITTED",
+                PassportProgressDto(
+                    id = "pr_1",
+                    brotherProfileId = "bp_1",
+                    milestoneTemplateId = "mt_1",
+                    status = "SUBMITTED",
+                    milestoneTemplate = MilestoneTemplateDto(
+                        id = "mt_1",
+                        title = "Review learning topics",
+                        category = "learning",
+                        sortOrder = 1,
+                    ),
+                    brotherProfile = BrotherProfileDto(
+                        id = "bp_1",
+                        userId = "usr_1",
+                        lodgeId = "lodge_1",
+                        currentStage = "ENTERED_APPRENTICE",
+                        lodge = LodgeDto("lodge_1", "dist_1", "Lodge One", "L-001"),
+                    ),
                 ),
             )
 
-            override suspend fun login(request: LoginRequest): LoginResponse { throw NotImplementedError() }
-            override suspend fun me(): UserDto { throw NotImplementedError() }
-            override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
-                BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "IN_PROGRESS")))
-
-            override suspend fun verificationQueue(): VerificationQueueResponse =
-                VerificationQueueResponse(queue, 1, queue.size, queue.size, 1)
-
-            override suspend fun verify(recordId: String): PassportRecordDto =
-                PassportRecordDto(
-                    id = recordId,
-                    memberProfileId = "mp_1",
-                    districtId = "dist_1",
-                    lodgeId = "lodge_1",
-                    sectionTemplateId = "sec_1",
-                    templateItemId = "ti_1",
-                    templateIsDistrictCore = true,
-                    status = "VERIFIED",
+            override suspend fun me(): MeProfileDto =
+                MeProfileDto(
+                    id = "usr_mentor",
+                    email = "mentor@example.org",
+                    displayName = "Mentor",
+                    roles = listOf(RoleAssignmentDto("LODGE_MENTOR", "LODGE", "lodge_1")),
                 )
 
-            override suspend fun reject(recordId: String, request: ActionReasonRequest): PassportRecordDto =
-                PassportRecordDto(
-                    id = recordId,
-                    memberProfileId = "mp_1",
-                    districtId = "dist_1",
-                    lodgeId = "lodge_1",
-                    sectionTemplateId = "sec_1",
-                    templateItemId = "ti_1",
-                    templateIsDistrictCore = true,
-                    status = "REJECTED",
+            override suspend fun myPassport(): BrotherPassportDto =
+                BrotherPassportDto(
+                    profile = BrotherPassportProfileDto(
+                        id = "bp_1",
+                        currentStage = "ENTERED_APPRENTICE",
+                        lodge = LodgeDto("lodge_1", "dist_1", "Lodge One", "L-001"),
+                    ),
+                    template = PassportTemplateDto("tpl_1", "1.0.0"),
+                    progress = queue,
+                    signoffs = emptyList(),
                 )
 
-            override suspend fun requestClarification(recordId: String, request: ActionReasonRequest): PassportRecordDto =
-                PassportRecordDto(
-                    id = recordId,
-                    memberProfileId = "mp_1",
-                    districtId = "dist_1",
-                    lodgeId = "lodge_1",
-                    sectionTemplateId = "sec_1",
-                    templateItemId = "ti_1",
-                    templateIsDistrictCore = true,
-                    status = "NEEDS_CLARIFICATION",
+            override suspend fun updateDraft(progressId: String, request: UpdateDraftRequest): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun submit(progressId: String): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun clarificationResponse(progressId: String, request: ClarificationResponseRequest): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun reviewQueue(brotherProfileId: String?): List<PassportProgressDto> = queue
+            override suspend fun review(progressId: String, request: ReviewActionRequest): ReviewActionResultDto =
+                ReviewActionResultDto(
+                    review = ReviewDto(
+                        id = "rv_1",
+                        progressId = progressId,
+                        reviewerUserId = "usr_mentor",
+                        decision = request.decision,
+                        reason = request.reason,
+                        createdAt = "2026-01-01T00:00:00Z",
+                    ),
+                    progress = queue.first().copy(status = request.decision),
                 )
+            override suspend fun notifications(): List<NotificationDto> = emptyList()
+            override suspend fun markNotificationRead(id: String) = Unit
         }
 
         val vm = MentorViewModel(MentorRepository(api))
@@ -100,25 +110,30 @@ class MentorViewModelTest {
 
         vm.verify("pr_1")
         dispatcher.scheduler.advanceUntilIdle()
-        assertEquals("VERIFIED", vm.state.value.lastDecision?.status)
-        assertEquals(1, vm.state.value.actionNonce)
+        assertEquals("VERIFY", vm.state.value.lastDecision?.review?.decision)
     }
 
     @Test
     fun `stale selection is rejected locally`() = runTest {
         val api = object : BackendApi {
-            override suspend fun login(request: LoginRequest): LoginResponse { throw NotImplementedError() }
-            override suspend fun me(): UserDto { throw NotImplementedError() }
-            override suspend fun createDraft(memberId: String, request: CreateDraftRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun updateRecord(recordId: String, request: UpdateRecordRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun submit(recordId: String): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun passportSummary(memberId: String): BrotherPassportSummaryDto =
-                BrotherPassportSummaryDto(memberId, listOf(SectionSummaryDto("EA", "Entered Apprentice", "IN_PROGRESS")))
-            override suspend fun verificationQueue(): VerificationQueueResponse =
-                VerificationQueueResponse(emptyList(), 1, 0, 0, 1)
-            override suspend fun verify(recordId: String): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun reject(recordId: String, request: ActionReasonRequest): PassportRecordDto { throw NotImplementedError() }
-            override suspend fun requestClarification(recordId: String, request: ActionReasonRequest): PassportRecordDto { throw NotImplementedError() }
+            override suspend fun me(): MeProfileDto = MeProfileDto("usr_mentor", "mentor@example.org", "Mentor")
+            override suspend fun myPassport(): BrotherPassportDto = BrotherPassportDto(
+                profile = BrotherPassportProfileDto(
+                    id = "bp_1",
+                    currentStage = "ENTERED_APPRENTICE",
+                    lodge = LodgeDto("lodge_1", "dist_1", "Lodge One", "L-001"),
+                ),
+                template = PassportTemplateDto("tpl_1", "1.0.0"),
+                progress = emptyList(),
+                signoffs = emptyList(),
+            )
+            override suspend fun updateDraft(progressId: String, request: UpdateDraftRequest): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun submit(progressId: String): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun clarificationResponse(progressId: String, request: ClarificationResponseRequest): PassportProgressDto { throw NotImplementedError() }
+            override suspend fun reviewQueue(brotherProfileId: String?): List<PassportProgressDto> = emptyList()
+            override suspend fun review(progressId: String, request: ReviewActionRequest): ReviewActionResultDto { throw NotImplementedError() }
+            override suspend fun notifications(): List<NotificationDto> = emptyList()
+            override suspend fun markNotificationRead(id: String) = Unit
         }
 
         val vm = MentorViewModel(MentorRepository(api))
@@ -127,5 +142,4 @@ class MentorViewModelTest {
 
         assertEquals("Selected record is no longer pending. Refresh queue and try again.", vm.state.value.error)
     }
-
 }

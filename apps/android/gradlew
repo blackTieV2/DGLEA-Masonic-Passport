@@ -1,11 +1,5 @@
-#!/usr/bin/env sh
+#!/bin/sh
 set -eu
-
-# Lightweight wrapper for environments where committing binary wrapper JARs is disallowed.
-# Uses local Gradle installation while preserving the standard ./gradlew entrypoint.
-if command -v gradle >/dev/null 2>&1; then
-  exec gradle "$@"
-fi
-
-echo "Gradle executable not found. Install Gradle or regenerate wrapper jar via: gradle wrapper" >&2
-exit 1
+APP_HOME=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+JAVA_CMD=${JAVA_HOME:+$JAVA_HOME/bin/}java
+exec "$JAVA_CMD" -classpath "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" org.gradle.wrapper.GradleWrapperMain "$@"

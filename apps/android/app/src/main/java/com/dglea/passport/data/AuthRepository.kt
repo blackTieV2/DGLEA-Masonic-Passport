@@ -1,39 +1,25 @@
 package com.dglea.passport.data
 
 import com.dglea.passport.network.BackendApi
-import com.dglea.passport.network.LoginRequest
-import com.dglea.passport.network.UserDto
-import retrofit2.HttpException
+import com.dglea.passport.network.BrotherPassportDto
+import com.dglea.passport.network.MeProfileDto
 
 class AuthRepository(
     private val api: BackendApi,
     private val sessionStore: SessionStore,
 ) {
-    suspend fun signIn(email: String, password: String): UserDto {
-        return try {
-            val response = api.login(LoginRequest(email, password))
-            sessionStore.accessToken = response.accessToken
-            response.user.copy(roles = response.roles)
-        } catch (e: Throwable) {
-            sessionStore.accessToken = null
-            throw e
-        }
+    fun connect(devFirebaseUid: String?, bearerToken: String?) {
+        sessionStore.devFirebaseUid = devFirebaseUid?.trim()?.takeIf { it.isNotBlank() }
+        sessionStore.bearerToken = bearerToken?.trim()?.takeIf { it.isNotBlank() }
     }
 
-    suspend fun currentUser(): UserDto {
-        return try {
-            api.me()
-        } catch (e: HttpException) {
-            if (e.code() == 401) {
-                sessionStore.accessToken = null
-            }
-            throw e
-        }
-    }
+    suspend fun currentUser(): MeProfileDto = api.me()
 
-    fun hasSessionToken(): Boolean = !sessionStore.accessToken.isNullOrBlank()
+    suspend fun myPassport(): BrotherPassportDto = api.myPassport()
+
+    fun hasSession(): Boolean = sessionStore.hasSession()
 
     fun signOut() {
-        sessionStore.accessToken = null
+        sessionStore.clear()
     }
 }

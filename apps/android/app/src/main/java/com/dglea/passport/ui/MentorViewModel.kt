@@ -3,8 +3,8 @@ package com.dglea.passport.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dglea.passport.data.MentorRepository
-import com.dglea.passport.network.PassportRecordDto
-import com.dglea.passport.network.VerificationQueueItemDto
+import com.dglea.passport.network.PassportProgressDto
+import com.dglea.passport.network.ReviewActionResultDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,9 +12,8 @@ import kotlinx.coroutines.launch
 
 data class MentorUiState(
     val loading: Boolean = false,
-    val queue: List<VerificationQueueItemDto> = emptyList(),
-    val lastDecision: PassportRecordDto? = null,
-    val actionNonce: Int = 0,
+    val queue: List<PassportProgressDto> = emptyList(),
+    val lastDecision: ReviewActionResultDto? = null,
     val error: String? = null,
 )
 
@@ -22,10 +21,10 @@ class MentorViewModel(private val repository: MentorRepository) : ViewModel() {
     private val _state = MutableStateFlow(MentorUiState())
     val state: StateFlow<MentorUiState> = _state.asStateFlow()
 
-    fun refreshQueue() {
+    fun refreshQueue(brotherProfileId: String? = null) {
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
-            runCatching { repository.pendingQueue() }
+            runCatching { repository.reviewQueue(brotherProfileId) }
                 .onSuccess { queue ->
                     _state.value = _state.value.copy(
                         loading = false,
@@ -33,34 +32,28 @@ class MentorViewModel(private val repository: MentorRepository) : ViewModel() {
                         error = null,
                     )
                 }
-                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Queue failed")) }
+                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Queue load failed")) }
         }
     }
 
-    fun verify(recordId: String) {
-        runActionIfQueueRecordIsSubmitted(recordId) {
-            repository.verify(recordId)
-        }
+    fun verify(progressId: String) {
+        runReviewActionIfPending(progressId) { repository.verify(progressId) }
     }
 
-    fun reject(recordId: String, reason: String) {
-        runActionIfQueueRecordIsSubmitted(recordId) {
-            repository.reject(recordId, reason)
-        }
+    fun reject(progressId: String, reason: String) {
+        runReviewActionIfPending(progressId) { repository.reject(progressId, reason) }
     }
 
-    fun requestClarification(recordId: String, reason: String) {
-        runActionIfQueueRecordIsSubmitted(recordId) {
-            repository.requestClarification(recordId, reason)
-        }
+    fun requestClarification(progressId: String, reason: String) {
+        runReviewActionIfPending(progressId) { repository.requestClarification(progressId, reason) }
     }
 
-    private fun runActionIfQueueRecordIsSubmitted(
-        recordId: String,
-        action: suspend () -> PassportRecordDto,
+    private fun runReviewActionIfPending(
+        progressId: String,
+        action: suspend () -> ReviewActionResultDto,
     ) {
-        val queueItem = _state.value.queue.firstOrNull { it.passportRecordId == recordId }
-        if (queueItem == null || queueItem.currentStatus != "SUBMITTED") {
+        val queueItem = _state.value.queue.firstOrNull { it.id == progressId }
+        if (queueItem == null || queueItem.status != "SUBMITTED") {
             _state.value = _state.value.copy(
                 error = "Selected record is no longer pending. Refresh queue and try again.",
             )
@@ -70,16 +63,15 @@ class MentorViewModel(private val repository: MentorRepository) : ViewModel() {
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             runCatching { action() }
-                .onSuccess { decision ->
+                .onSuccess { result ->
                     _state.value = _state.value.copy(
                         loading = false,
-                        lastDecision = decision,
-                        actionNonce = _state.value.actionNonce + 1,
+                        lastDecision = result,
                         error = null,
                     )
                     refreshQueue()
                 }
-                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Action failed")) }
+                .onFailure { e -> _state.value = _state.value.copy(loading = false, error = e.toUiMessage("Review failed")) }
         }
     }
 }
