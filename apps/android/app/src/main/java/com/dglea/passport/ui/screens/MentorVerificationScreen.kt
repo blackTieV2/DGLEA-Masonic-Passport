@@ -33,6 +33,7 @@ fun MentorVerificationScreen(
     onReject: (progressId: String, reason: String) -> Unit,
     onClarification: (progressId: String, reason: String) -> Unit,
     onShowProfiles: () -> Unit,
+    onShowReference: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     val reasonByProgress = remember { mutableStateMapOf<String, String>() }
@@ -50,6 +51,7 @@ fun MentorVerificationScreen(
 
         Button(onClick = onRefreshQueue) { Text("Refresh Queue") }
         Button(onClick = onShowProfiles) { Text("Profile & Progress") }
+        Button(onClick = onShowReference) { Text("Passport Guide") }
         Button(onClick = onSignOut) { Text("Sign Out") }
 
         queue.forEach { item ->

@@ -210,3 +210,24 @@ data class NotificationDto(
     val relatedResourceId: String? = null,
     val createdAt: String,
 )
+
+data class ReferencePageDto(
+    val id: String,
+    val slug: String,
+    val title: String,
+    val section: String,
+    val orderIndex: Int,
+    val sourceEdition: String? = null,
+    val updatedAt: String? = null,
+)
+
+data class ReferencePageDetailDto(
+    val id: String,
+    val slug: String,
+    val title: String,
+    val section: String,
+    val orderIndex: Int,
+    val contentMarkdown: String? = null,
+    val sourceEdition: String? = null,
+    val updatedAt: String? = null,
+)
