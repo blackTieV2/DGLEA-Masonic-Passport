@@ -121,6 +121,13 @@ interface BackendApi {
         @Path("id") id: String,
         @Body request: ReopenDegreeProgressRequest,
     ): DegreeProgressDto
+
+    // Reference pages
+    @GET("reference-pages")
+    suspend fun listReferencePages(): List<ReferencePageDto>
+
+    @GET("reference-pages/{slug}")
+    suspend fun getReferencePage(@Path("slug") slug: String): ReferencePageDetailDto
 }
 
 data class ReviewActionResultDto(

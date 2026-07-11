@@ -17,6 +17,7 @@ class AppContainer(context: Context) {
     val passportRepository: PassportRepository by lazy { PassportRepository(api) }
     val mentorRepository: MentorRepository by lazy { MentorRepository(api) }
     val profilesRepository: ProfilesRepository by lazy { ProfilesRepository(api) }
+    val referenceContentRepository: ReferenceContentRepository by lazy { ReferenceContentRepository(api) }
 
     companion object {
         const val BASE_URL = "http://10.0.2.2:3000/api/v1/"
