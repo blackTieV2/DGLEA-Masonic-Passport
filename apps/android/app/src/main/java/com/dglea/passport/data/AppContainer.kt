@@ -16,7 +16,7 @@ class AppContainer(context: Context) {
     val authRepository: AuthRepository by lazy { AuthRepository(api, sessionStore) }
     val passportRepository: PassportRepository by lazy { PassportRepository(api) }
     val mentorRepository: MentorRepository by lazy { MentorRepository(api) }
-    val profilesRepository: ProfilesRepository by lazy { ProfilesRepository(api) }
+    val profilesRepository: ProfilesRepository by lazy { ProfilesRepository(api, context) }
     val referenceContentRepository: ReferenceContentRepository by lazy { ReferenceContentRepository(api) }
 
     companion object {

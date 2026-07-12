@@ -1,5 +1,7 @@
 package com.dglea.passport.network
 
+import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -7,6 +9,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Streaming
 
 interface BackendApi {
     @GET("me")
@@ -128,6 +131,13 @@ interface BackendApi {
 
     @GET("reference-pages/{slug}")
     suspend fun getReferencePage(@Path("slug") slug: String): ReferencePageDetailDto
+
+    // Passport PDF export
+    @Streaming
+    @GET("exports/passport/{brotherProfileId}/pdf")
+    suspend fun downloadPassportPdf(
+        @Path("brotherProfileId") brotherProfileId: String,
+    ): Response<ResponseBody>
 }
 
 data class ReviewActionResultDto(

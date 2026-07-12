@@ -1,5 +1,9 @@
 package com.dglea.passport.data
 
+import android.content.Context
+import android.net.Uri
+import androidx.core.content.FileProvider
+import java.io.File
 import com.dglea.passport.network.BackendApi
 import com.dglea.passport.network.BrotherProfileDto
 import com.dglea.passport.network.CreateBrotherProfileRequest
@@ -21,7 +25,10 @@ import com.dglea.passport.network.ReopenDegreeProgressRequest
  * (Firebase token / dev header). The Android client does not send actor IDs or
  * role fields; it relies on the backend guard for permission enforcement.
  */
-class ProfilesRepository(private val api: BackendApi) {
+class ProfilesRepository(
+    private val api: BackendApi,
+    private val context: Context,
+) {
 
     // Brother profiles
     suspend fun listBrotherProfiles(): List<BrotherProfileDto> = api.listBrotherProfiles()
@@ -82,4 +89,31 @@ class ProfilesRepository(private val api: BackendApi) {
         id: String,
         request: ReopenDegreeProgressRequest = ReopenDegreeProgressRequest(),
     ): DegreeProgressDto = api.reopenDegreeProgress(id, request)
+
+    /**
+     * Downloads the Passport PDF for the given Brother profile and returns a
+     * FileProvider content URI suitable for sharing. The file is written to the
+     * app's private cache directory; no storage runtime permission is required.
+     */
+    suspend fun downloadPassportPdf(brotherProfileId: String): Uri {
+        val response = api.downloadPassportPdf(brotherProfileId)
+        if (!response.isSuccessful) {
+            throw IllegalStateException("PDF download failed: ${response.code()}")
+        }
+        val body = response.body() ?: throw IllegalStateException("PDF response body was null")
+
+        val dir = File(context.cacheDir, "passports").apply { mkdirs() }
+        val file = File(dir, "passport-$brotherProfileId.pdf")
+        body.byteStream().use { input ->
+            file.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        return FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            file,
+        )
+    }
 }

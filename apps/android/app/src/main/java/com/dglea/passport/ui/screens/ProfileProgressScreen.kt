@@ -31,10 +31,12 @@ fun ProfileProgressScreen(
     degreeProgress: List<DegreeProgressDto>,
     lastMutatedProgress: DegreeProgressDto?,
     error: String?,
+    pdfDownloadEnabled: Boolean,
     onRefresh: () -> Unit,
     onReadyForSignOff: (progressId: String) -> Unit,
     onApprove: (progressId: String, approvalNotes: String?) -> Unit,
     onReopen: (progressId: String) -> Unit,
+    onDownloadPassportPdf: () -> Unit,
     onNavigateBack: () -> Unit,
     onSignOut: () -> Unit,
 ) {
@@ -132,6 +134,11 @@ fun ProfileProgressScreen(
                 }
             }
         }
+
+        Button(
+            onClick = onDownloadPassportPdf,
+            enabled = pdfDownloadEnabled,
+        ) { Text("Share Passport PDF") }
 
         lastMutatedProgress?.let {
             Text("Last updated: ${it.degreeType} • ${it.status}")

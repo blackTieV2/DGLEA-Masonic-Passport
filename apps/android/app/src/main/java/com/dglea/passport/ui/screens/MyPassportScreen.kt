@@ -34,6 +34,8 @@ fun MyPassportScreen(
     onSubmitProgress: (progressId: String) -> Unit,
     onShowProfiles: () -> Unit,
     onShowReference: () -> Unit,
+    pdfDownloadEnabled: Boolean,
+    onDownloadPassportPdf: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     val draftNotes = remember { mutableStateMapOf<String, String>() }
@@ -62,6 +64,10 @@ fun MyPassportScreen(
         Button(onClick = onRefreshPassport) { Text("Refresh Passport") }
         Button(onClick = onShowProfiles) { Text("Profile & Progress") }
         Button(onClick = onShowReference) { Text("Passport Guide") }
+        Button(
+            onClick = onDownloadPassportPdf,
+            enabled = pdfDownloadEnabled,
+        ) { Text("Share Passport PDF") }
         Button(onClick = onSignOut) { Text("Sign Out") }
 
         if (passport == null) {
