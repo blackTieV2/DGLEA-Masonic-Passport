@@ -1,6 +1,8 @@
 package com.dglea.passport
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.dglea.passport.data.AppContainer
 import com.dglea.passport.ui.AuthViewModel
@@ -20,11 +23,13 @@ import com.dglea.passport.ui.MentorViewModel
 import com.dglea.passport.ui.PassportViewModel
 import com.dglea.passport.ui.ProfileProgressViewModel
 import com.dglea.passport.ui.ReferenceContentViewModel
+import com.dglea.passport.ui.toUiMessage
 import com.dglea.passport.ui.screens.ConnectScreen
 import com.dglea.passport.ui.screens.MentorVerificationScreen
 import com.dglea.passport.ui.screens.MyPassportScreen
 import com.dglea.passport.ui.screens.ProfileProgressScreen
 import com.dglea.passport.ui.screens.ReferenceContentScreen
+import kotlinx.coroutines.launch
 
 private enum class AppScreen {
     Home,
@@ -54,6 +59,7 @@ class MainActivity : ComponentActivity() {
                     val profileProgressState by profileProgressVm.state.collectAsState()
                     val referenceContentState by referenceContentVm.state.collectAsState()
                     val currentScreen = remember { mutableStateOf(AppScreen.Home) }
+                    val isDownloadingPdf = remember { mutableStateOf(false) }
 
                     LaunchedEffect(Unit) {
                         authVm.restoreSessionIfPresent()
@@ -69,6 +75,35 @@ class MainActivity : ComponentActivity() {
                     }
 
                     val user = authState.user
+                    val downloadPassportPdf: () -> Unit = {
+                        user?.brotherProfileId?.let { brotherProfileId ->
+                            isDownloadingPdf.value = true
+                            lifecycleScope.launch {
+                                runCatching { container.profilesRepository.downloadPassportPdf(brotherProfileId) }
+                                    .onSuccess { uri ->
+                                        isDownloadingPdf.value = false
+                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "application/pdf"
+                                            putExtra(Intent.EXTRA_STREAM, uri)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            putExtra(Intent.EXTRA_SUBJECT, "DGLEA Masonic Passport")
+                                        }
+                                        startActivity(
+                                            Intent.createChooser(shareIntent, "Share Passport PDF"),
+                                        )
+                                    }
+                                    .onFailure { error ->
+                                        isDownloadingPdf.value = false
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            error.toUiMessage("PDF download failed"),
+                                            Toast.LENGTH_LONG,
+                                        ).show()
+                                    }
+                            }
+                        }
+                    }
+
                     if (user == null) {
                         ConnectScreen(
                             loading = authState.loading,
@@ -84,10 +119,12 @@ class MainActivity : ComponentActivity() {
                             degreeProgress = profileProgressState.degreeProgress,
                             lastMutatedProgress = profileProgressState.lastMutatedProgress,
                             error = authState.error ?: profileProgressState.error,
+                            pdfDownloadEnabled = user.brotherProfileId != null && !isDownloadingPdf.value,
                             onRefresh = profileProgressVm::refresh,
                             onReadyForSignOff = profileProgressVm::readyForSignOff,
                             onApprove = profileProgressVm::approve,
                             onReopen = profileProgressVm::reopen,
+                            onDownloadPassportPdf = downloadPassportPdf,
                             onNavigateBack = { currentScreen.value = AppScreen.Home },
                             onSignOut = authVm::signOut,
                         )
@@ -124,12 +161,14 @@ class MainActivity : ComponentActivity() {
                             passport = passportState.passport,
                             lastMutatedProgress = passportState.lastMutatedProgress,
                             error = authState.error ?: passportState.error,
+                            pdfDownloadEnabled = user.brotherProfileId != null && !isDownloadingPdf.value,
                             onRefreshPassport = passportVm::refreshPassport,
                             onUpdateDraft = passportVm::updateDraft,
                             onRespondToClarification = passportVm::respondToClarification,
                             onSubmitProgress = passportVm::submit,
                             onShowProfiles = { currentScreen.value = AppScreen.Profiles },
                             onShowReference = { currentScreen.value = AppScreen.Reference },
+                            onDownloadPassportPdf = downloadPassportPdf,
                             onSignOut = authVm::signOut,
                         )
                     }
