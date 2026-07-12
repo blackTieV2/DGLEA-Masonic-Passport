@@ -41,4 +41,19 @@ export class ExportsController {
     response.setHeader("Content-Type", "text/html; charset=utf-8");
     response.send(html);
   }
+
+  @Get("passport/:brotherProfileId/pdf")
+  async pdfPassport(
+    @Param("brotherProfileId", ParseUUIDPipe) brotherProfileId: string,
+    @CurrentUser() user: CurrentUserType,
+    @Res() response: Response,
+  ) {
+    const pdf = await this.exportsService.generatePdf(user, brotherProfileId);
+    response.setHeader("Content-Type", "application/pdf");
+    response.setHeader(
+      "Content-Disposition",
+      `attachment; filename="passport-${brotherProfileId}.pdf"`,
+    );
+    response.send(pdf);
+  }
 }

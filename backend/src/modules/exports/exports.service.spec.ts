@@ -123,4 +123,57 @@ describe("ExportsService", () => {
     expect(html).toContain("John Doe");
     expect(html).toContain("No lodge profile available");
   });
+
+  it("generates a PDF export", async () => {
+    mockPrisma.brotherProfile.findUnique.mockResolvedValue({
+      id: "brother-1",
+      fullName: "John Doe",
+      preferredName: null,
+      email: "john@example.com",
+      phone: "+123",
+      currentStage: "ENTERED_APPRENTICE",
+      dateInitiated: null,
+      datePassed: null,
+      dateRaised: null,
+      solomonRegisteredOn: null,
+      user: { displayName: "John Doe", email: "john@example.com" },
+      lodge: { lodgeName: "Singapore Lodge", lodgeNumber: "L-001" },
+      degreeProgress: [
+        {
+          id: "dp-1",
+          degreeType: "ENTERED_APPRENTICE",
+          status: "SIGNED_OFF",
+          mentorNotes: "Completed.",
+          submittedAt: null,
+          submittedBy: null,
+          approvedAt: new Date("2026-06-01"),
+          approvedBy: "mentor-1",
+          approvalNotes: "Well done.",
+          reopenedAt: null,
+          reopenedBy: null,
+        },
+      ],
+    });
+    mockPrisma.lodgeProfile.findUnique.mockResolvedValue({
+      id: "lodge-profile-1",
+      lodgeName: "Singapore Lodge",
+      lodgeNumber: "L-001",
+      district: "District Grand Lodge of the Eastern Archipelago",
+      meetingLocation: "Singapore",
+      secretaryContact: "secretary@example.local",
+    });
+
+    const pdf = await service.generatePdf(actor, "brother-1");
+
+    expect(pdf).toBeInstanceOf(Buffer);
+    expect(pdf.toString("ascii", 0, 4)).toBe("%PDF");
+  });
+
+  it("denies PDF generation when the actor cannot view the Brother", async () => {
+    mockPermissionEvaluator.canViewBrother.mockResolvedValue(false);
+
+    await expect(service.generatePdf(actor, "brother-1")).rejects.toThrow(
+      "Cannot export this passport",
+    );
+  });
 });

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { PrismaService } from "../../common/prisma/prisma.service";
 import { CurrentUser } from "../../common/guards/firebase-auth.guard";
 import { PermissionEvaluator } from "../roles/permission-evaluator.service";
@@ -52,6 +53,87 @@ export class ExportsService {
       lodgeProfile: lodgeProfile ? this.mapLodge(lodgeProfile) : null,
       degreeProgress: brotherProfile.degreeProgress.map((dp) => this.mapDegreeProgress(dp)),
     };
+  }
+
+  async generatePdf(
+    actor: CurrentUser,
+    brotherProfileId: string,
+  ): Promise<Buffer> {
+    const data = await this.exportPassport(actor, brotherProfileId);
+    const pdf = await PDFDocument.create();
+    const font = await pdf.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdf.embedFont(StandardFonts.HelveticaBold);
+    const page = pdf.addPage();
+    const { width, height } = page.getSize();
+
+    const margin = 50;
+    let y = height - margin;
+    const lineHeight = 16;
+    const drawText = (text: string, opts: { size?: number; bold?: boolean; y?: number } = {}) => {
+      const size = opts.size ?? 10;
+      const selectedFont = opts.bold ? boldFont : font;
+      const lineY = opts.y ?? y;
+      page.drawText(text, { x: margin, y: lineY, size, font: selectedFont, color: rgb(0, 0, 0) });
+      y = lineY - lineHeight;
+      return y;
+    };
+
+    drawText("DGLEA Masonic Passport", { size: 18, bold: true });
+    drawText(`Generated: ${data.generatedAt}`, { size: 9 });
+    y -= 10;
+
+    drawText("Brother", { size: 12, bold: true });
+    drawText(`Name: ${data.brotherProfile.fullName ?? data.brotherProfile.userDisplayName}`);
+    drawText(`Stage: ${data.brotherProfile.currentStage}`);
+    drawText(`Email: ${data.brotherProfile.email ?? data.brotherProfile.userEmail}`);
+    if (data.brotherProfile.phone) drawText(`Phone: ${data.brotherProfile.phone}`);
+    drawText(`Lodge: ${data.brotherProfile.lodgeName} (${data.brotherProfile.lodgeNumber})`);
+    y -= 10;
+
+    drawText("Lodge", { size: 12, bold: true });
+    if (data.lodgeProfile) {
+      drawText(`${data.lodgeProfile.lodgeName} (${data.lodgeProfile.lodgeNumber})`);
+      drawText(`District: ${data.lodgeProfile.district ?? "—"}`);
+      drawText(`Meeting location: ${data.lodgeProfile.meetingLocation ?? "—"}`);
+      drawText(`Secretary contact: ${data.lodgeProfile.secretaryContact ?? "—"}`);
+    } else {
+      drawText("No lodge profile available.");
+    }
+    y -= 10;
+
+    drawText("Degree Progress", { size: 12, bold: true });
+    if (data.degreeProgress.length === 0) {
+      drawText("No degree progress recorded.");
+    } else {
+      const headers = ["Degree", "Status", "Mentor notes", "Approved", "Approval notes"];
+      const colWidths = [120, 80, 120, 80, 120];
+      const rowHeight = 14;
+      let x = margin;
+      headers.forEach((header, i) => {
+        page.drawText(header, { x, y, size: 9, font: boldFont, color: rgb(0, 0, 0) });
+        x += colWidths[i];
+      });
+      y -= rowHeight;
+
+      data.degreeProgress.forEach((dp) => {
+        const row = [
+          dp.degreeType,
+          dp.status,
+          dp.mentorNotes ?? "—",
+          dp.approvedAt ?? "—",
+          dp.approvalNotes ?? "—",
+        ];
+        x = margin;
+        row.forEach((cell, i) => {
+          page.drawText(String(cell), { x, y, size: 8, font, color: rgb(0, 0, 0) });
+          x += colWidths[i];
+        });
+        y -= rowHeight;
+      });
+    }
+
+    const pdfBytes = await pdf.save();
+    return Buffer.from(pdfBytes);
   }
 
   async renderPrintableHtml(
