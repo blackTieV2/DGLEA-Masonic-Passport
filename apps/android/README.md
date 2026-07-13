@@ -37,6 +37,11 @@ The app assumes the backend is available on the Android emulator host at:
 
 `http://10.0.2.2:3000/api/v1/`
 
+The backend base URL is defined per build type via `BuildConfig.API_BASE_URL`:
+
+- `debug`: `http://10.0.2.2:3000/api/v1/` (emulator → local backend)
+- `release`: placeholder constant until the staging/production URL is provisioned
+
 The screen shown first is a connection screen. Use it to:
 
 - select one of the seeded demo identities
@@ -53,6 +58,22 @@ The seeded demo identities correspond to the backend seed data:
 - `dev-district-admin`
 
 In backend development mode, the app can send `X-Dev-Auth-Firebase-Uid` to load one of those identities directly.
+
+## Firebase setup (scaffolding only)
+
+The Firebase Auth SDK and Google Services Gradle plugin are wired into the
+build, but **no sign-in behaviour is active yet** — the demo identity selector
+above remains the only auth path. Email/password sign-in arrives in slice 16B.
+
+The Google Services plugin is applied only when the Firebase config file is
+present:
+
+- place your project file at `apps/android/app/google-services.json`
+- the file is gitignored and must never be committed
+- supply it locally from the Firebase console, and later via a CI secret
+
+Without the file, debug builds compile and run exactly as before (Firebase is
+simply not initialised, and nothing calls it yet).
 
 ## Prerequisites
 
