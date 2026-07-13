@@ -12,6 +12,29 @@ import {
 
 const dbAvailable = process.env.DB_AVAILABLE === "true";
 
+interface MeResponse {
+  id: string;
+  displayName: string;
+  email: string;
+  brotherProfileId: string;
+}
+
+interface BrotherProfileResponse {
+  id: string;
+}
+
+interface DegreeProgressResponse {
+  id: string;
+  status: string;
+  approvalNotes?: string | null;
+}
+
+interface PassportExportResponse {
+  brotherProfile: { id: string };
+  generatedAt: string;
+  degreeProgress: unknown[];
+}
+
 (dbAvailable ? describe : describe.skip)("Passport MVP smoke tests (e2e)", () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -57,12 +80,13 @@ const dbAvailable = process.env.DB_AVAILABLE === "true";
         .set("x-dev-auth-firebase-uid", "test-brother")
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      const body = response.body as MeResponse;
+      expect(body).toMatchObject({
         id: fixtures.brotherUserId,
         displayName: "Test Brother",
         email: "brother@example.local",
       });
-      expect(response.body.brotherProfileId).toBe(fixtures.brotherProfileId);
+      expect(body.brotherProfileId).toBe(fixtures.brotherProfileId);
     });
 
     it("GET /api/v1/me/passport returns the Brother's passport", async () => {
@@ -83,7 +107,7 @@ const dbAvailable = process.env.DB_AVAILABLE === "true";
         .set("x-dev-auth-firebase-uid", "test-brother")
         .expect(200);
 
-      expect(response.body.id).toBe(fixtures.brotherProfileId);
+      expect((response.body as BrotherProfileResponse).id).toBe(fixtures.brotherProfileId);
     });
 
     it("POST /api/v1/degree-progress creates and GET returns progress", async () => {
@@ -97,9 +121,10 @@ const dbAvailable = process.env.DB_AVAILABLE === "true";
         })
         .expect(201);
 
-      const progressId = createResponse.body.id;
+      const createdBody = createResponse.body as DegreeProgressResponse;
+      const progressId = createdBody.id;
       expect(progressId).toBeDefined();
-      expect(createResponse.body.status).toBe(DegreeStatus.NOT_STARTED);
+      expect(createdBody.status).toBe(DegreeStatus.NOT_STARTED);
 
       await request(app.getHttpServer() as Server)
         .get(`/api/v1/degree-progress/${progressId}`)
@@ -136,8 +161,9 @@ const dbAvailable = process.env.DB_AVAILABLE === "true";
         .send({ approvalNotes: "Approved in smoke test" })
         .expect(200);
 
-      expect(approveResponse.body.status).toBe(DegreeStatus.SIGNED_OFF);
-      expect(approveResponse.body.approvalNotes).toBe("Approved in smoke test");
+      const approvedBody = approveResponse.body as DegreeProgressResponse;
+      expect(approvedBody.status).toBe(DegreeStatus.SIGNED_OFF);
+      expect(approvedBody.approvalNotes).toBe("Approved in smoke test");
     });
 
     it("GET /api/v1/exports/passport/:id returns JSON export", async () => {
@@ -146,13 +172,14 @@ const dbAvailable = process.env.DB_AVAILABLE === "true";
         .set("x-dev-auth-firebase-uid", "test-brother")
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      const exportBody = response.body as PassportExportResponse;
+      expect(exportBody).toMatchObject({
         brotherProfile: {
           id: fixtures.brotherProfileId,
         },
       });
-      expect(response.body).toHaveProperty("generatedAt");
-      expect(Array.isArray(response.body.degreeProgress)).toBe(true);
+      expect(exportBody).toHaveProperty("generatedAt");
+      expect(Array.isArray(exportBody.degreeProgress)).toBe(true);
     });
 
     it("GET /api/v1/exports/passport/:id/printable returns HTML", async () => {
@@ -172,8 +199,9 @@ const dbAvailable = process.env.DB_AVAILABLE === "true";
         .expect(200)
         .expect("Content-Type", /application\/pdf/);
 
-      expect(response.body).toBeInstanceOf(Buffer);
-      expect(response.body.toString("binary", 0, 4)).toBe("%PDF");
+      const pdfBuffer = response.body as Buffer;
+      expect(pdfBuffer).toBeInstanceOf(Buffer);
+      expect(pdfBuffer.toString("binary", 0, 4)).toBe("%PDF");
     });
   });
 });
