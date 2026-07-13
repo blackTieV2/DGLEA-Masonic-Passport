@@ -34,6 +34,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/dglea_passport?schema=public}
       GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-/app/secrets/firebase-service-account.json}
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-local-dev}
+      ALLOW_DEV_AUTH: ${ALLOW_DEV_AUTH:-true}
       DEV_AUTH_USER_ID: ${DEV_AUTH_USER_ID:-00000000-0000-0000-0000-000000000000}
     ports:
       - "3000:3000"

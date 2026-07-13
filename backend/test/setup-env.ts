@@ -1,5 +1,9 @@
 process.env.NODE_ENV = "test";
 
+// Explicitly allow dev-auth bypass for the test suite. Production builds must
+// keep this flag false.
+process.env.ALLOW_DEV_AUTH = process.env.ALLOW_DEV_AUTH ?? "true";
+
 if (!process.env.DATABASE_URL) {
   process.env.DATABASE_URL =
     process.env.DATABASE_URL_TEST ??

@@ -9,6 +9,7 @@ export interface AppConfig {
   GOOGLE_APPLICATION_CREDENTIALS?: string;
   FIREBASE_PROJECT_ID?: string;
   DEV_AUTH_USER_ID?: string;
+  ALLOW_DEV_AUTH?: string;
 }
 
 @Module({
@@ -22,6 +23,7 @@ export interface AppConfig {
         GOOGLE_APPLICATION_CREDENTIALS: Joi.string().optional(),
         FIREBASE_PROJECT_ID: Joi.string().optional(),
         DEV_AUTH_USER_ID: Joi.string().uuid().optional(),
+        ALLOW_DEV_AUTH: Joi.string().valid("true", "false").default("false"),
       }),
       validationOptions: {
         allowUnknown: true,
