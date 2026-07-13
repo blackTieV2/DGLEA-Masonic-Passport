@@ -4,38 +4,47 @@ import { ExecutionContext } from "@nestjs/common";
 import { FirebaseAuthGuard } from "./firebase-auth.guard";
 import { PrismaService } from "../prisma/prisma.service";
 
+interface RequestWithUser {
+  headers: Record<string, string>;
+  currentUser?: { id: string };
+}
+
 describe("FirebaseAuthGuard", () => {
   it("prefers the dev firebase uid header over the fallback dev auth user", async () => {
-    const request: any = {
+    const request: RequestWithUser = {
       headers: {
         authorization: "Bearer ignored",
         "x-dev-auth-firebase-uid": "dev-brother-ea",
       },
     };
 
+    const findUniqueMock = jest.fn(
+      ({ where }: { where: { firebaseUid?: string; id?: string } }) => {
+        if (where.firebaseUid === "dev-brother-ea") {
+          return Promise.resolve({
+            id: "user-from-header",
+            email: "brother@example.local",
+            displayName: "Brother",
+            roleAssignments: [],
+          });
+        }
+
+        if (where.id === "fallback-user") {
+          return Promise.resolve({
+            id: "fallback-user",
+            email: "fallback@example.local",
+            displayName: "Fallback",
+            roleAssignments: [],
+          });
+        }
+
+        return Promise.resolve(null);
+      },
+    );
+
     const prisma = {
       user: {
-        findUnique: jest.fn().mockImplementation(({ where }) => {
-          if (where.firebaseUid === "dev-brother-ea") {
-            return Promise.resolve({
-              id: "user-from-header",
-              email: "brother@example.local",
-              displayName: "Brother",
-              roleAssignments: [],
-            });
-          }
-
-          if (where.id === "fallback-user") {
-            return Promise.resolve({
-              id: "fallback-user",
-              email: "fallback@example.local",
-              displayName: "Fallback",
-              roleAssignments: [],
-            });
-          }
-
-          return Promise.resolve(null);
-        }),
+        findUnique: findUniqueMock,
       },
     } as unknown as PrismaService;
 
@@ -64,8 +73,8 @@ describe("FirebaseAuthGuard", () => {
     const allowed = await guard.canActivate(context);
 
     expect(allowed).toBe(true);
-    expect(request.currentUser.id).toBe("user-from-header");
-    expect(prisma.user.findUnique).toHaveBeenCalledWith(
+    expect(request.currentUser?.id).toBe("user-from-header");
+    expect(findUniqueMock).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { firebaseUid: "dev-brother-ea" },
       }),

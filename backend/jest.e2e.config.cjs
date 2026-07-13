@@ -11,4 +11,6 @@ module.exports = {
   },
   roots: ["<rootDir>/test"],
   setupFiles: ["<rootDir>/test/setup-env.ts"],
+  setupFilesAfterEnv: ["<rootDir>/test/setup-integration.ts"],
+  globalSetup: "<rootDir>/test/global-setup.ts",
 };

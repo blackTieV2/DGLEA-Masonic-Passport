@@ -64,7 +64,7 @@ export class ExportsService {
     const font = await pdf.embedFont(StandardFonts.Helvetica);
     const boldFont = await pdf.embedFont(StandardFonts.HelveticaBold);
     const page = pdf.addPage();
-    const { width, height } = page.getSize();
+    const { height } = page.getSize();
 
     const margin = 50;
     let y = height - margin;
