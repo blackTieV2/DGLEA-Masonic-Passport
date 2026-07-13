@@ -56,28 +56,35 @@ export class FirebaseAuthGuard implements CanActivate {
     const authHeader = request.headers.authorization;
 
     const devAuthUserId = this.configService.get<string>("DEV_AUTH_USER_ID");
+    const allowDevAuth =
+      this.configService.get<string>("ALLOW_DEV_AUTH") === "true";
     const nodeEnv = this.configService.get<string>("NODE_ENV", "development");
     const devFirebaseUid =
       typeof request.headers["x-dev-auth-firebase-uid"] === "string"
         ? request.headers["x-dev-auth-firebase-uid"]
         : undefined;
 
-    if (devFirebaseUid && nodeEnv !== "production") {
-      const user = await this.loadUserByFirebaseUid(devFirebaseUid);
-      if (!user) {
-        throw new UnauthorizedException("Dev auth firebase uid not found");
+    // Dev-auth bypass is only permitted when explicitly enabled and never in
+    // production. This supports the current backend-first development phase
+    // while the Android client is brought up to the session contract.
+    if (allowDevAuth && nodeEnv !== "production") {
+      if (devFirebaseUid) {
+        const user = await this.loadUserByFirebaseUid(devFirebaseUid);
+        if (!user) {
+          throw new UnauthorizedException("Dev auth firebase uid not found");
+        }
+        request.currentUser = user;
+        return true;
       }
-      request.currentUser = user;
-      return true;
-    }
 
-    if (devAuthUserId && nodeEnv !== "production") {
-      const user = await this.loadUser(devAuthUserId);
-      if (!user) {
-        throw new UnauthorizedException("Dev auth user not found");
+      if (devAuthUserId) {
+        const user = await this.loadUser(devAuthUserId);
+        if (!user) {
+          throw new UnauthorizedException("Dev auth user not found");
+        }
+        request.currentUser = user;
+        return true;
       }
-      request.currentUser = user;
-      return true;
     }
 
     if (!authHeader?.startsWith("Bearer ")) {
