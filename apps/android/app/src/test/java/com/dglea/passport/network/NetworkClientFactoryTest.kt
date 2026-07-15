@@ -1,10 +1,13 @@
 package com.dglea.passport.network
 
+import com.dglea.passport.BuildConfig
+import com.dglea.passport.data.FakeFirebaseAuthManager
 import com.dglea.passport.data.InMemorySessionStore
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class NetworkClientFactoryTest {
@@ -35,7 +38,12 @@ class NetworkClientFactoryTest {
                 bearerToken = "token_123"
                 devFirebaseUid = "dev-brother-ea"
             }
-            val api = NetworkClientFactory.createBackendApi(server.url("/").toString(), sessionStore)
+            val firebaseAuthManager = FakeFirebaseAuthManager(available = false)
+            val api = NetworkClientFactory.createBackendApi(
+                server.url("/").toString(),
+                sessionStore,
+                firebaseAuthManager,
+            )
 
             val response = api.me()
 
@@ -43,7 +51,11 @@ class NetworkClientFactoryTest {
             assertEquals("GET", request.method)
             assertEquals("/me", request.path)
             assertEquals("Bearer token_123", request.getHeader("Authorization"))
-            assertEquals("dev-brother-ea", request.getHeader("X-Dev-Auth-Firebase-Uid"))
+            if (BuildConfig.DEBUG) {
+                assertEquals("dev-brother-ea", request.getHeader("X-Dev-Auth-Firebase-Uid"))
+            } else {
+                assertNull(request.getHeader("X-Dev-Auth-Firebase-Uid"))
+            }
             assertEquals("usr_1", response.id)
             assertEquals("ENTERED_APPRENTICE", response.currentStage)
         } finally {

@@ -1,22 +1,17 @@
 package com.dglea.passport.ui
 
 import com.dglea.passport.data.PassportRepository
-import com.dglea.passport.network.BackendApi
+import com.dglea.passport.network.BackendApiFake
 import com.dglea.passport.network.BrotherPassportDto
 import com.dglea.passport.network.BrotherPassportProfileDto
 import com.dglea.passport.network.ClarificationResponseRequest
 import com.dglea.passport.network.LodgeDto
 import com.dglea.passport.network.MeProfileDto
 import com.dglea.passport.network.MilestoneTemplateDto
-import com.dglea.passport.network.NotificationDto
 import com.dglea.passport.network.PassportProgressDto
-import com.dglea.passport.network.PassportTemplateDto
 import com.dglea.passport.network.PassportSectionDto
-import com.dglea.passport.network.ReviewActionRequest
-import com.dglea.passport.network.ReviewActionResultDto
-import com.dglea.passport.network.ReviewDto
+import com.dglea.passport.network.PassportTemplateDto
 import com.dglea.passport.network.RoleAssignmentDto
-import com.dglea.passport.network.SectionSignoffDto
 import com.dglea.passport.network.UpdateDraftRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,7 +47,7 @@ class PassportViewModelTest {
             ),
         )
 
-        val api = object : BackendApi {
+        val api = object : BackendApiFake() {
             override suspend fun me(): MeProfileDto =
                 MeProfileDto(
                     id = "usr_brother",
@@ -94,11 +89,6 @@ class PassportViewModelTest {
 
             override suspend fun clarificationResponse(progressId: String, request: ClarificationResponseRequest): PassportProgressDto =
                 progress.copy(status = "DRAFT", draftNote = request.response)
-
-            override suspend fun reviewQueue(brotherProfileId: String?): List<PassportProgressDto> = emptyList()
-            override suspend fun review(progressId: String, request: ReviewActionRequest): ReviewActionResultDto { throw NotImplementedError() }
-            override suspend fun notifications(): List<NotificationDto> = emptyList()
-            override suspend fun markNotificationRead(id: String) = Unit
         }
 
         val vm = PassportViewModel(PassportRepository(api))

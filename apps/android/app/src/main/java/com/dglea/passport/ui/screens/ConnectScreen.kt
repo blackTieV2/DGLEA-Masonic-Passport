@@ -12,12 +12,12 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.dglea.passport.BuildConfig
 
 private data class DemoIdentity(val label: String, val firebaseUid: String)
 
@@ -35,16 +35,14 @@ private val demoIdentities = listOf(
 fun ConnectScreen(
     loading: Boolean,
     error: String?,
-    onConnect: (String?, String?) -> Unit,
+    onSignIn: (String, String) -> Unit,
+    onDevConnect: (String?, String?) -> Unit,
 ) {
-    val bearerToken = remember { mutableStateOf("") }
-    val selectedUid = remember { mutableStateOf(demoIdentities.first().firebaseUid) }
-
-    LaunchedEffect(Unit) {
-        if (selectedUid.value.isBlank()) {
-            selectedUid.value = demoIdentities.first().firebaseUid
-        }
-    }
+    val email = remember { mutableStateOf("") }
+    val password = remember { mutableStateOf("") }
+    val devExpanded = remember { mutableStateOf(false) }
+    val devUid = remember { mutableStateOf(demoIdentities.first().firebaseUid) }
+    val devBearerToken = remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -53,46 +51,82 @@ fun ConnectScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text("DGLEA Masonic Passport")
-        Text("Connect to the backend and choose a seeded demo identity for local development.")
-
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            demoIdentities.forEach { identity ->
-                FilterChip(
-                    selected = selectedUid.value == identity.firebaseUid,
-                    onClick = { selectedUid.value = identity.firebaseUid },
-                    label = { Text(identity.label) },
-                )
-            }
-        }
+        Text("Sign in with your DGLEA account.")
 
         OutlinedTextField(
-            value = selectedUid.value,
-            onValueChange = { selectedUid.value = it },
-            label = { Text("Dev Firebase UID") },
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
         )
 
         OutlinedTextField(
-            value = bearerToken.value,
-            onValueChange = { bearerToken.value = it },
-            label = { Text("Bearer token (optional)") },
+            value = password.value,
+            onValueChange = { password.value = it },
+            label = { Text("Password") },
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
         )
 
         Button(
-            onClick = {
-                onConnect(
-                    selectedUid.value.trim().takeIf { it.isNotBlank() },
-                    bearerToken.value.trim().takeIf { it.isNotBlank() },
-                )
-            },
+            onClick = { onSignIn(email.value.trim(), password.value) },
             enabled = !loading,
             modifier = Modifier.widthIn(min = 160.dp),
         ) {
-            Text(if (loading) "Connecting..." else "Connect")
+            Text(if (loading) "Signing in..." else "Sign In")
+        }
+
+        if (BuildConfig.DEBUG) {
+            Button(
+                onClick = { devExpanded.value = !devExpanded.value },
+                enabled = !loading,
+            ) {
+                Text(if (devExpanded.value) "Hide local demo account" else "Use local demo account")
+            }
+
+            if (devExpanded.value) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    demoIdentities.forEach { identity ->
+                        FilterChip(
+                            selected = devUid.value == identity.firebaseUid,
+                            onClick = { devUid.value = identity.firebaseUid },
+                            label = { Text(identity.label) },
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = devUid.value,
+                    onValueChange = { devUid.value = it },
+                    label = { Text("Dev Firebase UID") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+
+                OutlinedTextField(
+                    value = devBearerToken.value,
+                    onValueChange = { devBearerToken.value = it },
+                    label = { Text("Bearer token (optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                )
+
+                Button(
+                    onClick = {
+                        onDevConnect(
+                            devUid.value.trim().takeIf { it.isNotBlank() },
+                            devBearerToken.value.trim().takeIf { it.isNotBlank() },
+                        )
+                    },
+                    enabled = !loading,
+                    modifier = Modifier.widthIn(min = 160.dp),
+                ) {
+                    Text(if (loading) "Connecting..." else "Connect")
+                }
+            }
         }
 
         if (!error.isNullOrBlank()) {

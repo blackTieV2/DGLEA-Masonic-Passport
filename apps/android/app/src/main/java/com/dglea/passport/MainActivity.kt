@@ -108,7 +108,8 @@ class MainActivity : ComponentActivity() {
                         ConnectScreen(
                             loading = authState.loading,
                             error = authState.error,
-                            onConnect = authVm::connect,
+                            onSignIn = authVm::signIn,
+                            onDevConnect = authVm::connect,
                         )
                     } else if (currentScreen.value == AppScreen.Profiles) {
                         ProfileProgressScreen(

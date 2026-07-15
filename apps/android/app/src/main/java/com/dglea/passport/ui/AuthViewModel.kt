@@ -21,15 +21,34 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private var restoreAttempted = false
 
+    fun signIn(email: String, password: String) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(loading = true, error = null)
+            runCatching { repository.signIn(email, password) }
+                .onSuccess { result ->
+                    result
+                        .onSuccess { refreshCurrentUser() }
+                        .onFailure { e -> _state.value = AuthUiState(error = e.toUiMessage("Sign in failed")) }
+                }
+                .onFailure { e -> _state.value = AuthUiState(error = e.toUiMessage("Sign in failed")) }
+        }
+    }
+
     fun connect(devFirebaseUid: String?, bearerToken: String?) {
         repository.connect(devFirebaseUid, bearerToken)
         refreshCurrentUser()
     }
 
     fun restoreSessionIfPresent() {
-        if (restoreAttempted || !repository.hasSession()) return
+        if (restoreAttempted) return
         restoreAttempted = true
-        refreshCurrentUser()
+        viewModelScope.launch {
+            // Always attempt to refresh the Firebase ID token into SessionStore.
+            runCatching { repository.restoreFirebaseSession() }
+            if (repository.hasSession()) {
+                refreshCurrentUser()
+            }
+        }
     }
 
     fun signOut() {
@@ -46,4 +65,5 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                 .onFailure { e -> _state.value = AuthUiState(error = e.toUiMessage("Failed to load current user")) }
         }
     }
+
 }

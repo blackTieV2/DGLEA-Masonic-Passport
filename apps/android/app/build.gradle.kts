@@ -75,6 +75,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
     // Firebase SDK scaffolding. Sign-in behaviour is added in slice 16B.
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
