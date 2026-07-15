@@ -4,7 +4,7 @@ plugins {
 }
 
 // google-services.json is environment-specific and intentionally not committed.
-// The plugin is applied only when the file is present locally (see FIREBASE_SETUP.md).
+// The plugin is applied only when the file is present locally (see README.md).
 val googleServicesJson = file("google-services.json")
 if (googleServicesJson.exists()) {
     apply(plugin = "com.google.gms.google-services")
