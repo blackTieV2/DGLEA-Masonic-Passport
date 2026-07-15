@@ -1,7 +1,7 @@
 package com.dglea.passport.ui
 
 import com.dglea.passport.data.MentorRepository
-import com.dglea.passport.network.BackendApi
+import com.dglea.passport.network.BackendApiFake
 import com.dglea.passport.network.BrotherPassportDto
 import com.dglea.passport.network.BrotherPassportProfileDto
 import com.dglea.passport.network.BrotherProfileDto
@@ -12,12 +12,10 @@ import com.dglea.passport.network.MilestoneTemplateDto
 import com.dglea.passport.network.NotificationDto
 import com.dglea.passport.network.PassportProgressDto
 import com.dglea.passport.network.PassportTemplateDto
-import com.dglea.passport.network.PassportSectionDto
 import com.dglea.passport.network.ReviewActionRequest
 import com.dglea.passport.network.ReviewActionResultDto
 import com.dglea.passport.network.ReviewDto
 import com.dglea.passport.network.RoleAssignmentDto
-import com.dglea.passport.network.SectionSignoffDto
 import com.dglea.passport.network.UpdateDraftRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -39,29 +37,29 @@ class MentorViewModelTest {
 
     @Test
     fun `queue and verification actions update state`() = runTest {
-        val api = object : BackendApi {
-            private val queue = listOf(
-                PassportProgressDto(
-                    id = "pr_1",
-                    brotherProfileId = "bp_1",
-                    milestoneTemplateId = "mt_1",
-                    status = "SUBMITTED",
-                    milestoneTemplate = MilestoneTemplateDto(
-                        id = "mt_1",
-                        title = "Review learning topics",
-                        category = "learning",
-                        sortOrder = 1,
-                    ),
-                    brotherProfile = BrotherProfileDto(
-                        id = "bp_1",
-                        userId = "usr_1",
-                        lodgeId = "lodge_1",
-                        currentStage = "ENTERED_APPRENTICE",
-                        lodge = LodgeDto("lodge_1", "dist_1", "Lodge One", "L-001"),
-                    ),
+        val queue = listOf(
+            PassportProgressDto(
+                id = "pr_1",
+                brotherProfileId = "bp_1",
+                milestoneTemplateId = "mt_1",
+                status = "SUBMITTED",
+                milestoneTemplate = MilestoneTemplateDto(
+                    id = "mt_1",
+                    title = "Review learning topics",
+                    category = "learning",
+                    sortOrder = 1,
                 ),
-            )
+                brotherProfile = BrotherProfileDto(
+                    id = "bp_1",
+                    userId = "usr_1",
+                    lodgeId = "lodge_1",
+                    currentStage = "ENTERED_APPRENTICE",
+                    lodge = LodgeDto("lodge_1", "dist_1", "Lodge One", "L-001"),
+                ),
+            ),
+        )
 
+        val api = object : BackendApiFake() {
             override suspend fun me(): MeProfileDto =
                 MeProfileDto(
                     id = "usr_mentor",
@@ -82,9 +80,6 @@ class MentorViewModelTest {
                     signoffs = emptyList(),
                 )
 
-            override suspend fun updateDraft(progressId: String, request: UpdateDraftRequest): PassportProgressDto { throw NotImplementedError() }
-            override suspend fun submit(progressId: String): PassportProgressDto { throw NotImplementedError() }
-            override suspend fun clarificationResponse(progressId: String, request: ClarificationResponseRequest): PassportProgressDto { throw NotImplementedError() }
             override suspend fun reviewQueue(brotherProfileId: String?): List<PassportProgressDto> = queue
             override suspend fun review(progressId: String, request: ReviewActionRequest): ReviewActionResultDto =
                 ReviewActionResultDto(
@@ -98,8 +93,6 @@ class MentorViewModelTest {
                     ),
                     progress = queue.first().copy(status = request.decision),
                 )
-            override suspend fun notifications(): List<NotificationDto> = emptyList()
-            override suspend fun markNotificationRead(id: String) = Unit
         }
 
         val vm = MentorViewModel(MentorRepository(api))
@@ -115,7 +108,7 @@ class MentorViewModelTest {
 
     @Test
     fun `stale selection is rejected locally`() = runTest {
-        val api = object : BackendApi {
+        val api = object : BackendApiFake() {
             override suspend fun me(): MeProfileDto = MeProfileDto("usr_mentor", "mentor@example.org", "Mentor")
             override suspend fun myPassport(): BrotherPassportDto = BrotherPassportDto(
                 profile = BrotherPassportProfileDto(
@@ -127,13 +120,7 @@ class MentorViewModelTest {
                 progress = emptyList(),
                 signoffs = emptyList(),
             )
-            override suspend fun updateDraft(progressId: String, request: UpdateDraftRequest): PassportProgressDto { throw NotImplementedError() }
-            override suspend fun submit(progressId: String): PassportProgressDto { throw NotImplementedError() }
-            override suspend fun clarificationResponse(progressId: String, request: ClarificationResponseRequest): PassportProgressDto { throw NotImplementedError() }
             override suspend fun reviewQueue(brotherProfileId: String?): List<PassportProgressDto> = emptyList()
-            override suspend fun review(progressId: String, request: ReviewActionRequest): ReviewActionResultDto { throw NotImplementedError() }
-            override suspend fun notifications(): List<NotificationDto> = emptyList()
-            override suspend fun markNotificationRead(id: String) = Unit
         }
 
         val vm = MentorViewModel(MentorRepository(api))

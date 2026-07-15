@@ -10,11 +10,17 @@ class AppContainer(context: Context) {
         context.getSharedPreferences("dglea_session", Context.MODE_PRIVATE),
     )
 
+    private val firebaseAuthManager: FirebaseAuthManager by lazy { DefaultFirebaseAuthManager() }
+
     private val api: BackendApi by lazy {
-        NetworkClientFactory.createBackendApi(BuildConfig.API_BASE_URL, sessionStore)
+        NetworkClientFactory.createBackendApi(
+            BuildConfig.API_BASE_URL,
+            sessionStore,
+            firebaseAuthManager,
+        )
     }
 
-    val authRepository: AuthRepository by lazy { AuthRepository(api, sessionStore) }
+    val authRepository: AuthRepository by lazy { AuthRepository(api, sessionStore, firebaseAuthManager) }
     val passportRepository: PassportRepository by lazy { PassportRepository(api) }
     val mentorRepository: MentorRepository by lazy { MentorRepository(api) }
     val profilesRepository: ProfilesRepository by lazy { ProfilesRepository(api, context) }
