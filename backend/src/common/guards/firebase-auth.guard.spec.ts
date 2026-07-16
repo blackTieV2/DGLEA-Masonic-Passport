@@ -39,20 +39,28 @@ function createExecutionContext(request: RequestWithUser): ExecutionContext {
   } as unknown as ExecutionContext;
 }
 
-function createPrismaMock(usersByFirebaseUid: Record<string, unknown>, usersById: Record<string, unknown>) {
-  return {
+function createPrismaMock(
+  usersByFirebaseUid: Record<string, unknown>,
+  usersById: Record<string, unknown>,
+): PrismaService & { findUniqueMock: jest.Mock } {
+  const findUniqueMock = jest.fn(({ where }: { where: { firebaseUid?: string; id?: string } }) => {
+    if (where.firebaseUid && usersByFirebaseUid[where.firebaseUid]) {
+      return Promise.resolve(usersByFirebaseUid[where.firebaseUid]);
+    }
+    if (where.id && usersById[where.id]) {
+      return Promise.resolve(usersById[where.id]);
+    }
+    return Promise.resolve(null);
+  });
+
+  const prisma = {
     user: {
-      findUnique: jest.fn(({ where }: { where: { firebaseUid?: string; id?: string } }) => {
-        if (where.firebaseUid && usersByFirebaseUid[where.firebaseUid]) {
-          return Promise.resolve(usersByFirebaseUid[where.firebaseUid]);
-        }
-        if (where.id && usersById[where.id]) {
-          return Promise.resolve(usersById[where.id]);
-        }
-        return Promise.resolve(null);
-      }),
+      findUnique: findUniqueMock,
     },
-  } as unknown as PrismaService;
+  } as unknown as PrismaService & { findUniqueMock: jest.Mock };
+
+  prisma.findUniqueMock = findUniqueMock;
+  return prisma;
 }
 
 describe("FirebaseAuthGuard", () => {
@@ -92,7 +100,7 @@ describe("FirebaseAuthGuard", () => {
     expect(request.currentUser).toBeUndefined();
   });
 
-  it("allows dev-auth when ALLOW_DEV_AUTH=true and NODE_ENV is not production", async () => {
+  it("allows dev-auth via header when ALLOW_DEV_AUTH=true and NODE_ENV is not production", async () => {
     const request: RequestWithUser = {
       headers: {
         "x-dev-auth-firebase-uid": "dev-brother-ea",
@@ -125,6 +133,38 @@ describe("FirebaseAuthGuard", () => {
     expect(request.currentUser?.id).toBe("user-from-header");
   });
 
+  it("allows dev-auth via fallback DEV_AUTH_USER_ID when ALLOW_DEV_AUTH=true", async () => {
+    const request: RequestWithUser = {
+      headers: {},
+    };
+
+    const prisma = createPrismaMock(
+      {},
+      {
+        "fallback-user": {
+          id: "fallback-user",
+          email: "fallback@example.local",
+          displayName: "Fallback",
+          roleAssignments: [],
+        },
+      },
+    );
+
+    const guard = createGuard(
+      {
+        NODE_ENV: "development",
+        ALLOW_DEV_AUTH: "true",
+        DEV_AUTH_USER_ID: "fallback-user",
+      },
+      prisma,
+    );
+
+    const allowed = await guard.canActivate(createExecutionContext(request));
+
+    expect(allowed).toBe(true);
+    expect(request.currentUser?.id).toBe("fallback-user");
+  });
+
   it("rejects dev-auth in production even when ALLOW_DEV_AUTH=true", async () => {
     const request: RequestWithUser = {
       headers: {
@@ -151,38 +191,28 @@ describe("FirebaseAuthGuard", () => {
   it("prefers the dev firebase uid header over the fallback dev auth user", async () => {
     const request: RequestWithUser = {
       headers: {
-        authorization: "Bearer ignored",
         "x-dev-auth-firebase-uid": "dev-brother-ea",
       },
     };
 
-    const findUniqueMock = jest.fn(({ where }: { where: { firebaseUid?: string; id?: string } }) => {
-      if (where.firebaseUid === "dev-brother-ea") {
-        return Promise.resolve({
+    const prisma = createPrismaMock(
+      {
+        "dev-brother-ea": {
           id: "user-from-header",
           email: "brother@example.local",
           displayName: "Brother",
           roleAssignments: [],
-        });
-      }
-
-      if (where.id === "fallback-user") {
-        return Promise.resolve({
+        },
+      },
+      {
+        "fallback-user": {
           id: "fallback-user",
           email: "fallback@example.local",
           displayName: "Fallback",
           roleAssignments: [],
-        });
-      }
-
-      return Promise.resolve(null);
-    });
-
-    const prisma = {
-      user: {
-        findUnique: findUniqueMock,
+        },
       },
-    } as unknown as PrismaService;
+    );
 
     const guard = createGuard(
       {
@@ -192,6 +222,8 @@ describe("FirebaseAuthGuard", () => {
       },
       prisma,
     );
+
+    const findUniqueMock = prisma.findUniqueMock;
 
     const allowed = await guard.canActivate(createExecutionContext(request));
 
@@ -266,6 +298,184 @@ describe("FirebaseAuthGuard", () => {
     );
 
     await expect(guard.canActivate(createExecutionContext(request))).rejects.toThrow("Invalid token");
+    expect(request.currentUser).toBeUndefined();
+  });
+
+  it("valid Bearer token takes precedence over DEV_AUTH_USER_ID fallback", async () => {
+    const request: RequestWithUser = {
+      headers: {
+        authorization: "Bearer valid-token",
+      },
+    };
+
+    const verifyIdTokenMock = jest.fn().mockResolvedValue({ uid: "real-firebase-uid" });
+    (getAuth as jest.Mock).mockReturnValue({
+      verifyIdToken: verifyIdTokenMock,
+    });
+
+    const prisma = createPrismaMock(
+      {
+        "real-firebase-uid": {
+          id: "user-from-token",
+          email: "token@example.local",
+          displayName: "Token User",
+          roleAssignments: [],
+        },
+      },
+      {
+        "fallback-user": {
+          id: "fallback-user",
+          email: "fallback@example.local",
+          displayName: "Fallback",
+          roleAssignments: [],
+        },
+      },
+    );
+
+    const guard = createGuard(
+      {
+        NODE_ENV: "development",
+        ALLOW_DEV_AUTH: "true",
+        DEV_AUTH_USER_ID: "fallback-user",
+      },
+      prisma,
+    );
+
+    const findUniqueMock = prisma.findUniqueMock;
+
+    const allowed = await guard.canActivate(createExecutionContext(request));
+
+    expect(allowed).toBe(true);
+    expect(request.currentUser?.id).toBe("user-from-token");
+    expect(verifyIdTokenMock).toHaveBeenCalledWith("valid-token");
+    expect(findUniqueMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "fallback-user" },
+      }),
+    );
+  });
+
+  it("valid Bearer token takes precedence over X-Dev-Auth-Firebase-Uid header", async () => {
+    const request: RequestWithUser = {
+      headers: {
+        authorization: "Bearer valid-token",
+        "x-dev-auth-firebase-uid": "dev-brother-ea",
+      },
+    };
+
+    const verifyIdTokenMock = jest.fn().mockResolvedValue({ uid: "real-firebase-uid" });
+    (getAuth as jest.Mock).mockReturnValue({
+      verifyIdToken: verifyIdTokenMock,
+    });
+
+    const prisma = createPrismaMock(
+      {
+        "real-firebase-uid": {
+          id: "user-from-token",
+          email: "token@example.local",
+          displayName: "Token User",
+          roleAssignments: [],
+        },
+        "dev-brother-ea": {
+          id: "user-from-header",
+          email: "brother@example.local",
+          displayName: "Brother",
+          roleAssignments: [],
+        },
+      },
+      {},
+    );
+
+    const guard = createGuard(
+      {
+        NODE_ENV: "development",
+        ALLOW_DEV_AUTH: "true",
+      },
+      prisma,
+    );
+
+    const findUniqueMock = prisma.findUniqueMock;
+
+    const allowed = await guard.canActivate(createExecutionContext(request));
+
+    expect(allowed).toBe(true);
+    expect(request.currentUser?.id).toBe("user-from-token");
+    expect(verifyIdTokenMock).toHaveBeenCalledWith("valid-token");
+    expect(findUniqueMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { firebaseUid: "dev-brother-ea" },
+      }),
+    );
+  });
+
+  it("invalid Bearer token does not fall back to dev-auth", async () => {
+    const request: RequestWithUser = {
+      headers: {
+        authorization: "Bearer invalid-token",
+        "x-dev-auth-firebase-uid": "dev-brother-ea",
+      },
+    };
+
+    const verifyIdTokenMock = jest.fn().mockRejectedValue(new Error("Invalid token"));
+    (getAuth as jest.Mock).mockReturnValue({
+      verifyIdToken: verifyIdTokenMock,
+    });
+
+    const prisma = createPrismaMock(
+      {
+        "dev-brother-ea": {
+          id: "user-from-header",
+          email: "brother@example.local",
+          displayName: "Brother",
+          roleAssignments: [],
+        },
+      },
+      {},
+    );
+
+    const guard = createGuard(
+      {
+        NODE_ENV: "development",
+        ALLOW_DEV_AUTH: "true",
+      },
+      prisma,
+    );
+
+    await expect(guard.canActivate(createExecutionContext(request))).rejects.toThrow("Invalid token");
+    expect(request.currentUser).toBeUndefined();
+  });
+
+  it("rejects a non-Bearer authorization header without falling back to dev-auth", async () => {
+    const request: RequestWithUser = {
+      headers: {
+        authorization: "Basic dXNlcjpwYXNz",
+        "x-dev-auth-firebase-uid": "dev-brother-ea",
+      },
+    };
+
+    const prisma = createPrismaMock(
+      {
+        "dev-brother-ea": {
+          id: "user-from-header",
+          email: "brother@example.local",
+          displayName: "Brother",
+          roleAssignments: [],
+        },
+      },
+      {},
+    );
+
+    const guard = createGuard(
+      {
+        NODE_ENV: "development",
+        ALLOW_DEV_AUTH: "true",
+      },
+      prisma,
+    );
+
+    await expect(guard.canActivate(createExecutionContext(request))).rejects.toThrow(
+      "Missing or invalid authorization header",
+    );
     expect(request.currentUser).toBeUndefined();
   });
 });
