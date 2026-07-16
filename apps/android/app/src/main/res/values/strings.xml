@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">DGLEA Passport</string>
+    <string name="app_full_name">DGLEA Masonic Passport</string>
+    <string name="app_tagline">Digital progress record</string>
+    <string name="sign_in_prompt">Sign in to view your Masonic Passport.</string>
+    <string name="sign_in_subtitle">Track progress, mentor verification, and reference material.</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
+    <string name="sign_in_button">Sign In</string>
+    <string name="signing_in_button">Signing in…</string>
+    <string name="debug_demo_accounts_title">Debug demo accounts</string>
+    <string name="show_debug_demo_accounts">Show debug demo accounts</string>
+    <string name="hide_debug_demo_accounts">Hide debug demo accounts</string>
+    <string name="demo_firebase_uid_label">Demo Firebase UID</string>
+    <string name="bearer_token_label">Bearer token (optional)</string>
+    <string name="connect_demo_account_button">Connect demo account</string>
+    <string name="connecting_demo_account_button">Connecting…</string>
 </resources>
