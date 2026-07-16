@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class AuthUiState(
-    val loading: Boolean = false,
+    val loading: Boolean = true,
     val user: MeProfileDto? = null,
     val error: String? = null,
 )
@@ -43,10 +43,13 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         if (restoreAttempted) return
         restoreAttempted = true
         viewModelScope.launch {
+            _state.value = _state.value.copy(loading = true, error = null)
             // Always attempt to refresh the Firebase ID token into SessionStore.
             runCatching { repository.restoreFirebaseSession() }
             if (repository.hasSession()) {
                 refreshCurrentUser()
+            } else {
+                _state.value = AuthUiState(loading = false)
             }
         }
     }
