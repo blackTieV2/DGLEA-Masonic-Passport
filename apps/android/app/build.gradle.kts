@@ -26,17 +26,33 @@ android {
 
     buildTypes {
         debug {
+            isDebuggable = true
             // Local backend reachable from the Android emulator.
             buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:3000/api/v1/\"")
+            buildConfigField("String", "ENVIRONMENT_NAME", "\"debug\"")
+            buildConfigField("boolean", "ALLOW_DEV_AUTH", "true")
+        }
+        register("staging") {
+            isDebuggable = true
+            // Placeholder until a real staging backend URL is provisioned.
+            // Replace the host before distributing a staging build.
+            buildConfigField("String", "API_BASE_URL", "\"https://REPLACE-WITH-STAGING-BACKEND.invalid/api/v1/\"")
+            buildConfigField("String", "ENVIRONMENT_NAME", "\"staging\"")
+            buildConfigField("boolean", "ALLOW_DEV_AUTH", "false")
+            matchingFallbacks += listOf("release")
         }
         release {
             isMinifyEnabled = false
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Placeholder until staging/production backend URL is provisioned.
-            buildConfigField("String", "API_BASE_URL", "\"https://REPLACE-WITH-STAGING-BACKEND.invalid/api/v1/\"")
+            // Placeholder until the production backend URL is approved and provisioned.
+            // Release builds must never point to localhost or emulator hosts.
+            buildConfigField("String", "API_BASE_URL", "\"https://REPLACE-WITH-PRODUCTION-BACKEND.invalid/api/v1/\"")
+            buildConfigField("String", "ENVIRONMENT_NAME", "\"release\"")
+            buildConfigField("boolean", "ALLOW_DEV_AUTH", "false")
         }
     }
 

@@ -51,7 +51,7 @@ class NetworkClientFactoryTest {
             assertEquals("GET", request.method)
             assertEquals("/me", request.path)
             assertEquals("Bearer token_123", request.getHeader("Authorization"))
-            if (BuildConfig.DEBUG) {
+            if (BuildConfig.ALLOW_DEV_AUTH) {
                 assertEquals("dev-brother-ea", request.getHeader("X-Dev-Auth-Firebase-Uid"))
             } else {
                 assertNull(request.getHeader("X-Dev-Auth-Firebase-Uid"))

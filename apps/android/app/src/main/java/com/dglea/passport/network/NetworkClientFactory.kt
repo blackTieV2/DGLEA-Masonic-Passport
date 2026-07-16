@@ -21,7 +21,9 @@ object NetworkClientFactory {
             .authenticator(TokenRefreshAuthenticator(sessionStore, firebaseAuthManager))
             .addInterceptor(AuthInterceptor(sessionStore))
             .apply {
-                if (BuildConfig.DEBUG) {
+                // Dev-auth fallback is enabled only for local debug builds.
+                // Staging and release builds must authenticate via real Firebase Bearer tokens.
+                if (BuildConfig.ALLOW_DEV_AUTH) {
                     addInterceptor(DevAuthInterceptor(sessionStore))
                 }
             }
