@@ -2,6 +2,7 @@ package com.dglea.passport.ui
 
 import com.dglea.passport.data.AuthRepository
 import com.dglea.passport.data.FakeFirebaseAuthManager
+import com.dglea.passport.data.FirebaseAuthManager
 import com.dglea.passport.data.FirebaseUserInfo
 import com.dglea.passport.data.InMemorySessionStore
 import com.dglea.passport.network.BackendApiFake
@@ -11,6 +12,7 @@ import com.dglea.passport.network.LodgeDto
 import com.dglea.passport.network.MeProfileDto
 import com.dglea.passport.network.PassportTemplateDto
 import com.dglea.passport.network.RoleAssignmentDto
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -58,10 +60,11 @@ class AuthViewModelTest {
         assertEquals("id-token-123", sessionStore.bearerToken)
         assertNull(sessionStore.devFirebaseUid)
         assertNull(vm.state.value.error)
+        assertEquals(false, vm.state.value.loading)
     }
 
     @Test
-    fun `sign in failure shows error`() = runTest {
+    fun `sign in failure shows error and clears loading`() = runTest {
         val api = BackendApiFake()
         val sessionStore = InMemorySessionStore()
         val firebase = FakeFirebaseAuthManager(signInResult = Result.failure(RuntimeException("Invalid credentials")))
@@ -73,6 +76,7 @@ class AuthViewModelTest {
         assertNull(vm.state.value.user)
         assertNotNull(vm.state.value.error)
         assertTrue(vm.state.value.error!!.contains("Invalid credentials"))
+        assertEquals(false, vm.state.value.loading)
     }
 
     @Test
@@ -115,7 +119,7 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `sign out clears session`() = runTest {
+    fun `sign out clears session and leaves sign in usable`() = runTest {
         val api = object : BackendApiFake() {
             override suspend fun me(): MeProfileDto =
                 MeProfileDto(
@@ -136,6 +140,8 @@ class AuthViewModelTest {
         assertEquals(null, vm.state.value.user)
         assertEquals(false, sessionStore.hasSession())
         assertEquals(1, firebase.signedOutCalls.size)
+        assertEquals(false, vm.state.value.loading)
+        assertNull(vm.state.value.error)
     }
 
     @Test
@@ -162,5 +168,63 @@ class AuthViewModelTest {
         assertEquals("usr_brother", vm.state.value.user?.id)
         assertEquals("id-token-123", sessionStore.bearerToken)
         assertNull(sessionStore.devFirebaseUid)
+        assertEquals(false, vm.state.value.loading)
+    }
+
+    @Test
+    fun `restore session clears loading when no session exists`() = runTest {
+        val api = BackendApiFake()
+        val sessionStore = InMemorySessionStore()
+        val firebase = FakeFirebaseAuthManager()
+        val vm = AuthViewModel(AuthRepository(api, sessionStore, firebase))
+
+        assertEquals(true, vm.state.value.loading)
+
+        vm.restoreSessionIfPresent()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertNull(vm.state.value.user)
+        assertEquals(false, vm.state.value.loading)
+        assertNull(vm.state.value.error)
+    }
+
+    @Test
+    fun `sign in shows loading while active and clears it on success`() = runTest {
+        val api = object : BackendApiFake() {
+            override suspend fun me(): MeProfileDto =
+                MeProfileDto(
+                    id = "usr_brother",
+                    email = "brother@example.org",
+                    displayName = "Brother",
+                )
+        }
+
+        val sessionStore = InMemorySessionStore()
+        val signInDeferred = CompletableDeferred<String>()
+        val firebase = object : FirebaseAuthManager {
+            override val isAvailable: Boolean = true
+            override suspend fun signIn(email: String, password: String): Result<String> {
+                signInDeferred.await()
+                return Result.success("fake-uid")
+            }
+            override suspend fun getIdToken(forceRefresh: Boolean): String? = "id-token-123"
+            override fun getCurrentUser(): FirebaseUserInfo? = null
+            override fun signOut() {}
+        }
+        val vm = AuthViewModel(AuthRepository(api, sessionStore, firebase))
+
+        vm.signIn("brother@example.org", "password")
+        dispatcher.scheduler.runCurrent()
+
+        assertEquals(true, vm.state.value.loading)
+        assertNull(vm.state.value.error)
+        assertNull(vm.state.value.user)
+
+        signInDeferred.complete("fake-uid")
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("usr_brother", vm.state.value.user?.id)
+        assertEquals(false, vm.state.value.loading)
+        assertNull(vm.state.value.error)
     }
 }

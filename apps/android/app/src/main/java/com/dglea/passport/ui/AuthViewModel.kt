@@ -28,9 +28,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                 .onSuccess { result ->
                     result
                         .onSuccess { refreshCurrentUser() }
-                        .onFailure { e -> _state.value = AuthUiState(error = e.toUiMessage("Sign in failed")) }
+                        .onFailure { e -> _state.value = AuthUiState(loading = false, error = e.toUiMessage("Sign in failed")) }
                 }
-                .onFailure { e -> _state.value = AuthUiState(error = e.toUiMessage("Sign in failed")) }
+                .onFailure { e -> _state.value = AuthUiState(loading = false, error = e.toUiMessage("Sign in failed")) }
         }
     }
 
@@ -57,15 +57,15 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     fun signOut() {
         repository.signOut()
         restoreAttempted = false
-        _state.value = AuthUiState()
+        _state.value = AuthUiState(loading = false)
     }
 
     fun refreshCurrentUser() {
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true, error = null)
             runCatching { repository.currentUser() }
-                .onSuccess { user -> _state.value = AuthUiState(user = user) }
-                .onFailure { e -> _state.value = AuthUiState(error = e.toUiMessage("Failed to load current user")) }
+                .onSuccess { user -> _state.value = AuthUiState(user = user, loading = false) }
+                .onFailure { e -> _state.value = AuthUiState(loading = false, error = e.toUiMessage("Failed to load current user")) }
         }
     }
 
