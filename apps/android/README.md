@@ -104,14 +104,52 @@ simply not initialised, and nothing calls it yet).
 
 If Gradle complains about the SDK path, set `apps/android/local.properties` or configure the SDK in Android Studio.
 
+
+## Release signing
+
+Release APK signing is configured to read credentials from environment variables or Gradle project properties. **No keystore, password, alias, or signing secret is committed to this repository.**
+
+Supported inputs (all four must be provided to sign a release build):
+
+| Environment variable | Gradle project property | Purpose |
+|----------------------|-------------------------|---------|
+| `DGLEA_ANDROID_KEYSTORE_PATH` | `dglea.android.keystorePath` | Absolute or relative path to the keystore file |
+| `DGLEA_ANDROID_KEYSTORE_PASSWORD` | `dglea.android.keystorePassword` | Keystore password |
+| `DGLEA_ANDROID_KEY_ALIAS` | `dglea.android.keyAlias` | Key alias |
+| `DGLEA_ANDROID_KEY_PASSWORD` | `dglea.android.keyPassword` | Key password |
+
+When credentials are absent, `./gradlew :app:assembleRelease` still succeeds and produces an **unsigned** release APK. This keeps CI and local builds green while preventing accidental commits of signing material.
+
+To create and use a local release keystore later:
+
+```bash
+# Generate a keystore (do this once on a secure machine; never commit the file)
+keytool -genkey -v -keystore dglea-release.keystore -alias dglea -keyalg RSA -keysize 2048 -validity 10000
+
+# Build a signed release APK
+export DGLEA_ANDROID_KEYSTORE_PATH="$(pwd)/dglea-release.keystore"
+export DGLEA_ANDROID_KEYSTORE_PASSWORD="your-keystore-password"
+export DGLEA_ANDROID_KEY_ALIAS="dglea"
+export DGLEA_ANDROID_KEY_PASSWORD="your-key-password"
+./gradlew :app:assembleRelease
+```
+
+Alternatively, set the Gradle project properties in `~/.gradle/gradle.properties` or on the command line with `-P`.
+
+⚠️ Never commit `*.jks`, `*.keystore`, `signing.properties`, or any password. These are already gitignored.
+
 ## Checks
 
 From `apps/android`:
 
 ```bash
-./gradlew test
-./gradlew assembleDebug
+./gradlew :app:test
+./gradlew :app:assembleDebug
+./gradlew :app:assembleStaging
+./gradlew :app:assembleRelease
 ```
+
+`assembleRelease` does not require signing credentials; it will be unsigned when they are absent.
 
 ## Current status
 

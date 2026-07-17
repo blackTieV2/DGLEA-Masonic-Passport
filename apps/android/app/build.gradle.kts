@@ -24,6 +24,32 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        register("release") {
+            // Release signing credentials are supplied at build time via environment variables
+            // or Gradle project properties. They are never committed to the repository.
+            val keystorePath = providers.environmentVariable("DGLEA_ANDROID_KEYSTORE_PATH").orNull
+                ?: findProperty("dglea.android.keystorePath") as? String
+            val keystorePassword = providers.environmentVariable("DGLEA_ANDROID_KEYSTORE_PASSWORD").orNull
+                ?: findProperty("dglea.android.keystorePassword") as? String
+            val keyAliasValue = providers.environmentVariable("DGLEA_ANDROID_KEY_ALIAS").orNull
+                ?: findProperty("dglea.android.keyAlias") as? String
+            val keyPasswordValue = providers.environmentVariable("DGLEA_ANDROID_KEY_PASSWORD").orNull
+                ?: findProperty("dglea.android.keyPassword") as? String
+
+            if (!keystorePath.isNullOrBlank() &&
+                !keystorePassword.isNullOrBlank() &&
+                !keyAliasValue.isNullOrBlank() &&
+                !keyPasswordValue.isNullOrBlank()
+            ) {
+                storeFile = file(keystorePath)
+                storePassword = keystorePassword
+                keyAlias = keyAliasValue
+                keyPassword = keyPasswordValue
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isDebuggable = true
@@ -53,6 +79,9 @@ android {
             buildConfigField("String", "API_BASE_URL", "\"https://REPLACE-WITH-PRODUCTION-BACKEND.invalid/api/v1/\"")
             buildConfigField("String", "ENVIRONMENT_NAME", "\"release\"")
             buildConfigField("boolean", "ALLOW_DEV_AUTH", "false")
+            // Apply release signing only when credentials are supplied. Without them,
+            // assembleRelease produces an unsigned APK safely instead of failing.
+            signingConfig = signingConfigs.findByName("release")?.takeIf { it.storeFile != null }
         }
     }
 

@@ -17,3 +17,9 @@ local.properties
 
 # Firebase config (supplied locally or via CI secret; never committed)
 app/google-services.json
+
+# Android signing secrets (never commit keystores, passwords, or signing.properties)
+*.jks
+*.keystore
+signing.properties
+app/signing.properties
