@@ -2,6 +2,7 @@ package com.dglea.passport
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -105,12 +106,14 @@ class MainActivity : ComponentActivity() {
                                                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                                 putExtra(Intent.EXTRA_SUBJECT, "DGLEA Masonic Passport")
                                             }
-                                            startActivity(
-                                                Intent.createChooser(shareIntent, "Share Passport PDF"),
-                                            )
+                                            val chooser = Intent.createChooser(shareIntent, "Share Passport PDF").apply {
+                                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            }
+                                            startActivity(chooser)
                                         }
                                         .onFailure { error ->
                                             isDownloadingPdf.value = false
+                                            Log.e("MainActivity", "PDF share failed", error)
                                             Toast.makeText(
                                                 this@MainActivity,
                                                 error.toUiMessage("PDF download failed"),
