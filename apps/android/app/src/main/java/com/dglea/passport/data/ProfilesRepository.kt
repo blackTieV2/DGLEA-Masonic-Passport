@@ -2,8 +2,12 @@ package com.dglea.passport.data
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.core.content.FileProvider
 import java.io.File
+import java.io.IOException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.dglea.passport.network.BackendApi
 import com.dglea.passport.network.BrotherProfileDto
 import com.dglea.passport.network.CreateBrotherProfileRequest
@@ -29,6 +33,9 @@ class ProfilesRepository(
     private val api: BackendApi,
     private val context: Context,
 ) {
+    companion object {
+        private const val TAG = "ProfilesRepository"
+    }
 
     // Brother profiles
     suspend fun listBrotherProfiles(): List<BrotherProfileDto> = api.listBrotherProfiles()
@@ -94,23 +101,39 @@ class ProfilesRepository(
      * Downloads the Passport PDF for the given Brother profile and returns a
      * FileProvider content URI suitable for sharing. The file is written to the
      * app's private cache directory; no storage runtime permission is required.
+     *
+     * All network and file I/O is performed on [Dispatchers.IO] to avoid
+     * [NetworkOnMainThreadException] and jank on the UI thread.
      */
-    suspend fun downloadPassportPdf(brotherProfileId: String): Uri {
+    suspend fun downloadPassportPdf(brotherProfileId: String): Uri = withContext(Dispatchers.IO) {
         val response = api.downloadPassportPdf(brotherProfileId)
         if (!response.isSuccessful) {
-            throw IllegalStateException("PDF download failed: ${response.code()}")
+            val code = response.code()
+            Log.w(TAG, "PDF download returned HTTP $code for brotherProfileId=$brotherProfileId")
+            throw IOException("PDF download failed with HTTP $code")
         }
-        val body = response.body() ?: throw IllegalStateException("PDF response body was null")
+        val body = response.body()
+            ?: run {
+                Log.w(TAG, "PDF response body was null for brotherProfileId=$brotherProfileId")
+                throw IOException("PDF response body was empty")
+            }
 
         val dir = File(context.cacheDir, "passports").apply { mkdirs() }
         val file = File(dir, "passport-$brotherProfileId.pdf")
+        if (file.exists() && !file.delete()) {
+            Log.w(TAG, "Could not delete existing PDF file, will overwrite: $file")
+        }
+
         body.byteStream().use { input ->
             file.outputStream().use { output ->
                 input.copyTo(output)
             }
         }
 
-        return FileProvider.getUriForFile(
+        val bytesWritten = file.length()
+        Log.i(TAG, "Wrote PDF file: $file, size=$bytesWritten bytes")
+
+        FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
             file,
