@@ -1,11 +1,10 @@
 package com.dglea.passport.ui.screens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -62,13 +61,14 @@ fun ConnectScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .safeDrawingPadding()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
     ) {
         Column(
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
                 text = stringResource(R.string.app_full_name),
@@ -84,67 +84,101 @@ fun ConnectScreen(
             )
         }
 
-        Column(
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            shape = MaterialTheme.shapes.medium,
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         ) {
-            Text(
-                text = stringResource(R.string.sign_in_prompt),
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Text(
-                text = stringResource(R.string.sign_in_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            OutlinedTextField(
-                value = email.value,
-                onValueChange = { email.value = it },
-                label = { Text(stringResource(R.string.email_label)) },
-                leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = stringResource(R.string.email_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                enabled = !loading,
-            )
-
-            OutlinedTextField(
-                value = password.value,
-                onValueChange = { password.value = it },
-                label = { Text(stringResource(R.string.password_label)) },
-                leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = stringResource(R.string.password_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine = true,
-                enabled = !loading,
-            )
-
-            Button(
-                onClick = { onSignIn(email.value.trim(), password.value) },
-                enabled = !loading,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 48.dp),
+                    .padding(24.dp)
+                    .animateContentSize(),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {
-                Text(if (loading) stringResource(R.string.signing_in_button) else stringResource(R.string.sign_in_button))
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.sign_in_prompt),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = stringResource(R.string.sign_in_subtitle),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                OutlinedTextField(
+                    value = email.value,
+                    onValueChange = { email.value = it },
+                    label = { Text(stringResource(R.string.email_label)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.Email,
+                            contentDescription = stringResource(R.string.email_label),
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    enabled = !loading,
+                )
+
+                OutlinedTextField(
+                    value = password.value,
+                    onValueChange = { password.value = it },
+                    label = { Text(stringResource(R.string.password_label)) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Outlined.Lock,
+                            contentDescription = stringResource(R.string.password_label),
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                    enabled = !loading,
+                )
+
+                Button(
+                    onClick = { onSignIn(email.value.trim(), password.value) },
+                    enabled = !loading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 52.dp),
+                ) {
+                    Text(
+                        if (loading) stringResource(R.string.signing_in_button)
+                        else stringResource(R.string.sign_in_button),
+                    )
+                }
+
+                if (!error.isNullOrBlank()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                        ),
+                        shape = MaterialTheme.shapes.small,
+                    ) {
+                        Text(
+                            text = error,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                        )
+                    }
+                }
             }
         }
 
         if (BuildConfig.DEBUG) {
-            Spacer(Modifier.height(8.dp))
             DebugDemoPanel(
                 loading = loading,
                 onDevConnect = onDevConnect,
-            )
-        }
-
-        if (!error.isNullOrBlank()) {
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
@@ -164,9 +198,14 @@ private fun DebugDemoPanel(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
         ),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .animateContentSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
@@ -190,7 +229,7 @@ private fun DebugDemoPanel(
             }
 
             if (expanded.value) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     demoIdentities.forEach { identity ->
                         FilterChip(
                             selected = devUid.value == identity.firebaseUid,
@@ -198,38 +237,41 @@ private fun DebugDemoPanel(
                             label = { Text(identity.label) },
                         )
                     }
-                }
 
-                OutlinedTextField(
-                    value = devUid.value,
-                    onValueChange = { devUid.value = it },
-                    label = { Text(stringResource(R.string.demo_firebase_uid_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    enabled = !loading,
-                )
+                    OutlinedTextField(
+                        value = devUid.value,
+                        onValueChange = { devUid.value = it },
+                        label = { Text(stringResource(R.string.demo_firebase_uid_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        enabled = !loading,
+                    )
 
-                OutlinedTextField(
-                    value = devBearerToken.value,
-                    onValueChange = { devBearerToken.value = it },
-                    label = { Text(stringResource(R.string.bearer_token_label)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    visualTransformation = PasswordVisualTransformation(),
-                    singleLine = true,
-                    enabled = !loading,
-                )
+                    OutlinedTextField(
+                        value = devBearerToken.value,
+                        onValueChange = { devBearerToken.value = it },
+                        label = { Text(stringResource(R.string.bearer_token_label)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true,
+                        enabled = !loading,
+                    )
 
-                OutlinedButton(
-                    onClick = {
-                        onDevConnect(
-                            devUid.value.trim().takeIf { it.isNotBlank() },
-                            devBearerToken.value.trim().takeIf { it.isNotBlank() },
+                    OutlinedButton(
+                        onClick = {
+                            onDevConnect(
+                                devUid.value.trim().takeIf { it.isNotBlank() },
+                                devBearerToken.value.trim().takeIf { it.isNotBlank() },
+                            )
+                        },
+                        enabled = !loading,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(
+                            if (loading) stringResource(R.string.connecting_demo_account_button)
+                            else stringResource(R.string.connect_demo_account_button),
                         )
-                    },
-                    enabled = !loading,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text(if (loading) stringResource(R.string.connecting_demo_account_button) else stringResource(R.string.connect_demo_account_button))
+                    }
                 }
             }
         }

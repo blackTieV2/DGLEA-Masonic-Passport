@@ -2,13 +2,16 @@ package com.dglea.passport.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 
 private val LightColorScheme = lightColorScheme(
     primary = DgleaPassportColor.primary,
@@ -17,12 +20,16 @@ private val LightColorScheme = lightColorScheme(
     onPrimaryContainer = DgleaPassportColor.onPrimaryContainer,
     secondary = DgleaPassportColor.secondary,
     onSecondary = DgleaPassportColor.onSecondary,
+    secondaryContainer = DgleaPassportColor.secondaryContainer,
+    onSecondaryContainer = DgleaPassportColor.onSecondaryContainer,
     background = DgleaPassportColor.background,
     surface = DgleaPassportColor.surface,
+    surfaceVariant = DgleaPassportColor.surfaceVariant,
     onSurface = DgleaPassportColor.onSurface,
     onSurfaceVariant = DgleaPassportColor.onSurfaceVariant,
     outline = DgleaPassportColor.outline,
     error = DgleaPassportColor.error,
+    onError = DgleaPassportColor.onError,
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -32,12 +39,23 @@ private val DarkColorScheme = darkColorScheme(
     onPrimaryContainer = DgleaPassportColor.onPrimary,
     secondary = DgleaPassportColor.secondary,
     onSecondary = DgleaPassportColor.onSecondary,
-    background = DgleaPassportColor.onSurface,
-    surface = DgleaPassportColor.onSurfaceVariant,
-    onSurface = DgleaPassportColor.background,
-    onSurfaceVariant = DgleaPassportColor.surface,
+    secondaryContainer = DgleaPassportColor.secondaryContainer,
+    onSecondaryContainer = DgleaPassportColor.onSecondaryContainer,
+    background = DgleaPassportColor.darkBackground,
+    surface = DgleaPassportColor.darkSurface,
+    surfaceVariant = DgleaPassportColor.darkSurfaceVariant,
+    onSurface = DgleaPassportColor.darkOnSurface,
+    onSurfaceVariant = DgleaPassportColor.onSurfaceVariant,
     outline = DgleaPassportColor.outline,
     error = DgleaPassportColor.error,
+    onError = DgleaPassportColor.onError,
+)
+
+private val DgleaPassportShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(16.dp),
+    large = RoundedCornerShape(20.dp),
 )
 
 @Composable
@@ -58,6 +76,7 @@ fun DgleaPassportTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = DgleaPassportTypography,
+        shapes = DgleaPassportShapes,
         content = content,
     )
 }

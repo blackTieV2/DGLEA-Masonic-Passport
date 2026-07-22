@@ -2,21 +2,23 @@ package com.dglea.passport.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.dglea.passport.network.MeProfileDto
 import com.dglea.passport.network.ReferencePageDetailDto
 import com.dglea.passport.network.ReferencePageDto
+import com.dglea.passport.ui.theme.DgleaPassportComponents
+import com.dglea.passport.ui.theme.DgleaPassportSpacing
 
 @Composable
 fun ReferenceContentScreen(
@@ -39,52 +41,91 @@ fun ReferenceContentScreen(
 
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(DgleaPassportSpacing.large)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(DgleaPassportSpacing.large),
     ) {
-        Text("Passport Guide")
-        Text("Signed in: ${user.displayName}")
-
-        Button(onClick = onNavigateBack) { Text("Back") }
-        Button(onClick = onSignOut) { Text("Sign Out") }
+        DgleaPassportComponents.SectionCard(
+            title = "Passport Guide",
+            subtitle = "Browse reference pages for the DGLEA passport process.",
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(DgleaPassportSpacing.small)) {
+                Text(
+                    text = "Signed in as ${user.displayName}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = user.email,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(DgleaPassportSpacing.small)) {
+                    Button(onClick = onNavigateBack) { Text("Back") }
+                    Button(onClick = onSignOut) { Text("Sign Out") }
+                }
+            }
+        }
 
         if (loading) {
-            CircularProgressIndicator()
+            DgleaPassportComponents.SectionCard(
+                title = "Loading content",
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(DgleaPassportSpacing.small),
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
 
         if (selectedPage != null) {
-            Button(onClick = onClearSelection) { Text("Back to list") }
-
-            Card(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Text(selectedPage.title)
-                    Text("Section: ${selectedPage.section}")
-                    selectedPage.sourceEdition?.let { Text("Source: $it") }
+            DgleaPassportComponents.SectionCard(
+                title = selectedPage.title,
+                subtitle = "Section: ${selectedPage.section}",
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(DgleaPassportSpacing.medium)) {
+                    selectedPage.sourceEdition?.let {
+                        Text(
+                            text = "Source: $it",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                     Text(
-                        selectedPage.contentMarkdown ?: "No content available.",
-                        modifier = Modifier.padding(top = 8.dp),
+                        text = selectedPage.contentMarkdown ?: "No content available.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
+                    Button(onClick = onClearSelection) { Text("Back to list") }
                 }
             }
         } else if (pages.isEmpty()) {
-            Text("No reference pages loaded.")
-            Button(onClick = onLoadPages) { Text("Refresh") }
+            DgleaPassportComponents.SectionCard(
+                title = "No reference pages",
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(DgleaPassportSpacing.small)) {
+                    Text(
+                        text = "No content is available yet. Try refreshing to load the latest guide.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Button(onClick = onLoadPages) { Text("Refresh") }
+                }
+            }
         } else {
-            Text("Reference pages (${pages.size})")
-            pages.forEach { page ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(
-                        modifier = Modifier.padding(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        Text(page.title)
-                        Text("Section: ${page.section}")
-                        Button(onClick = { onSelectPage(page.slug) }) {
-                            Text("Read")
+            DgleaPassportComponents.SectionCard(
+                title = "Reference pages",
+                subtitle = "${pages.size} pages available",
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(DgleaPassportSpacing.medium)) {
+                    pages.forEach { page ->
+                        DgleaPassportComponents.SectionCard(
+                            title = page.title,
+                            subtitle = "Section: ${page.section}",
+                        ) {
+                            Button(onClick = { onSelectPage(page.slug) }) { Text("Read") }
                         }
                     }
                 }
@@ -92,7 +133,15 @@ fun ReferenceContentScreen(
         }
 
         if (!error.isNullOrBlank()) {
-            Text(error)
+            DgleaPassportComponents.SectionCard(
+                title = "Problem",
+            ) {
+                Text(
+                    text = error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
     }
 }
